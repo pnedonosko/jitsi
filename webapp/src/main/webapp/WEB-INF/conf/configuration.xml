@@ -27,9 +27,6 @@
   <component>
     <type>org.exoplatform.jitsi.JitsiMeetService</type>
   </component>
-  <!-- component>
-    <type>org.exoplatform.jitsi.webui.JitsiApplicationService</type>
-  </component -->
   <component>
     <type>org.exoplatform.jitsi.rest.MeetService</type>
   </component>
