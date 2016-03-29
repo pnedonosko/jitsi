@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<portlet-app xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd"
+             version="2.0"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd
+   http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd">
+   <portlet>
+     <portlet-name>JitsiMeetApplication</portlet-name>
+     <display-name xml:lang="EN">Jitsi Meet Application</display-name>
+     <portlet-class>org.exoplatform.jitsi.portlet.videocall.JitsiMeetPortlet</portlet-class>
+     <init-param>
+       <name>juzu.run_mode</name>
+       <value>prod</value>
+     </init-param>
+     <supports>
+       <mime-type>text/html</mime-type>
+     </supports>
+     <supported-locale>en</supported-locale>
+     <supported-locale>fr</supported-locale>     
+     <resource-bundle>locale.portlet.videocall.Resource</resource-bundle>
+     <portlet-info>
+       <title>Jitsi Meet Application</title>
+       <keywords>Jitsi Meet</keywords>
+     </portlet-info>
+     <portlet-preferences>
+       <preference>
+         <name>view</name>
+         <value>normal</value>
+         <read-only>false</read-only>
+       </preference>
+       <preference>
+         <name>fullscreen</name>
+         <value>false</value>
+         <read-only>false</read-only>
+       </preference>
+     </portlet-preferences>
+   </portlet>
+   
+    <portlet>
+      <portlet-name>JitsiMeetPopupApplication</portlet-name>
+      <display-name xml:lang="EN">Jitsi Meet Popup Application</display-name>
+      <portlet-class>org.exoplatform.jitsi.portlet.videocallpopup.JitsiMeetPopupPortlet</portlet-class>
+      <init-param>
+        <name>juzu.run_mode</name>
+        <value>prod</value>
+      </init-param>
+      <supports>
+        <mime-type>text/html</mime-type>
+      </supports>
+      <supported-locale>en</supported-locale>
+      <supported-locale>fr</supported-locale>
+      <resource-bundle>locale.portlet.videocall.Resource</resource-bundle>
+      <portlet-info>
+        <title>Jitsi Meet Popup Application</title>
+        <keywords>Jitsi Meet</keywords>
+      </portlet-info>
+      <portlet-preferences>
+        <preference>
+          <name>view</name>
+          <value>normal</value>
+          <read-only>false</read-only>
+        </preference>
+        <preference>
+          <name>fullscreen</name>
+          <value>false</value>
+          <read-only>false</read-only>
+        </preference>
+      </portlet-preferences>
+    </portlet>
+</portlet-app>

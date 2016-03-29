@@ -1,2 +1,4 @@
-# exo-jitsi-extension
-eXo Platform addon for Jitsi Meet
+eXo Jitsi add-on
+================
+
+TBD

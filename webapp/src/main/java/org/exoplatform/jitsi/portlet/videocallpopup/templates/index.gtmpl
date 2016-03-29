@@ -1,0 +1,35 @@
+<div id="sightcall-status"
+  data-username="<%=user%>"
+  data-version="<%=videoCallVersion%>"
+  data-cometd-user-token="<%=cometdUserToken%>"
+  data-cometd-context-name="<%=cometdContextName%>"
+  data-call-mode="<%=mode%>"
+  data-callee="<%=callee%>"
+  data-callee-full-name="<%=calleeFullName%>"
+  data-caller="<%=caller%>"
+  data-caller-full-name="<%=callerFullName%>"
+  data-has-chat-message="<%=hasChatMessage%>"
+  data-is-space="<%=isSpace%>"
+  data-space-or-team-name="<%=spaceOrTeamName%>"
+  style="display: none;">
+</div>
+
+<div class="videoCallCont">
+    <div id="videoCallConnectionStatus" class="callling center">
+     <% if (mode.equals("one")) {%>
+        <div class="calleeAvatar"><i class="iconChatLarge"></i></div>
+     <% } else if (mode.equals("one_callee")) { %>
+        <div class="calleeAvatar"><i class="iconChatLarge"></i></div>
+     <% } else if (mode.equals("host") || mode.equals("attendee")) { %>
+        <div class="calleeAvatar">
+            <%if (isSpace) {%>
+              <img src="/rest/weemo/getSpaceAvartar/<%=spaceOrTeamName%>" alt="<%=spaceOrTeamName%>" />
+            <%} else {%>
+              <img src="/weemo-extension/img/TeamChatAvatar.png" alt="<%=spaceOrTeamName%>" />
+            <%} %>
+        </div>
+     <% } %>
+        <div class="inProgress">&{exoplatform.videocall.connecting.message}</div>
+        <div id="video-container" class="center"></div>
+    </div>
+</div>

@@ -1,0 +1,74 @@
+<script type="text/javascript">
+  ${messages}
+</script>
+<div id="videocall-status"
+  data-username="${user}"
+  data-userfullname="${userFullName}" 
+  data-spacename="${spaceName}"
+  data-spaceroomname="${spaceRoomName}"
+  data-version="${videoCallVersion}"
+  data-call-label="&{exoplatform.videocall.Call}"
+  data-make-call-label="&{exoplatform.videocall.makeCall}"
+  data-cometd-user-token="${cometdUserToken}"
+  data-cometd-context-name="${cometdContextName}"
+  style="display: none;">
+</div>
+
+<div id="videocall-interceptor" style="display:none;" permissions-title="&{exoplatform.videocall.permissions.title}" permissions-message="&{exoplatform.videocall.permissions.message}"
+permissions-okButton="&{exoplatform.videocall.permissions.okButton}" 
+installKey-title="&{exoplatform.videocall.installKey.title}"
+installKey-message="&{exoplatform.videocall.installKey.message}" 
+installKey-learnMoreButton="&{exoplatform.videocall.installKey.learnMoreButton}"
+installKey-cancelButton="&{exoplatform.videocall.installKey.cancelButton}">
+</div>
+
+<!--Permission Interceptor Modal -->
+<div id="videocall-permission-interceptor" class="uiPopup modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+  <div class="modal-dialog">
+    <div class="modal-content">
+		<div class="popupHeader clearfix modal-header">
+			<button type="button" class="uiIconClose pull-right close" data-dismiss="modal" aria-hidden="true" rel="tooltip" data-placement="bottom" title="&{exoplatform.videocall.installer.close}" ></button>
+			<span id="groupModalTitle" class="PopupTitle popupTitle modal-title" style="cursor: auto;">&{exoplatform.videocall.permissions.title}</span>
+		</div>
+		<div class="PopupContent popupContent modal-body">    
+			<i class="uiVideoCallIconWarning"></i><span> &{exoplatform.videocall.permissions.message}</span>
+			<div class="uiAction uiActionBorder">
+				<button type="button" class="btn" data-dismiss="modal">&{exoplatform.videocall.permissions.okButton}</button>
+			</div>
+		</div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<!--Receiving Permission Interceptor Modal -->
+<div data-message="&{exoplatform.videocall.permissions.message.receiving.user}" id="videocall-receive-permission-interceptor" class="uiPopup modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="popupHeader clearfix modal-header">
+                <button type="button" class="uiIconClose pull-right close" data-dismiss="modal" aria-hidden="true" rel="tooltip" data-placement="bottom" title="&{exoplatform.videocall.installer.close}"></button>
+                <span id="groupModalTitle" class="PopupTitle popupTitle modal-title" style="cursor: auto;">&{exoplatform.videocall.permissions.title}</span>
+            </div>
+            <div class="PopupContent popupContent modal-body">
+                <i class="uiVideoCallIconWarning"></i>
+                <span id="receive-permission-interceptor-message">&{exoplatform.videocall.permissions.message.receiving.user}</span>
+                <div class="uiAction uiActionBorder">
+                    <button type="button" class="btn" data-dismiss="modal">&{exoplatform.videocall.permissions.okButton}</button>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<style>
+  .uiVideoCallIconError {
+      background: url("/eXoResources/skin/images/Icons/uiIconColor.png") no-repeat scroll left top rgba(0, 0, 0, 0);
+      width: 16px;
+      vertical-align: text-top;
+      height: 16px;
+      display: inline-block;
+  }
+</style>
+
+</div>

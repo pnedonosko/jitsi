@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>eXo Meet</title>
+<%if (domain) {%>
+<link rel="icon" type="image/png" href="https://${domain}/images/favicon.ico?v=1" />
+<%}%>
+<meta charset="utf-8">
+<style type='text/css'>
+body, html {
+	padding: 0px;
+	margin: 0px;
+	border: 0px none;
+	width: 100%;
+	height: 100%;
+}
+
+iframe {
+	border: none;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}
+</style>
+<%if (domain) {%>
+<script src="${scheme}://${domain}/external_api.js"></script>
+<script>
+  var w = window;
+  var e = window.document.documentElement, g = window.document.getElementsByTagName("body")[0];
+  var width = w.innerWidth || e.clientWidth || g.clientWidth;
+  var height = w.innerHeight || e.clientHeight || g.clientHeight;
+  var uiConfig = {
+	  filmStripOnly : false
+  // , TOOLBAR_BUTTONS: ['authentication', 'microphone', 'camera', 'desktop',
+  // 'recording', 'security', 'invite', // 'chat', 'prezi', 'etherpad',
+  // 'fullscreen', 'sip', 'dialpad', 'settings', 'hangup', 'filmstrip','contacts']
+  };
+  var api = new JitsiMeetExternalAPI("${domain}", "${room}", width, height, null, {}, {}); // uiConfig
+</script>
+<%}%>
+</head>
+<body>
+<%if (domain && room) {%>
+	<div class="jitsiMeet" style="display: none;"></div>
+<%} else {%>
+	<div class="error" style="display: block; color: red;"><h1>Error</h1>Domain and Room should be provided!</div>
+<%}%>
+</body>
