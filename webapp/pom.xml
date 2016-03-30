@@ -19,26 +19,23 @@
     02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.exoplatform.addons</groupId>
     <artifactId>exo-jitsi-parent</artifactId>
+    <groupId>org.exoplatform.addons</groupId>
     <version>1.0.x-SNAPSHOT</version>
   </parent>
   <artifactId>exo-jitsi-webapp</artifactId>
   <packaging>war</packaging>
   <name>eXo Jitsi :: Extension Webapp</name>
   <description>eXo Jitsi web application of portal extension</description>
-
   <dependencies>
     <dependency>
       <groupId>org.exoplatform.addons</groupId>
       <artifactId>exo-jitsi-services</artifactId>
       <scope>provided</scope>
     </dependency>
-    
     <!-- Application dependencies-->
     <dependency>
       <groupId>javax.enterprise</groupId>
@@ -119,9 +116,7 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
-
   <build>
-    <finalName>jitsi-meet</finalName>
     <resources>
       <resource>
         <directory>src/main/resources</directory>
@@ -144,5 +139,6 @@
         </includes>
       </resource>
     </resources>
+    <finalName>jitsi-meet</finalName>
   </build>
 </project>

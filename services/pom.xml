@@ -19,34 +19,31 @@
     02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.exoplatform.addons</groupId>
     <artifactId>exo-jitsi-parent</artifactId>
+    <groupId>org.exoplatform.addons</groupId>
     <version>1.0.x-SNAPSHOT</version>
   </parent>
   <artifactId>exo-jitsi-services</artifactId>
   <packaging>jar</packaging>
   <name>eXo Jitsi :: Extension Services</name>
   <description>eXo Jitsi services of portal extension</description>
-
   <dependencies>
     <!-- Others third party -->
     <dependency>
       <groupId>javax.jcr</groupId>
       <artifactId>jcr</artifactId>
-      <scope>provided</scope>
       <type>jar</type>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
-      <scope>provided</scope>
       <type>jar</type>
+      <scope>provided</scope>
     </dependency>
-    
     <!-- Portal & ECMS & Social -->
     <dependency>
       <groupId>org.exoplatform.commons</groupId>
@@ -74,7 +71,6 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
-
   <build>
     <resources>
       <resource>
