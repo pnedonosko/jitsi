@@ -36,7 +36,7 @@
      </portlet-preferences>
    </portlet>
    
-    <portlet>
+    <!-- TODO portlet>
       <portlet-name>JitsiMeetPopupApplication</portlet-name>
       <display-name xml:lang="EN">Jitsi Meet Popup Application</display-name>
       <portlet-class>org.exoplatform.jitsi.portlet.videocallpopup.JitsiMeetPopupPortlet</portlet-class>
@@ -66,5 +66,5 @@
           <read-only>false</read-only>
         </preference>
       </portlet-preferences>
-    </portlet>
+    </portlet -->
 </portlet-app>

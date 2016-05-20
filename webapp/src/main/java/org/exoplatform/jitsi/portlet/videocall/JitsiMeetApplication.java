@@ -2,6 +2,7 @@ package org.exoplatform.jitsi.portlet.videocall;
 
 import juzu.Path;
 import juzu.Response;
+import juzu.SessionScoped;
 import juzu.View;
 import juzu.request.ApplicationContext;
 import juzu.request.SecurityContext;
@@ -17,13 +18,10 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.services.organization.User;
-import org.exoplatform.services.security.ConversationRegistry;
 import org.exoplatform.social.common.router.ExoRouter;
 import org.exoplatform.social.common.router.ExoRouter.Route;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.space.spi.SpaceService;
-import org.exoplatform.ws.frameworks.cometd.ContinuationService;
-import org.mortbay.cometd.continuation.EXoContinuationBayeux;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -32,45 +30,23 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+@SessionScoped
 public class JitsiMeetApplication {
 
-  private static final Log   LOG     = ExoLogger.getLogger(JitsiMeetApplication.class);
-
-  public static final String VERSION = "2.0.0-Beta1";                                  // TODO
+  private static final Log LOG = ExoLogger.getLogger(JitsiMeetApplication.class);
 
   @Inject
   @Path("index.gtmpl")
-  Template                   index;
+  Template                 index;
 
   @Inject
-  BundleService              bundleService;
-
-  OrganizationService        organizationService;
-
-  SpaceService               spaceService;
-
-  JitsiMeetService           meetService;
-
-  ConversationRegistry       conversationRegistry;
-
-  ContinuationService        continuationService;
-
-  EXoContinuationBayeux      exoContinuationBayeux;
+  OrganizationService      organizationService;
 
   @Inject
-  public JitsiMeetApplication(OrganizationService organizationService,
-                              SpaceService spaceService,
-                              JitsiMeetService meetService,
-                              ConversationRegistry conversationRegistry,
-                              ContinuationService continuationService,
-                              EXoContinuationBayeux exoContinuationBayeux) {
-    this.organizationService = organizationService;
-    this.spaceService = spaceService;
-    this.meetService = meetService;
-    this.conversationRegistry = conversationRegistry;
-    this.continuationService = continuationService;
-    this.exoContinuationBayeux = exoContinuationBayeux;
-  }
+  SpaceService             spaceService;
+
+  @Inject
+  JitsiMeetService         meetService;
 
   @View
   public Response.Content index(ApplicationContext applicationContext,
@@ -94,7 +70,6 @@ public class JitsiMeetApplication {
     // Get bundle messages
     Locale locale = userContext.getLocale();
     ResourceBundle bundle = applicationContext.resolveBundle(locale);
-    String messages = bundleService.getBundle("jitsiBundleData", bundle, locale);
 
     // Space
     String spacePrettyName, spaceRoomName;
@@ -110,12 +85,7 @@ public class JitsiMeetApplication {
                            .set("user", remoteUser)
                            .set("userFullName", userFullName)
                            .set("spaceName", spacePrettyName)
-                           .set("spaceRoomName", spaceRoomName)
-                           .set("videoCallVersion", VERSION)
-                           .set("messages", messages)
-                           .set("cometdUserToken", continuationService.getUserToken(remoteUser))
-                           .set("cometdContextName",
-                                (exoContinuationBayeux == null ? "cometd" : exoContinuationBayeux.getCometdContextName()));
+                           .set("spaceRoomName", spaceRoomName);
 
     return builder.ok();
   }

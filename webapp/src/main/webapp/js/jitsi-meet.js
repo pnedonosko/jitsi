@@ -4,14 +4,12 @@
 (function($) {
 
 	// ******** Constants ********
-	var ACCESS_DENIED = "access-denied";
-	var NODE_NOT_FOUND = "node-not-found";
 
 	// ******** Context ********
 	var currentUser, currentSpace;
 
 	// ******** Utils ********
-	var pageBaseUrl = function(theLocation) {
+	function pageBaseUrl(theLocation) {
 		if (!theLocation) {
 			theLocation = window.location;
 		}
@@ -24,12 +22,12 @@
 		}
 
 		return theLocation.protocol + "//" + theHostName;
-	};
+	}
 
 	/**
 	 * Add style to current document (to the end of head).
 	 */
-	var loadStyle = function(cssUrl) {
+	function loadStyle(cssUrl) {
 		if (document.createStyleSheet) {
 			document.createStyleSheet(cssUrl);
 			// IE way
@@ -44,23 +42,23 @@
 				// $("head").append($("<link href='" + cssUrl + "' rel='stylesheet' type='text/css' />"));
 			} // else, already added
 		}
-	};
+	}
 
 	/** For debug logging. */
-	var log = function(msg, e) {
+	function log(msg, e) {
 		if ( typeof console != "undefined" && typeof console.log != "undefined") {
 			console.log(msg);
 			if (e && typeof e.stack != "undefined") {
 				console.log(e.stack);
 			}
 		}
-	};
+	}
 
-	var getPortalUser = function() {
+	function getPortalUser() {
 		return eXo.env.portal.userName;
-	};
+	}
 
-	var decodeString = function(str) {
+	function decodeString(str) {
 		if (str) {
 			try {
 				str = str.replace(/\+/g, " ");
@@ -71,9 +69,9 @@
 			}
 		}
 		return null;
-	};
+	}
 
-	var encodeString = function(str) {
+	function encodeString(str) {
 		if (str) {
 			try {
 				str = encodeURIComponent(str);
@@ -83,25 +81,91 @@
 			}
 		}
 		return null;
-	};
+	}
 
 	// ******** UI utils **********
 
 	/**
 	 * Open pop-up.
 	 */
-	var popupWindow = function(url) {
+	function popupWindow(url) {
 		var w = 650;
 		var h = 400;
 		var left = (screen.width / 2) - (w / 2);
 		var top = (screen.height / 2) - (h / 2);
 		return window.open(url, 'contacts', 'width=' + w + ',height=' + h + ',top=' + top + ',left=' + left);
-	};
+	}
+	
+	// UI messages 
+	// Used to show immediate notifications in top right corner. 
+	// This functionality requires pnotifyJQuery and jqueryui CSS. 
+
+	/**
+	 * Show notice to user. Options support "icon" class, "hide", "closer" and "nonblock" features.
+	 */
+	function showNotice(type, title, text, options) {
+		var noticeOptions = {
+			title : title,
+			text : text,
+			type : type,
+			icon : "picon " + ( options ? options.icon : ""),
+			hide : options && typeof options.hide != "undefined" ? options.hide : false,
+			closer : options && typeof options.closer != "undefined" ? options.closer : true,
+			sticker : false,
+			opacity : .75,
+			shadow : true,
+			width : options && options.width ? options.width : NOTICE_WIDTH,
+			nonblock : options && typeof options.nonblock != "undefined" ? options.nonblock : false,
+			nonblock_opacity : .25,
+			after_init : function(pnotify) {
+				if (options && typeof options.onInit == "function") {
+					options.onInit(pnotify);
+				}
+			}
+		};
+		return $.pnotify(noticeOptions);
+	}
+
+	/**
+	 * Show error notice to user. Error will stick until an user close it.
+	 */
+	function showError(title, text, onInit) {
+		return UI.showNotice("error", title, text, {
+			icon : "picon-dialog-error",
+			hide : false,
+			delay : 0,
+			onInit : onInit
+		});
+	}
+
+	/**
+	 * Show info notice to user. Info will be shown for 8sec and hidden then.
+	 */
+	function showInfo(title, text, onInit) {
+		return UI.showNotice("info", title, text, {
+			hide : true,
+			delay : 8000,
+			icon : "picon-dialog-information",
+			onInit : onInit
+		});
+	}
+
+	/**
+	 * Show warning notice to user. Info will be shown for 8sec and hidden then.
+	 */
+	function showWarn(title, text, onInit) {
+		return UI.showNotice("exclamation", title, text, {
+			hide : false,
+			delay : 30000,
+			icon : "picon-dialog-warning",
+			onInit : onInit
+		});
+	}
 
 	// ******** REST services ********
 	var prefixUrl = pageBaseUrl(location);
 
-	var initRequest = function(request) {
+	function initRequest(request) {
 		var process = $.Deferred();
 
 		// stuff in textStatus is less interesting: it can be "timeout",
@@ -161,9 +225,9 @@
 			request : request
 		};
 		return process.promise(processTarget);
-	};
+	}
 
-	var postUserMeet = function(room, name, users) {
+	function postUserMeet(room, name, users) {
 		var request = $.ajax({
 			async : false,
 			type : "POST",
@@ -176,9 +240,9 @@
 		});
 
 		return initRequest(request);
-	};
+	}
 
-	var getUserMeet = function(room, users) {
+	function getUserMeet(room, users) {
 		var request = $.ajax({
 			async : false,
 			type : "GET",
@@ -186,9 +250,9 @@
 		});
 
 		return initRequest(request);
-	};
+	}
 
-	var deleteUserMeet = function(room, users) {
+	function deleteUserMeet(room, users) {
 		var request = $.ajax({
 			async : false,
 			type : "DELETE",
@@ -196,9 +260,9 @@
 		});
 
 		return initRequest(request);
-	};
+	}
 
-	var postGroupMeet = function(room, name, space) {
+	function postGroupMeet(room, name, space) {
 		var request = $.ajax({
 			async : false,
 			type : "POST",
@@ -211,9 +275,9 @@
 		});
 
 		return initRequest(request);
-	};
+	}
 
-	var getGroupMeet = function(room, space) {
+	function getGroupMeet(room, space) {
 		var request = $.ajax({
 			async : false,
 			type : "GET",
@@ -221,9 +285,9 @@
 		});
 
 		return initRequest(request);
-	};
+	}
 
-	var deleteGroupMeet = function(room, space) {
+	function deleteGroupMeet(room, space) {
 		var request = $.ajax({
 			async : false,
 			type : "DELETE",
@@ -231,9 +295,9 @@
 		});
 
 		return initRequest(request);
-	};
+	}
 
-	var serviceGet = function(url, data) {
+	function serviceGet(url, data) {
 		var request = $.ajax({
 			async : true,
 			type : "GET",
@@ -242,8 +306,8 @@
 			data : data ? data : {}
 		});
 		return initRequest(request);
-	};
-
+	}
+	
 	/**
 	 * Jitsi Meet core class.
 	 */
@@ -253,6 +317,9 @@
 
 		var spaceUpdater;
 
+		/**
+		 * TODO a placeholder for Chat initialization
+		 */
 		var initChat = function() {
 			if (chatApplication) {
 				log("Init chat for " + chatApplication.username);
@@ -352,11 +419,8 @@
 												});
 												api.addEventListener("participantLeft", function(event) {
 													log("participantLeft: " + JSON.stringify(event));
-													//api.dispose();
-													//meetWindow.close();
 												});
-												//api.initListeners();
-												//log("Meet shown: " + JSON.stringify(api));
+												//api.initListeners(); // TODO do we need this?
 											}
 										}, 5000);
 									});
@@ -467,17 +531,9 @@
 
 				var $breadcumbEntry = $navigationPortlet.find(".breadcumbEntry");
 				if ($breadcumbEntry.size() > 0 && $breadcumbEntry.find("a.meetStartAction").size() === 0) {
-					//var strChatLink = "<a onclick='javascript:showMiniChatPopup(\"" + spaceName + "\", \"space-name\");' class='chat-button
-					// actionIcon' href='javascript:void();'><span class='uiIconChatChat uiIconChatLightGray'></span><span
-					// class='chat-label-status'>&nbsp;Chat</span></a>";
-					//var strChatLink = "<a class='chat-button actionIcon'><span class='uiIconChatChat uiIconChatLightGray'></span><span
-					// class='chat-label-status'>&nbsp;Chat</span></a>";
-					//$breadcumbEntry.append(strChatLink);
-
 					if (spaceUpdater) {
 						spaceUpdater.clearInterval();
 					}
-					///
 					// had classes uiIconWeemoVideoCalls uiIconWeemoLightGray
 					var meetLabel = "<i class='uiIconVideoCall'></i>Meet";
 					var meetButton = "<a class='actionIcon meetStartAction spaceMeet";
@@ -534,7 +590,6 @@
 													}
 												});
 												log("Meet shown: " + JSON.stringify(api));
-												//alert("Meet shown " + api);
 											}
 										}, 5000);
 									});
@@ -583,7 +638,7 @@
 							}
 						}
 					});
-					///
+
 					function checkMeet() {
 						// check if meet not started by others
 						var get = getGroupMeet(currentSpace.roomName, currentSpace.name);
@@ -622,15 +677,6 @@
 		};
 
 		/**
-		 * Create Jitsi Meet for current chat room.
-		 */
-		this.create = function(room) {
-			log("Creating Jisti Meet for " + room);
-
-			// TODO
-		};
-
-		/**
 		 * Initialize context
 		 */
 		this.init = function(userName, userTitle, spaceName, spaceRoomName) {
@@ -644,222 +690,25 @@
 				roomName : spaceRoomName
 			};
 		};
-
-		this.showInfo = function(title, text) {
-			UI.showInfo(title, text);
-		};
-	}
-
-	/**
-	 * TODO not used
-	 */
-	function UI() {
-		var NOTICE_WIDTH = "380px";
-
-		var initChat = function() {
-			if (chatApplication) {
-				log("Init chat for " + chatApplication.username);
-
-				var $toolbarViewer = $("#UIDocumentWorkspace #toolbarViewerRight");
-				if ($toolbarViewer.size() > 0) {
-					var $editorAction = $toolbarViewer.find("#onlineEditor");
-					if ($editorAction.size() == 0) {
-						$editorAction = $("<a id='onlineEditor' class='actionIcon' data-placement='bottom' rel='tooltip' data-original-title='Edit' tabindex='11' data-l10n-id='edit'><i class='uiIconLightGray'></i></a>");
-						$toolbarViewer.prepend($editorAction);
-						var $icon = $editorAction.find("i");
-
-						$editorAction.data("original-title", "Edit");
-						$editorAction.data("l10n-id", "edit");
-						$icon.addClass("uiIconEdit");
-
-						var $container = $("#viewerContainer");
-						var $viewer = $container.find("#viewer");
-
-						function showProgress() {
-							var $progress = $container.find("#progress");
-							if ($progress.size() == 0) {
-								// uiLoadingIconXLarge
-								$progress = $("<div id='progress'><div class='waitThrobber'></div></div>");
-								$container.append($progress);
-							}
-
-							$editorAction.attr("disabled", true);
-
-							$container.find("#editor").remove();
-							$viewer.hide("blind");
-							$progress.show("blind");
-						}
-
-						function showEditor(document) {
-							var $editor = $container.find("#editor");
-							if ($editor.size() == 0) {
-								$editor = $("<div id='editor'><iframe frameborder='0' style='position: absolute; width: 100%; height: 100%;' src=''></iframe></div>");
-								$container.append($editor);
-							}
-							$editor.find("iframe").attr("src", document.link);
-
-							$editorAction.attr("disabled", false);
-							$editorAction.data("original-title", "Save");
-							$editorAction.data("l10n-id", "save");
-							$icon.removeClass("uiIconEdit");
-							$icon.addClass("uiIconSave");
-
-							$container.find("#progress").hide("blind");
-							$viewer.hide("blind");
-							$editor.show("blind");
-						}
-
-						function showViewer() {
-							$editorAction.attr("disabled", false);
-							$editorAction.data("original-title", "Edit");
-							$editorAction.data("l10n-id", "edit");
-							$icon.removeClass("uiIconSave");
-							$icon.addClass("uiIconEdit");
-
-							$container.find("#progress").hide("blind");
-							$container.find("#progress").remove();
-							$container.find("#editor").remove();
-							$viewer.show("blind");
-
-							// refresh view w/o popup
-							$("#ECMContextMenu a[exo\\:attr='RefreshView'] i").click();
-						}
-
-
-						$editorAction.click(function() {
-							if ($icon.hasClass("uiIconEdit")) {
-								// show loading while upload to editor
-								showProgress();
-
-								// upload the doc and start editor
-								var upload = meet.upload();
-								upload.done(function(document) {
-									// show editor
-									showEditor(document);
-								});
-								upload.fail(function(error) {
-									// TODO handle error
-									log(JSON.stringify(error));
-									UI.showError("Upload error", error.error);
-								});
-							} else {
-								// show loading while downloading from editor
-								showProgress();
-
-								// save the doc and switch to viewer
-								var download = meet.download();
-								download.done(function(document) {
-									// show viewer
-									showViewer();
-								});
-								download.fail(function(error) {
-									// TODO handle error
-									log(JSON.stringify(error));
-									UI.showError("Download error", error.error);
-								});
-							}
-						});
-					}
-				}
-			}
-		};
-
-		var initChat = function() {
-			// TODO
-		};
-
-		/**
-		 * Init all UI (dialogs, menus, views etc).
-		 */
-		this.init = function() {
-			// init doc view (list or file view)
-			initChar();
-			initUsers();
-		};
-
-		/**
-		 * Show notice to user. Options support "icon" class, "hide", "closer" and "nonblock" features.
-		 */
-		this.showNotice = function(type, title, text, options) {
-			var noticeOptions = {
-				title : title,
-				text : text,
-				type : type,
-				icon : "picon " + ( options ? options.icon : ""),
-				hide : options && typeof options.hide != "undefined" ? options.hide : false,
-				closer : options && typeof options.closer != "undefined" ? options.closer : true,
-				sticker : false,
-				opacity : .75,
-				shadow : true,
-				width : options && options.width ? options.width : NOTICE_WIDTH,
-				nonblock : options && typeof options.nonblock != "undefined" ? options.nonblock : false,
-				nonblock_opacity : .25,
-				after_init : function(pnotify) {
-					if (options && typeof options.onInit == "function") {
-						options.onInit(pnotify);
-					}
-				}
-			};
-
-			return $.pnotify(noticeOptions);
-		};
-
-		/**
-		 * Show error notice to user. Error will stick until an user close it.
-		 */
-		this.showError = function(title, text, onInit) {
-			return UI.showNotice("error", title, text, {
-				icon : "picon-dialog-error",
-				hide : false,
-				delay : 0,
-				onInit : onInit
-			});
-		};
-
-		/**
-		 * Show info notice to user. Info will be shown for 8sec and hidden then.
-		 */
-		this.showInfo = function(title, text, onInit) {
-			return UI.showNotice("info", title, text, {
-				hide : true,
-				delay : 8000,
-				icon : "picon-dialog-information",
-				onInit : onInit
-			});
-		};
-
-		/**
-		 * Show warning notice to user. Info will be shown for 8sec and hidden then.
-		 */
-		this.showWarn = function(title, text, onInit) {
-			return UI.showNotice("exclamation", title, text, {
-				hide : false,
-				delay : 30000,
-				icon : "picon-dialog-warning",
-				onInit : onInit
-			});
-		};
 	}
 
 	var meet = new Meet();
-	var UI = new UI();
 
 	// Load dependencies only in top window (not in iframes of gadgets).
 	if (window == top) {
 		$(function() {
 			try {
-				// load required styles via Juzu
-				//loadStyle("/jitsi-meet/skin/jquery-ui.css");
-				//loadStyle("/jitsi-meet/skin/jquery.pnotify.default.css");
-				//loadStyle("/jitsi-meet/skin/jquery.pnotify.default.icons.css");
-				//loadStyle("/jitsi-meet/skin/jitsi-meet.css");
-
+				// it's common styles for Jitsi client
+				loadStyle("/jitsi-meet/skin/jquery-ui.css");
+				loadStyle("/jitsi-meet/skin/jquery.pnotify.default.css");
+				loadStyle("/jitsi-meet/skin/jquery.pnotify.default.icons.css");
+				loadStyle("/jitsi-meet/skin/jitsi-meet.css");
+				
 				// configure Pnotify
 				$.pnotify.defaults.styling = "jqueryui";
 				// use jQuery UI css
 				$.pnotify.defaults.history = false;
-				// no history roller in the
-				// right corner
+				// no history roller in the right corner
 			} catch(e) {
 				log("Error configuring Jitsi style.", e);
 			}
@@ -868,65 +717,3 @@
 
 	return meet;
 })($);
-
-/*
- // TODO not used
- function showBlankMeet(meet) {
- meet.window = window.open("", "_blank");
- var d = meet.window.document;
- d.write("<html><head>");
- d.write("<script src='https://" + meet.domain + "/external_api.js'></script>");
- d.write("<style type='text/css'>body, html {padding: 0px;margin: 0px;border: 0px none;width: 100%;height: 100%;} iframe
- {border:none; position: absolute; width: 100%; height: 100%;}</style>");
- d.write("</head><body>");
- //d.write("<div style='cursor:wait; height: 200px; vertical-align: middle; margin-right: auto; margin-left: auto; width:
- // 800px; text-align: center;'>Wait, ");
- //d.write(meet.name + " is opening...</div>");
- //d.write("<div id='jitsiMeet' style='padding:0; margin:0;'></div>");
- d.write("<script>");
- d.write("var domain = '" + meet.domain + "';");
- d.write("var room = '" + meet.room + "';");
- var w = window;
- var e = window.document.documentElement, g = window.document.getElementsByTagName("body")[0];
- var x = w.innerWidth || e.clientWidth || g.clientWidth;
- var y = w.innerHeight || e.clientHeight || g.clientHeight;
- d.write("var width = " + x + ";");
- d.write("var height = " + y + ";");
- d.write("var uiConfig = {filmStripOnly: false");
- // d.write(", TOOLBAR_BUTTONS:");
- // d.write("['authentication', 'microphone', 'camera', 'desktop',");
- // d.write("'recording', 'security', 'invite',"); // 'chat', 'prezi', 'etherpad',
- // d.write("'fullscreen', 'sip', 'dialpad', 'settings', 'hangup', 'filmstrip','contacts']");
- d.write("};");
- d.write("var height = " + y + ";");
- d.write("var api = new JitsiMeetExternalAPI(domain, room, width, height, null, {}, {});");
- // uiConfig
- //d.write("api.executeCommands({'displayName' : ['" + currentUser.name + "']});");
- d.write("</script>");
- d.write("</body></html>");
-
- $(d).ready(function() {
- $button.addClass("meetReady");
- $button.attr("title", "Open meeting with " + userTitle);
- $button.attr("data-meet-invitee", userName);
- setTimeout(function() {
- if (meet.window.api) {
- var api = meet.window.api;
- api.executeCommands({
- "displayName" : [currentUser.title]
- });
- api.addEventListener("participantJoined", function(event) {
- log("participantJoined: " + JSON.stringify(event));
- });
- api.addEventListener("participantLeft", function(event) {
- log("participantLeft: " + JSON.stringify(event));
- //api.dispose();
- //meetWindow.close();
- });
- //api.initListeners();
- log("Meet shown: " + JSON.stringify(api));
- }
- }, 2500);
- });
- }
- * */

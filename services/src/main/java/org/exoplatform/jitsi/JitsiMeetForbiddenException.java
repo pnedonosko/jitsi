@@ -20,6 +20,8 @@
 package org.exoplatform.jitsi;
 
 /**
+ * Meet creation or joining forbidden for an user.
+ * 
  * Created by The eXo Platform SAS
  * 
  * @author <a href="mailto:pnedonosko@exoplatform.com">Peter Nedonosko</a>
@@ -37,7 +39,6 @@ public class JitsiMeetForbiddenException extends JitsiMeetException {
    * 
    */
   public JitsiMeetForbiddenException() {
-    // TODO Auto-generated constructor stub
   }
 
   /**
@@ -45,15 +46,6 @@ public class JitsiMeetForbiddenException extends JitsiMeetException {
    */
   public JitsiMeetForbiddenException(String message) {
     super(message);
-    // TODO Auto-generated constructor stub
-  }
-
-  /**
-   * @param cause
-   */
-  public JitsiMeetForbiddenException(Throwable cause) {
-    super(cause);
-    // TODO Auto-generated constructor stub
   }
 
   /**
@@ -62,21 +54,5 @@ public class JitsiMeetForbiddenException extends JitsiMeetException {
    */
   public JitsiMeetForbiddenException(String message, Throwable cause) {
     super(message, cause);
-    // TODO Auto-generated constructor stub
   }
-
-  /**
-   * @param message
-   * @param cause
-   * @param enableSuppression
-   * @param writableStackTrace
-   */
-  public JitsiMeetForbiddenException(String message,
-                                     Throwable cause,
-                                     boolean enableSuppression,
-                                     boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
-    // TODO Auto-generated constructor stub
-  }
-
 }

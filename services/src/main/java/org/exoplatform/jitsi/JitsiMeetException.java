@@ -20,6 +20,8 @@
 package org.exoplatform.jitsi;
 
 /**
+ * Jitsi exception.
+ * 
  * Created by The eXo Platform SAS
  * 
  * @author <a href="mailto:pnedonosko@exoplatform.com">Peter Nedonosko</a>
@@ -37,7 +39,6 @@ public class JitsiMeetException extends Exception {
    * 
    */
   public JitsiMeetException() {
-    // TODO Auto-generated constructor stub
   }
 
   /**
@@ -45,15 +46,6 @@ public class JitsiMeetException extends Exception {
    */
   public JitsiMeetException(String message) {
     super(message);
-    // TODO Auto-generated constructor stub
-  }
-
-  /**
-   * @param cause
-   */
-  public JitsiMeetException(Throwable cause) {
-    super(cause);
-    // TODO Auto-generated constructor stub
   }
 
   /**
@@ -62,18 +54,6 @@ public class JitsiMeetException extends Exception {
    */
   public JitsiMeetException(String message, Throwable cause) {
     super(message, cause);
-    // TODO Auto-generated constructor stub
-  }
-
-  /**
-   * @param message
-   * @param cause
-   * @param enableSuppression
-   * @param writableStackTrace
-   */
-  public JitsiMeetException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
-    // TODO Auto-generated constructor stub
   }
 
 }

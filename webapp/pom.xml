@@ -110,11 +110,6 @@
       <artifactId>juzu-plugins-servlet</artifactId>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.juzu</groupId>
-      <artifactId>juzu-plugins-upload</artifactId>
-      <scope>provided</scope>
-    </dependency>
   </dependencies>
   <build>
     <resources>

@@ -47,7 +47,7 @@ public class JitsiMeetService implements Startable {
 
   public static final String PROPERTY_JITSI_MEET_DOMAIN = "jitsi.meet.domain";
 
-  protected static final Log LOG                   = ExoLogger.getLogger(JitsiMeetService.class);
+  protected static final Log LOG                        = ExoLogger.getLogger(JitsiMeetService.class);
 
   protected class MeetKey {
     final int         hashCode;
@@ -359,7 +359,8 @@ public class JitsiMeetService implements Startable {
     } else {
       // TODO should remove this default?
       this.domain = "meet.jit.si";
-      LOG.warn("Configuration preperty " + PROPERTY_JITSI_MEET_DOMAIN + " not provided, will use default one: " + this.domain);
+      LOG.warn("Configuration preperty " + PROPERTY_JITSI_MEET_DOMAIN + " not provided, will use default one: "
+          + this.domain);
     }
   }
 
@@ -421,8 +422,7 @@ public class JitsiMeetService implements Startable {
    */
   @Override
   public void stop() {
-    // TODO Auto-generated method stub
-
+    // nothing
   }
 
   protected boolean joinMeet(MeetInfo meet, String userName) {

@@ -1,7 +1,7 @@
 /**
  * Jitsi application in eXo Platform.
  */
-(function($, jitsiMeet) {
+require(["SHARED/jquery", "SHARED/jitsiMeet", "SHARED/jqueryUI", "SHARED/jqueryPnotify"], function($, jitsiMeet) {
 
 	var getIEVersion = function()
 	// Returns the version of Windows Internet Explorer or a -1
@@ -54,6 +54,5 @@
 		}
 	});
 
-	return jitsiMeet;
-})($, jitsiMeet);
+});
 
