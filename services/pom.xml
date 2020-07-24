@@ -23,7 +23,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>exo-jitsi-parent</artifactId>
-    <groupId>org.exoplatform.addons</groupId>
+    <groupId>org.exoplatform.addons.jitsi</groupId>
     <version>1.0.x-SNAPSHOT</version>
   </parent>
   <artifactId>exo-jitsi-services</artifactId>
@@ -35,15 +35,20 @@
     <dependency>
       <groupId>javax.jcr</groupId>
       <artifactId>jcr</artifactId>
-      <type>jar</type>
       <scope>provided</scope>
+      <type>jar</type>
     </dependency>
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
-      <type>jar</type>
       <scope>provided</scope>
+      <type>jar</type>
     </dependency>
+<dependency>
+      <groupId>org.exoplatform</groupId>
+      <artifactId>exo-jcr-services</artifactId>
+    </dependency>
+
     <!-- Portal & ECMS & Social -->
     <dependency>
       <groupId>org.exoplatform.commons</groupId>
@@ -60,16 +65,23 @@
       <artifactId>ecms-core-webui</artifactId>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.exoplatform.core</groupId>
-      <artifactId>exo.core.component.organization.api</artifactId>
+        <dependency>
+      <groupId>org.exoplatform.ecms</groupId>
+      <artifactId>ecms-core-services</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.exoplatform.social</groupId>
-      <artifactId>social-component-core</artifactId>
+      <artifactId>social-component-webui</artifactId>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.exoplatform.ecms</groupId>
+      <artifactId>ecms-social-integration</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
   <build>
     <resources>

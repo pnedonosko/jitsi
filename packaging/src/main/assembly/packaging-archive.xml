@@ -9,7 +9,7 @@
      <dependencySet>
        <outputDirectory>webapps</outputDirectory>
        <includes>
-         <include>org.exoplatform.addons:exo-jitsi-webapp:war</include>
+         <include>org.exoplatform.addons.jitsi:exo-jitsi-webapp:war</include>
        </includes>
        <outputFileNameMapping>jitsi-meet.war</outputFileNameMapping>
        <scope>provided</scope>
@@ -20,7 +20,7 @@
        <outputDirectory>lib</outputDirectory>
        <useTransitiveDependencies>true</useTransitiveDependencies>
        <includes>
-         <include>org.exoplatform.addons:exo-jitsi-*:jar</include>
+         <include>org.exoplatform.addons.jitsi:exo-jitsi-*:jar</include>
          <!-- include>com.google.*:*:jar</include -->
          <!-- include>com.fasterxml.jackson.core:*:jar</include>
          <include>org.apache.httpcomponents:*:jar</include -->

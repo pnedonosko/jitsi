@@ -24,9 +24,10 @@
   <parent>
     <artifactId>addons-parent-pom</artifactId>
     <groupId>org.exoplatform.addons</groupId>
-    <version>6</version>
+    <version>12-RC01</version>
   </parent>
   <artifactId>exo-jitsi-parent</artifactId>
+  <groupId>org.exoplatform.addons.jitsi</groupId>
   <version>1.0.x-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>eXo Jitsi :: Parent</name>
@@ -43,110 +44,53 @@
     <url>https://github.com/exo-addons/jitsi</url>
   </scm>
   <properties>
+    <!-- Defaut compiler settings -->
+    <maven.compiler.optimize>true</maven.compiler.optimize>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <org.exoplatform.services.version>6.1.x-SNAPSHOT</org.exoplatform.services.version>
     <!-- eXo Modules -->
-    <org.exoplatform.platform.version>4.3.0</org.exoplatform.platform.version>
-    <!-- Dependencies -->
-    <commons-lang3.version>3.2</commons-lang3.version>
-    <javax.enterprise.cdi.version>1.0-SP4</javax.enterprise.cdi.version>
-    <org.juzu.version>1.1.0</org.juzu.version>
+    <org.exoplatform.social.version>6.1.x-SNAPSHOT</org.exoplatform.social.version>
+    <addon.exo.ecms.version>6.1.x-SNAPSHOT</addon.exo.ecms.version>
     <!-- for tests -->
-    <org.exoplatform.jcr-services.version>1.16.6-GA</org.exoplatform.jcr-services.version>
-    <test.groovy.version>2.0.8</test.groovy.version>
-    <!-- spock.version>1.0-groovy-2.0-SNAPSHOT</spock.version -->
-    <spock.version>0.7-groovy-2.0</spock.version>
-    <objenesis.version>1.2</objenesis.version>
-    <cglib.version>2.2.2</cglib.version>
-    <asm.version>4.0</asm.version>
-    <junit.version>4.11</junit.version>
-    <hamcrest.version>1.3</hamcrest.version>
-    <maven.gmaven.runtime.version>1.5</maven.gmaven.runtime.version>
-    <maven.surefire.junit47.version>2.16</maven.surefire.junit47.version>
+    <junit.version>4.12</junit.version>
   </properties>
   <dependencyManagement>
     <dependencies>
-      <!-- Import versions from platform project FIRST!!! -->
-      <dependency>
-        <groupId>org.exoplatform.platform</groupId>
-        <artifactId>platform</artifactId>
-        <version>${org.exoplatform.platform.version}</version>
+ <dependency>
+        <groupId>org.exoplatform.social</groupId>
+        <artifactId>social</artifactId>
+        <version>${org.exoplatform.social.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <!-- Import versions from Juzu -->
       <dependency>
-        <groupId>org.juzu</groupId>
-        <artifactId>juzu-parent</artifactId>
-        <version>${org.juzu.version}</version>
+        <groupId>org.exoplatform.ecms</groupId>
+        <artifactId>ecms</artifactId>
+        <version>${addon.exo.ecms.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <!-- Jitsi extension -->
       <dependency>
-        <groupId>org.exoplatform.addons</groupId>
+        <groupId>org.exoplatform.addons.jitsi</groupId>
         <artifactId>exo-jitsi-services</artifactId>
         <version>${project.version}</version>
         <type>jar</type>
       </dependency>
       <dependency>
-        <groupId>org.exoplatform.addons</groupId>
+        <groupId>org.exoplatform.addons.jitsi</groupId>
         <artifactId>exo-jitsi-webapp</artifactId>
         <version>${project.version}</version>
         <type>war</type>
       </dependency>
-      <!-- App dependencies -->
-      <dependency>
-        <groupId>javax.enterprise</groupId>
-        <artifactId>cdi-api</artifactId>
-        <version>${javax.enterprise.cdi.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>${commons-lang3.version}</version>
-      </dependency>
+
       <!-- for tests -->
       <dependency>
         <groupId>org.exoplatform</groupId>
         <artifactId>exo-jcr-services</artifactId>
-        <version>${org.exoplatform.jcr-services.version}</version>
+        <version>${org.exoplatform.services.version}</version>
         <type>jar</type>
-        <scope>test</scope>
-      </dependency>
-      <!-- We cannot declare groovy here, it will override eXo's version -->
-      <!-- dependency>
-        <groupId>org.codehaus.groovy</groupId>
-        <artifactId>groovy-all</artifactId>
-        <version>${groovy.version}</version>
-        <scope>test</scope>
-      </dependency -->
-      <dependency>
-        <groupId>org.spockframework</groupId>
-        <artifactId>spock-core</artifactId>
-        <version>${spock.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.ow2.asm</groupId>
-        <artifactId>asm</artifactId>
-        <version>${asm.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>cglib</groupId>
-        <artifactId>cglib-nodep</artifactId>
-        <version>${cglib.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.objenesis</groupId>
-        <artifactId>objenesis</artifactId>
-        <version>${objenesis.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.hamcrest</groupId>
-        <artifactId>hamcrest-core</artifactId>
-        <version>${hamcrest.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -157,4 +101,35 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <systemPropertyVariables>
+              <org.apache.commons.logging.Log>org.apache.commons.logging.impl.SimpleLog</org.apache.commons.logging.Log>
+              <org.apache.commons.logging.simplelog.defaultlog>info</org.apache.commons.logging.simplelog.defaultlog>
+              <org.apache.commons.logging.simplelog.log.org.exoplatform>debug</org.apache.commons.logging.simplelog.log.org.exoplatform>
+              <org.apache.commons.logging.simplelog.log.net.hibernate>warn</org.apache.commons.logging.simplelog.log.net.hibernate>
+              <java.naming.factory.initial>org.exoplatform.services.naming.SimpleContextFactory</java.naming.factory.initial>
+              <maven.exoplatform.dir>${project.build.directory}</maven.exoplatform.dir>
+              <gatein.test.tmp.dir>${project.build.directory}</gatein.test.tmp.dir>
+              <java.util.logging.config.class>org.exoplatform.component.test.logging.LogConfigurator</java.util.logging.config.class>
+              <com.arjuna.ats.arjuna.objectstore.objectStoreDir>${project.build.directory}</com.arjuna.ats.arjuna.objectstore.objectStoreDir>
+              <exo.profiles>hsqldb</exo.profiles>
+            </systemPropertyVariables>
+            <systemProperties>
+              <property>
+                <name>gatein.test.output.path</name>
+                <value>${project.build.directory}</value>
+              </property>
+            </systemProperties>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>

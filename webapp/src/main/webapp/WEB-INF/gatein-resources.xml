@@ -64,6 +64,14 @@
     </depends>
   </module>
   
+  <module>
+    <name>jitsi</name>
+    <load-group>jitsiGRP</load-group>
+    <script>
+      <path>/js/jitsi.js</path>
+    </script>
+  </module>
+  
   <!-- module>
     <name>jitsiMeetApp</name>
     <load-group>jitsiGRP</load-group>

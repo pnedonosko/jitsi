@@ -27,10 +27,11 @@
   <priority>1</priority>
   <page-nodes>
     <node>
-      <name>jitsimeetpopup</name>
-      <label xml:lang="en">Jitsi Meet Popup</label>
-      <visibility>HIDDEN</visibility>
-      <page-reference>portal::intranet::jitsimeetpopup</page-reference>
+      <uri>jitsi-meet</uri>
+      <name>jitsi-meet</name>
+      <label xml:lang="en">Jitsi Meet</label>
+      <visibility>SYSTEM</visibility>
+      <page-reference>portal::global::jitsi-meet</page-reference>
     </node>
   </page-nodes>
 </node-navigation>

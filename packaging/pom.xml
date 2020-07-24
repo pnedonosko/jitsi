@@ -23,7 +23,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>exo-jitsi-parent</artifactId>
-    <groupId>org.exoplatform.addons</groupId>
+    <groupId>org.exoplatform.addons.jitsi</groupId>
     <version>1.0.x-SNAPSHOT</version>
   </parent>
   <artifactId>exo-jitsi-packaging</artifactId>
@@ -32,13 +32,13 @@
   <description>eXo Jitsi packaging for installation</description>
   <dependencies>
     <dependency>
-      <groupId>org.exoplatform.addons</groupId>
+      <groupId>org.exoplatform.addons.jitsi</groupId>
       <artifactId>exo-jitsi-services</artifactId>
       <type>jar</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.exoplatform.addons</groupId>
+      <groupId>org.exoplatform.addons.jitsi</groupId>
       <artifactId>exo-jitsi-webapp</artifactId>
       <type>war</type>
       <scope>provided</scope>

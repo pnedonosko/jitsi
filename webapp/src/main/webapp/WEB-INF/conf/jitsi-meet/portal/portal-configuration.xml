@@ -24,7 +24,7 @@
             <field name="predefinedOwner">
               <collection type="java.util.HashSet">
                 <value>
-                  <string>intranet</string>
+                  <string>global</string>
                 </value>
               </collection>
             </field>
