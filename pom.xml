@@ -57,7 +57,7 @@
   </properties>
   <dependencyManagement>
     <dependencies>
- <dependency>
+    <dependency>
         <groupId>org.exoplatform.social</groupId>
         <artifactId>social</artifactId>
         <version>${org.exoplatform.social.version}</version>

@@ -42,8 +42,21 @@
     <servlet-class>org.gatein.wci.api.GateInServlet</servlet-class>
     <load-on-startup>0</load-on-startup>
   </servlet>
+  
+  <!--JitsiMeetServlet-->
+  <servlet>
+    <servlet-name>JitsiMeetServlet</servlet-name>
+    <servlet-class>org.exoplatform.jitsi.servlet.JitsiMeetServlet</servlet-class>
+  </servlet>
+
+
   <servlet-mapping>
     <servlet-name>GateInServlet</servlet-name>
     <url-pattern>/gateinservlet</url-pattern>
+  </servlet-mapping>
+  
+    <servlet-mapping>
+    <servlet-name>JitsiMeetServlet</servlet-name>
+    <url-pattern>/meet</url-pattern>
   </servlet-mapping>
 </web-app>
