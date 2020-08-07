@@ -18,14 +18,25 @@
  */
 package org.exoplatform.webconferencing.jitsi;
 
+import java.util.HashMap;
 import java.util.Locale;
 
+import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.configuration.ConfigurationException;
 import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
+import org.exoplatform.social.core.identity.model.Identity;
+import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
+import org.exoplatform.social.core.manager.IdentityManager;
 import org.exoplatform.social.core.profile.settings.IMType;
 import org.exoplatform.social.core.profile.settings.UserProfileSettingsService;
 import org.exoplatform.webconferencing.CallProvider;
 import org.exoplatform.webconferencing.UserInfo.IMInfo;
+
+import antlr.Token;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 
 /**
  * Jitsi provider implementation.
@@ -37,36 +48,32 @@ import org.exoplatform.webconferencing.UserInfo.IMInfo;
  */
 public class JitsiProvider extends CallProvider {
 
-  public static final String TYPE            = "jitsi";
+  /** The Constant LOG. */
+  protected static final Log        LOG                = ExoLogger.getLogger(JitsiProvider.class);
 
-  /** The Constant CONFIG_APIKEY. */
-  public static final String CONFIG_APIKEY   = "my-apiKey";
+  /** The Constant TYPE. */
+  public static final String        TYPE               = "jitsi";
 
-  /** The Constant CONFIG_CLIENTID. */
-  public static final String CONFIG_CLIENTID = "my-clientId";
+  /** The Constant CONFIG_SECRET. */
+  public static final String        CONFIG_SECRET      = "secret";
 
-  /** The Constant CONFIG_URL. */
-  public static final String CONFIG_URL      = "my-serviceUrl";
+  /** The Constant CONFIG_SERVICE_URL. */
+  public static final String        CONFIG_SERVICE_URL = "service-url";
 
   /** The Constant TITLE. */
-  public static final String TITLE           = "Jitsi";
+  public static final String        TITLE              = "Jitsi";
 
   /** The Constant VERSION. */
-  public static final String VERSION         = "1.0.0";
+  public static final String        VERSION            = "1.0.0";
+
+  /** The auth tokens. */
+  // TODO: should be cache with expiration
+  protected HashMap<String, String> authTokens         = new HashMap<>();
 
   /**
    * Settings for My Call provider.
    */
   public class MySettings extends Settings {
-
-    /**
-     * Gets the API client id.
-     *
-     * @return the API client id
-     */
-    public String getApiClientId() {
-      return JitsiProvider.this.getApiClientId();
-    }
 
     /**
      * Gets the url.
@@ -77,14 +84,6 @@ public class JitsiProvider extends CallProvider {
       return JitsiProvider.this.getUrl();
     }
 
-    /**
-     * Gets the api key.
-     *
-     * @return the api key
-     */
-    public String getApiKey() {
-      return JitsiProvider.this.getApiKey();
-    }
   }
 
   /**
@@ -105,17 +104,14 @@ public class JitsiProvider extends CallProvider {
     // side (in Javascript provider module).
   }
 
-  /** The client id (it's a sample, can be used for OAUth2 authentication). */
-  protected final String apiClientId;
-
-  /** The api key. (it's a sample) */
-  protected final String apiKey;
+  /** The secret. */
+  protected final String secret;
 
   /** The connector web-services URL (will be used to generate Call page URLs). */
   protected final String url;
 
   /**
-   * Instantiates a new My Call provider.
+   * Instantiates a new JitsiProvider provider.
    *
    * @param profileSettings the profile settings
    * @param params the params (from configuration.xml)
@@ -124,26 +120,17 @@ public class JitsiProvider extends CallProvider {
   public JitsiProvider(UserProfileSettingsService profileSettings, InitParams params) throws ConfigurationException {
     super(params);
 
-    // it's WAR name here,
-    this.url = "/jitsi";
-    // if need set this from external you can introduce a configuration parameter
-    // String url = this.config.get(CONFIG_URL);
-    // if (url == null || (url = url.trim()).length() == 0) {
-    // throw new ConfigurationException(CONFIG_URL + " required and should be non empty.");
-    // }
-    // this.url = url;
-
-    String apiClientId = this.config.get(CONFIG_CLIENTID);
-    if (apiClientId == null || (apiClientId = apiClientId.trim()).length() == 0) {
-      throw new ConfigurationException(CONFIG_CLIENTID + " required and should be non empty.");
+    String secret = this.config.get(CONFIG_SECRET);
+    if (secret == null || (secret = secret.trim()).length() == 0) {
+      throw new ConfigurationException(CONFIG_SECRET + " required and should be non empty.");
     }
-    this.apiClientId = apiClientId;
+    this.secret = secret;
 
-    String apiKey = this.config.get(CONFIG_APIKEY);
-    if (apiKey == null || (apiKey = apiKey.trim()).length() == 0) {
-      throw new ConfigurationException(CONFIG_APIKEY + " required and should be non empty.");
+    String serviceUrl = this.config.get(CONFIG_SERVICE_URL);
+    if (serviceUrl == null || (serviceUrl = serviceUrl.trim()).length() == 0) {
+      throw new ConfigurationException(CONFIG_SERVICE_URL + " required and should be non empty.");
     }
-    this.apiKey = apiKey;
+    this.url = serviceUrl;
 
     if (profileSettings != null) {
       // add plugin programmatically as it's an integral part of the provider
@@ -152,7 +139,7 @@ public class JitsiProvider extends CallProvider {
   }
 
   /**
-   * Instantiates a new My Connector provider. This constructor can be used in environments when no
+   * Instantiates a new JitsiProvider provider. This constructor can be used in environments when no
    * {@link UserProfileSettingsService} found (e.g. in test environments).
    *
    * @param params the params (from configuration.xml)
@@ -160,6 +147,50 @@ public class JitsiProvider extends CallProvider {
    */
   public JitsiProvider(InitParams params) throws ConfigurationException {
     this(null, params);
+  }
+
+  /**
+   * Adds the client.
+   *
+   * @param clientId the client id
+   * @param userId the user id
+   */
+  public void addClient(String clientId, String userId) {
+    IdentityManager identityManager = PortalContainer.getInstance().getComponentInstanceOfType(IdentityManager.class);
+    Identity identity = identityManager.getOrCreateIdentity(OrganizationIdentityProvider.NAME, userId);
+    String name = identity.getProfile().getFullName();
+    String email = identity.getProfile().getEmail();
+
+    String authToken = Jwts.builder()
+                           .setSubject("jitsi")
+                           .claim("name", name)
+                           .claim("email", email)
+                           .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
+                           .compact();
+    LOG.info("PUT AUTH TOKEN. ClientId: " + clientId + " token: " + authToken);
+    authTokens.put(clientId, authToken);
+  }
+
+  /**
+   * Gets the auth token.
+   *
+   * @param clientId the client id
+   * @return the auth token
+   */
+  public String getAuthToken(String clientId) {
+    String token = authTokens.get(clientId);
+    LOG.info("Get AUTH TOKEN. ClientId: " + clientId + " token: " + token);
+    return token;
+  }
+
+  /**
+   * Removes the client.
+   *
+   * @param clientId the client id
+   */
+  public void removeClient(String clientId) {
+    LOG.info("Get AUTH TOKEN. ClientId: " + clientId);
+    authTokens.remove(clientId);
   }
 
   /**
@@ -178,24 +209,6 @@ public class JitsiProvider extends CallProvider {
    */
   public String getUrl() {
     return url;
-  }
-
-  /**
-   * Gets the API client id.
-   *
-   * @return the API client id
-   */
-  public String getApiClientId() {
-    return apiClientId;
-  }
-
-  /**
-   * Gets the api key.
-   *
-   * @return the api key
-   */
-  public String getApiKey() {
-    return apiKey;
   }
 
   /**

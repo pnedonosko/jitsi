@@ -35,9 +35,11 @@
       <init-params>
         <properties-param>
           <name>provider-configuration</name>
-          <property name="my-apiKey" value="${webconferencing.myconnector.apiKey:myApiKey}" />
-          <property name="my-clientId" value="${webconferencing.myconnector.clientId:myClientId}" />
-          <property name="active" value="${webconferencing.myconnector.active:true}" />
+          <property name="active" value="${webconferencing.jitsi.active:true}" />
+          <property name="service-url"
+            value="${webconferencing.jitsi.url:https://jitsi-dev.francecentral.cloudapp.azure.com:8486}" />
+          <property name="secret"
+            value="${webconferencing.jitsi.secret:mQzPudDBpSAqUwM0FY2r86gNAd6be5tN1xqwdFDOb4Us1DT4Tm}" />
         </properties-param>
       </init-params>
     </component-plugin>
@@ -111,5 +113,26 @@
       </init-params>
     </component-plugin>
   </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.listener.ListenerService</target-component>
+    <component-plugin>
+      <name>exo.core.security.ConversationRegistry.unregister</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.webconferencing.jitsi.LogoutListener</type>
+      <description>Listener for user logout event</description>
+    </component-plugin>
+  </external-component-plugins>
   
+  
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.listener.ListenerService</target-component>
+    <component-plugin>
+      <name>exo.core.security.ConversationRegistry.register</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.webconferencing.jitsi.LoginListener</type>
+      <description>Listener for user login event</description>
+    </component-plugin>
+  </external-component-plugins>
+
 </configuration>
