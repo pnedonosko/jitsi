@@ -98,7 +98,9 @@
 	
 	// UI messages 
 	// Used to show immediate notifications in top right corner. 
-	// This functionality requires pnotifyJQuery and jqueryui CSS. 
+	// This functionality requires pnotifyJQuery and jqueryui CSS.
+	
+	var NOTICE_WIDTH = "380px";
 
 	/**
 	 * Show notice to user. Options support "icon" class, "hide", "closer" and "nonblock" features.
