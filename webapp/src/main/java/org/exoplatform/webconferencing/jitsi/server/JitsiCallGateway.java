@@ -25,8 +25,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -34,8 +34,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.gatein.common.logging.Logger;
 import org.gatein.common.logging.LoggerFactory;
-
-import com.drew.lang.StringUtil;
 
 import org.exoplatform.container.web.AbstractHttpServlet;
 
@@ -45,24 +43,22 @@ import org.exoplatform.container.web.AbstractHttpServlet;
 public class JitsiCallGateway extends AbstractHttpServlet {
 
   /** The Constant serialVersionUID. */
-  private static final long     serialVersionUID      = -6075521943684342671L;
+  private static final long     serialVersionUID         = -6075521943684342671L;
 
   /** The Constant LOG. */
-  protected static final Logger LOG                   = LoggerFactory.getLogger(JitsiCallGateway.class);
+  protected static final Logger LOG                      = LoggerFactory.getLogger(JitsiCallGateway.class);
 
   /** The Constant CALL_URL. */
-  private final static String   CALL_URL              = "http://192.168.0.105:9080/call";
+  private final static String   CALL_URL                 = "http://192.168.0.105:9080/jitsi/call";
 
   /** The Constant IDENTITY_HEADER. */
-  private final static String   IDENTITY_HEADER       = "X-Exoplatform-Identity";
+  private final static String   IDENTITY_HEADER          = "X-Exoplatform-Identity";
 
   /** The Constant AUTH_TOKEN_HEADER. */
-  private final static String   AUTH_TOKEN_HEADER     = "X-Exoplatform-Auth";
+  private final static String   AUTH_TOKEN_HEADER        = "X-Exoplatform-Auth";
 
-  /** The Constant GUEST_USERNAME_HEADER. */
-  private final static String   GUEST_USERNAME_HEADER = "X-Exoplatform-Guest-Username";
-
-  private final static String   GUEST_INFO_ENDPOINT   = "http://192.168.0.105:9080/guest";
+  /** The Constant TRANSFER_ENCODING_HEADER. */
+  private final static String   TRANSFER_ENCODING_HEADER = "Transfer-Encoding";
 
   /** 
    * Instantiates a new my call servlet.
@@ -78,69 +74,37 @@ public class JitsiCallGateway extends AbstractHttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
     final AsyncContext ctx = req.startAsync();
-    String roomId = req.getPathInfo().substring(1);
-
-    if (roomId.isEmpty()) {
-      log("RoomId cannot be empty");
-      resp.setStatus(500);
-      return;
-    }
-
-    String guestName = null;
-    if (req.getRemoteUser() == null) {
-      String inviteId = req.getParameter("inviteId");
-      if (inviteId != null) {
-        // Ask microservice the guest name
-        guestName = getGuestUsername(inviteId);
-        resp.sendRedirect(req.getContextPath() + "/call/" + roomId);
-      }
-    }
 
     ctx.start(new Runnable() {
       public void run() {
-       // HttpResponse response = getCallPage(username, isGuest);
+        StringBuilder requestUrl = new StringBuilder(CALL_URL).append(req.getPathInfo());
+        String inviteId = req.getParameter("inviteId");
+        if (inviteId != null) {
+          requestUrl.append("?inviteId=" + inviteId);
+        }
+        HttpGet request = new HttpGet(requestUrl.toString());
+        if (req.getRemoteUser() != null) {
+          request.setHeader(IDENTITY_HEADER, req.getRemoteUser());
+        }
+        request.setHeader(AUTH_TOKEN_HEADER, "auth-token-123");
 
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+            CloseableHttpResponse response = httpClient.execute(request)) {
+          for (Header header : response.getAllHeaders()) {
+            if (!header.getName().equals(TRANSFER_ENCODING_HEADER)) {
+              resp.setHeader(header.getName(), header.getValue());
+            }
+          }
+          HttpEntity entity = response.getEntity();
+          if (entity != null) {
+            resp.getWriter().write(EntityUtils.toString(entity));
+          }
+        } catch (IOException e) {
+          log("Error occured while requesting call page", e);
+        }
         ctx.complete();
       }
     });
-  }
-
-  protected HttpResponse getCallPage(String username, boolean isGuest) throws IOException {
-
-    HttpGet request = new HttpGet(CALL_URL);
-    if (isGuest) {
-      request.setHeader(GUEST_USERNAME_HEADER, username);
-    } else {
-      request.setHeader(IDENTITY_HEADER, username);
-    }
-
-    request.setHeader(AUTH_TOKEN_HEADER, "auth-token-123");
-    try (CloseableHttpClient httpClient = HttpClients.createDefault();
-        CloseableHttpResponse response = httpClient.execute(request)) {
-      return response;
-    }
-  }
-
-  /**
-   * Gets the guest username.
-   *
-   * @param inviteId the invite id
-   * @return the guest username
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  protected String getGuestUsername(String inviteId) throws IOException {
-
-    HttpGet request = new HttpGet(GUEST_INFO_ENDPOINT + "/" + inviteId);
-    request.setHeader(AUTH_TOKEN_HEADER, "auth-token-123");
-    try (CloseableHttpClient httpClient = HttpClients.createDefault();
-        CloseableHttpResponse response = httpClient.execute(request)) {
-      HttpEntity entity = response.getEntity();
-      if (entity != null) {
-        // TODO: parse JSON
-        return EntityUtils.toString(entity);
-      }
-      return null;
-    }
   }
 
   /**
