@@ -26,8 +26,6 @@ import javax.portlet.GenericPortlet;
 import javax.portlet.PortletException;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 
 import org.exoplatform.container.ExoContainer;
 import org.exoplatform.container.ExoContainerContext;
@@ -55,9 +53,6 @@ public class JitsiPortlet extends GenericPortlet {
   /** The provider. */
   private JitsiProvider          provider;
 
-  /** The Constant CLIENT_ID_COOKIE. */
-  private static final String    CLIENT_ID_COOKIE = "jitsi-client-id";
-
   /**
    * {@inheritDoc}
    */
@@ -82,19 +77,6 @@ public class JitsiPortlet extends GenericPortlet {
     if (this.provider != null) {
       try {
         PortalRequestContext prContext = Util.getPortalRequestContext();
-        String clientId = getClientIdCookie(prContext.getRequest());
-        if (clientId == null || clientId.isEmpty()) {
-          // TODO: fix add cookie
-          clientId = String.valueOf(System.currentTimeMillis());
-          Cookie clientIdCookie = new Cookie(CLIENT_ID_COOKIE, clientId);
-          clientIdCookie.setPath("/");
-          clientIdCookie.setMaxAge(3600);
-          prContext.getResponse().addCookie(clientIdCookie);
-          provider.addClient(clientId, request.getRemoteUser());
-          LOG.info("SET CLIENT ID. User: " + request.getRemoteUser() + " Set clientId: " + clientId);
-        }
-        String token = provider.getAuthToken(clientId);
-        String url = provider.getSettings().getUrl();
         // If we have settings to send to a client side
         String settingsJson = asJSON(provider.getSettings());
         JavascriptManager js = ((WebuiRequestContext) WebuiRequestContext.getCurrentInstance()).getJavascriptManager();
@@ -103,7 +85,7 @@ public class JitsiPortlet extends GenericPortlet {
           // load our connector module to myProvider variable
           .require("SHARED/webConferencing_jitsi", "jitsi")
           // check if the variable contains an object to ensure the provider was loaded successfully
-          .addScripts("if (jitsi) { " + "jitsi.initStorage('" + clientId + "', '" + token + "', '" + url + "');"
+          .addScripts("if (jitsi) { " 
           // optionally configure the provider with settings (from the server-side)
               + "jitsi.configure(" + settingsJson + "); "
               // then add an instance of the provider to the Web Conferencing client
@@ -116,22 +98,5 @@ public class JitsiPortlet extends GenericPortlet {
     }
   }
 
-  /**
-   * Gets the token cookie.
-   *
-   * @param req the req
-   * @return the token cookie
-   */
-  private String getClientIdCookie(HttpServletRequest req) {
-    Cookie[] cookies = req.getCookies();
-    if (cookies != null) {
-      for (Cookie cookie : cookies) {
-        if (CLIENT_ID_COOKIE.equals(cookie.getName())) {
-          return cookie.getValue();
-        }
-      }
-    }
-    return null;
-  }
 
 }

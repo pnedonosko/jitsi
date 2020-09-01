@@ -338,24 +338,7 @@
 				}
 				return process.promise();
 			};
-			
-			this.initStorage = function(clientId, token, domain){
-			  var iframe = document.createElement('iframe');
-			  iframe.src = domain + "/auth";
-			  iframe.setAttribute("height","300");
-			  iframe.setAttribute("width","3000");
-			  var data = {clientId : clientId, token : token};
-			  document.body.appendChild(iframe);
-			  iframe.addEventListener("load", function() {
-			    console.log("POST MESSAGE: " + JSON.stringify(data));
-			    this.contentWindow.postMessage({
-	          action: 'save',
-	          key: 'jitsi-auth',
-	          value: data
-	        }, domain);
-			  });
-			  
-			};
+
 			/**
 			 * OPTIONAL method. If implemented, it will be called by Web Conferencing core on addProvider() method. It is assumed that the connector
 			 * will initialize internals depending on the given context. 

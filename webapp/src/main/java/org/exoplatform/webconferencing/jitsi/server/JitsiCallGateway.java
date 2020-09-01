@@ -86,7 +86,7 @@ public class JitsiCallGateway extends AbstractHttpServlet {
         if (req.getRemoteUser() != null) {
           request.setHeader(IDENTITY_HEADER, req.getRemoteUser());
         }
-        request.setHeader(AUTH_TOKEN_HEADER, "auth-token-123");
+        request.setHeader(AUTH_TOKEN_HEADER, "mock-auth-token");
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
             CloseableHttpResponse response = httpClient.execute(request)) {
