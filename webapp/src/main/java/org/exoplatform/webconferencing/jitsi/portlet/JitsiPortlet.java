@@ -90,7 +90,7 @@ public class JitsiPortlet extends GenericPortlet {
           clientIdCookie.setPath("/");
           clientIdCookie.setMaxAge(3600);
           prContext.getResponse().addCookie(clientIdCookie);
-                 provider.addClient(clientId, request.getRemoteUser());
+          provider.addClient(clientId, request.getRemoteUser());
           LOG.info("SET CLIENT ID. User: " + request.getRemoteUser() + " Set clientId: " + clientId);
         }
         String token = provider.getAuthToken(clientId);

@@ -32,6 +32,7 @@
   <filter>
     <filter-name>ResourceRequestFilter</filter-name>
     <filter-class>org.exoplatform.portal.application.ResourceRequestFilter</filter-class>
+    <async-supported>true</async-supported>
   </filter>
   <filter-mapping>
     <filter-name>ResourceRequestFilter</filter-name>
@@ -48,9 +49,10 @@
     <load-on-startup>0</load-on-startup>
   </servlet>
   <servlet>
-    <servlet-name>JitsiCallServlet</servlet-name>
-    <servlet-class>org.exoplatform.webconferencing.jitsi.server.JitsiCallServlet</servlet-class>
+    <servlet-name>JitsiCallGateway</servlet-name>
+    <servlet-class>org.exoplatform.webconferencing.jitsi.server.JitsiCallGateway</servlet-class>
     <load-on-startup>0</load-on-startup>
+    <async-supported>true</async-supported>
   </servlet>
   
   <servlet-mapping>
@@ -58,8 +60,8 @@
     <url-pattern>/gateinservlet</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
-    <servlet-name>JitsiCallServlet</servlet-name>
-    <url-pattern>/call</url-pattern>
+    <servlet-name>JitsiCallGateway</servlet-name>
+    <url-pattern>/call/*</url-pattern>
   </servlet-mapping>
   
 </web-app>
