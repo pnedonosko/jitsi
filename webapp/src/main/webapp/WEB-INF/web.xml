@@ -19,16 +19,13 @@
   02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 -->
-<web-app
-        version="3.0"
-        metadata-complete="true"
-        xmlns="http://java.sun.com/xml/ns/javaee"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">  
+<web-app version="3.0" metadata-complete="true" xmlns="http://java.sun.com/xml/ns/javaee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
   <display-name>jitsi</display-name>
-  
+
   <absolute-ordering />
-  
+
   <filter>
     <filter-name>ResourceRequestFilter</filter-name>
     <filter-class>org.exoplatform.portal.application.ResourceRequestFilter</filter-class>
@@ -38,11 +35,11 @@
     <filter-name>ResourceRequestFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
-  
+
   <listener>
     <listener-class>org.exoplatform.container.web.PortalContainerConfigOwner</listener-class>
   </listener>
-  
+
   <servlet>
     <servlet-name>GateInServlet</servlet-name>
     <servlet-class>org.gatein.wci.api.GateInServlet</servlet-class>
@@ -54,7 +51,13 @@
     <load-on-startup>0</load-on-startup>
     <async-supported>true</async-supported>
   </servlet>
-  
+  <servlet>
+    <servlet-name>JitsiUserGateway</servlet-name>
+    <servlet-class>org.exoplatform.webconferencing.jitsi.server.JitsiUserGateway</servlet-class>
+    <load-on-startup>0</load-on-startup>
+    <async-supported>true</async-supported>
+  </servlet>
+
   <servlet-mapping>
     <servlet-name>GateInServlet</servlet-name>
     <url-pattern>/gateinservlet</url-pattern>
@@ -63,5 +66,9 @@
     <servlet-name>JitsiCallGateway</servlet-name>
     <url-pattern>/call/*</url-pattern>
   </servlet-mapping>
-  
+  <servlet-mapping>
+    <servlet-name>JitsiUserGateway</servlet-name>
+    <url-pattern>/user</url-pattern>
+  </servlet-mapping>
+
 </web-app>
