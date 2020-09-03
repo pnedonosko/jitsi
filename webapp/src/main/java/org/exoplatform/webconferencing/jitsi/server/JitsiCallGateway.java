@@ -74,18 +74,14 @@ public class JitsiCallGateway extends AbstractHttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
     final AsyncContext ctx = req.startAsync();
-
     ctx.start(new Runnable() {
       public void run() {
+
+        String uri = req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "");
+
         StringBuilder requestUrl = new StringBuilder(CALL_URL).append(req.getPathInfo());
-        String inviteId = req.getParameter("inviteId");
-        if (inviteId != null) {
-          requestUrl.append("?inviteId=" + inviteId);
-        }
+
         HttpGet request = new HttpGet(requestUrl.toString());
-        if (req.getRemoteUser() != null) {
-          request.setHeader(IDENTITY_HEADER, req.getRemoteUser());
-        }
         request.setHeader(AUTH_TOKEN_HEADER, "mock-auth-token");
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();

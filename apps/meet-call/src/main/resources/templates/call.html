@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="/skin/call.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
 <div>Call frame</div>
@@ -13,6 +14,36 @@
 </div>
 
 <script>
+
+var getUrlParameter = function getUrlParameter(sParam) {
+  var sPageURL = window.location.search.substring(1),
+      sURLVariables = sPageURL.split('&'),
+      sParameterName,
+      i;
+
+  for (i = 0; i < sURLVariables.length; i++) {
+      sParameterName = sURLVariables[i].split('=');
+
+      if (sParameterName[0] === sParam) {
+          return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+      }
+  }
+};
+
+var inviteId = getUrlParameter("inviteId");
+var url = "/jitsi/user";
+
+if (inviteId) {
+  url += "?inviteId=" + inviteId;
+}
+$.get(url, function( data ) {
+   alert("Data: " + data);
+   console.log(JSON.stringify(data));
+   if (inviteId) {
+     let trimmedUrl = window.location.href.substring(0, window.location.href.indexOf("?"));
+     window.history.pushState({},"", trimmedUrl);
+   }
+ });
 
 
 </script>
