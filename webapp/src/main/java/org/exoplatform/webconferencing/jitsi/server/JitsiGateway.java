@@ -84,10 +84,8 @@ public class JitsiGateway extends AbstractHttpServlet {
           RequestDispatcher requestDispatcher = servletContext.getRequestDispatcher(uri);
           try {
             requestDispatcher.forward(ctx.getRequest(), ctx.getResponse());
-          } catch (ServletException e) {
-            log("Servlet error", e);
-          } catch (IOException e) {
-            log("IO error", e);
+          } catch (Exception e) {
+            log("Cannot forward request to /portal" + uri, e);
           }
         } else {
           uri = uri.substring(uri.indexOf("/jitsi/") + 6);
@@ -107,7 +105,7 @@ public class JitsiGateway extends AbstractHttpServlet {
               resp.getWriter().write(EntityUtils.toString(entity));
             }
           } catch (IOException e) {
-            log("Error occured while requesting call page", e);
+            log("Error occured while requesting remote resource", e);
           }
         }
         ctx.complete();
