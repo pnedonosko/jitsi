@@ -46,29 +46,20 @@
     <load-on-startup>0</load-on-startup>
   </servlet>
   <servlet>
-    <servlet-name>JitsiCallGateway</servlet-name>
-    <servlet-class>org.exoplatform.webconferencing.jitsi.server.JitsiCallGateway</servlet-class>
+    <servlet-name>JitsiMeetGateway</servlet-name>
+    <servlet-class>org.exoplatform.webconferencing.jitsi.server.JitsiGateway</servlet-class>
     <load-on-startup>0</load-on-startup>
     <async-supported>true</async-supported>
   </servlet>
-  <servlet>
-    <servlet-name>JitsiUserGateway</servlet-name>
-    <servlet-class>org.exoplatform.webconferencing.jitsi.server.JitsiUserGateway</servlet-class>
-    <load-on-startup>0</load-on-startup>
-    <async-supported>true</async-supported>
-  </servlet>
-
+ 
   <servlet-mapping>
     <servlet-name>GateInServlet</servlet-name>
     <url-pattern>/gateinservlet</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
-    <servlet-name>JitsiCallGateway</servlet-name>
-    <url-pattern>/call/*</url-pattern>
+    <servlet-name>JitsiGateway</servlet-name>
+    <url-pattern>/*</url-pattern>
   </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>JitsiUserGateway</servlet-name>
-    <url-pattern>/user</url-pattern>
-  </servlet-mapping>
+ 
 
 </web-app>

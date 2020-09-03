@@ -1,6 +1,7 @@
 <template>
-  <div id="call">
-    <h2>{{ title }}</h2>
+  <div id="meet">
+   
+    
   </div>
 </template>
 
@@ -13,11 +14,6 @@ export default {
       backendResponse: [],
       errors: []
     };
-  },
-  methods: {
-    call () {
-      return "";
-    }
   }
 };
 </script>

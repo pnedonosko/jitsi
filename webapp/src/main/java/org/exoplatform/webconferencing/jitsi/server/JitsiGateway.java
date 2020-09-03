@@ -21,6 +21,8 @@ package org.exoplatform.webconferencing.jitsi.server;
 import java.io.IOException;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,19 +42,16 @@ import org.exoplatform.container.web.AbstractHttpServlet;
 /**
  * The Class JitsiCallGateway.
  */
-public class JitsiCallGateway extends AbstractHttpServlet {
+public class JitsiGateway extends AbstractHttpServlet {
 
   /** The Constant serialVersionUID. */
   private static final long     serialVersionUID         = -6075521943684342671L;
 
   /** The Constant LOG. */
-  protected static final Logger LOG                      = LoggerFactory.getLogger(JitsiCallGateway.class);
+  protected static final Logger LOG                      = LoggerFactory.getLogger(JitsiGateway.class);
 
   /** The Constant CALL_URL. */
-  private final static String   CALL_URL                 = "http://192.168.0.105:9080/jitsi/call";
-
-  /** The Constant IDENTITY_HEADER. */
-  private final static String   IDENTITY_HEADER          = "X-Exoplatform-Identity";
+  private final static String   JITSI_APP_URL            = "http://192.168.0.105:9080";
 
   /** The Constant AUTH_TOKEN_HEADER. */
   private final static String   AUTH_TOKEN_HEADER        = "X-Exoplatform-Auth";
@@ -63,7 +62,7 @@ public class JitsiCallGateway extends AbstractHttpServlet {
   /** 
    * Instantiates a new my call servlet.
    */
-  public JitsiCallGateway() {
+  public JitsiGateway() {
     //
   }
 
@@ -79,24 +78,37 @@ public class JitsiCallGateway extends AbstractHttpServlet {
 
         String uri = req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "");
 
-        StringBuilder requestUrl = new StringBuilder(CALL_URL).append(req.getPathInfo());
+        if (uri.startsWith("/jitsi/portal/")) {
+          uri = uri.substring(uri.indexOf("/jitsi/portal/") + 13);
+          ServletContext servletContext = getServletContext().getContext("/portal");
+          RequestDispatcher requestDispatcher = servletContext.getRequestDispatcher(uri);
+          try {
+            requestDispatcher.forward(ctx.getRequest(), ctx.getResponse());
+          } catch (ServletException e) {
+            log("Servlet error", e);
+          } catch (IOException e) {
+            log("IO error", e);
+          }
+        } else {
+          uri = uri.substring(uri.indexOf("/jitsi/") + 6);
+          StringBuilder requestUrl = new StringBuilder(JITSI_APP_URL).append(uri);
+          HttpGet request = new HttpGet(requestUrl.toString());
+          request.setHeader(AUTH_TOKEN_HEADER, "mock-auth-token");
 
-        HttpGet request = new HttpGet(requestUrl.toString());
-        request.setHeader(AUTH_TOKEN_HEADER, "mock-auth-token");
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-            CloseableHttpResponse response = httpClient.execute(request)) {
-          for (Header header : response.getAllHeaders()) {
-            if (!header.getName().equals(TRANSFER_ENCODING_HEADER)) {
-              resp.setHeader(header.getName(), header.getValue());
+          try (CloseableHttpClient httpClient = HttpClients.createDefault();
+              CloseableHttpResponse response = httpClient.execute(request)) {
+            for (Header header : response.getAllHeaders()) {
+              if (!header.getName().equals(TRANSFER_ENCODING_HEADER)) {
+                resp.setHeader(header.getName(), header.getValue());
+              }
             }
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+              resp.getWriter().write(EntityUtils.toString(entity));
+            }
+          } catch (IOException e) {
+            log("Error occured while requesting call page", e);
           }
-          HttpEntity entity = response.getEntity();
-          if (entity != null) {
-            resp.getWriter().write(EntityUtils.toString(entity));
-          }
-        } catch (IOException e) {
-          log("Error occured while requesting call page", e);
         }
         ctx.complete();
       }
