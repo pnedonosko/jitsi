@@ -46,7 +46,7 @@
     <load-on-startup>0</load-on-startup>
   </servlet>
   <servlet>
-    <servlet-name>JitsiMeetGateway</servlet-name>
+    <servlet-name>JitsiGateway</servlet-name>
     <servlet-class>org.exoplatform.webconferencing.jitsi.server.JitsiGateway</servlet-class>
     <load-on-startup>0</load-on-startup>
     <async-supported>true</async-supported>
