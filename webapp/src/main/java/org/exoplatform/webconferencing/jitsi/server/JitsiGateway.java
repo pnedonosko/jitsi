@@ -81,35 +81,7 @@ public class JitsiGateway extends AbstractHttpServlet {
     ctx.start(new Runnable() {
       public void run() {
         if (req.getRequestURI().startsWith("/jitsi/portal/")) {
-          if (req.getRemoteUser() == null) {
-            String webconfToken = getCookie(req, WebConferencingService.SESSION_TOKEN_COOKIE);
-            if (webconfToken == null || webconfToken.trim().isEmpty()) {
-              // Forward to login page
-            } else {
-              Claims claims = getClaims(webconfToken);
-              if (claims != null && claims.containsKey("username")) {
-                String username = String.valueOf(claims.get("username"));
-                if (username != null) {
-                  ConversationState state = createState(username);
-                  ConversationState.setCurrent(state);
-                  SessionProviderService sessionProviders =
-                                                          (SessionProviderService) getContainer().getComponentInstanceOfType(SessionProviderService.class);
-
-                  SessionProvider userProvider = new SessionProvider(state);
-                  sessionProviders.setSessionProvider(null, userProvider);
-                  // Do forwarding
-                  
-                  try {
-                    ConversationState.setCurrent(null);
-                  } catch (Exception e) {
-                    LOG.warn("An error occured while cleaning the ThreadLocal", e);
-                  }
-                }
-              }
-            }
-          } else {
-            forwardInternally(req, resp);
-          }
+          forwardInternally(req, resp);
         } else {
           forwardToCallApp(req, resp);
         }
@@ -160,86 +132,9 @@ public class JitsiGateway extends AbstractHttpServlet {
     }
   }
 
-  /**
-   * Gets the cookie.
-   *
-   * @param request the request
-   * @param name the name
-   * @return the cookie
-   */
-  private String getCookie(HttpServletRequest request, String name) {
-    for (Cookie cookie : request.getCookies()) {
-      if (cookie.getName().equals(name)) {
-        return cookie.getValue();
-      }
-    }
-    return null;
-  }
 
-  /**
-   * Gets the claims.
-   *
-   * @param token the token
-   * @return the claims
-   */
-  @SuppressWarnings("unchecked")
-  private Claims getClaims(String token) {
-    WebConferencingService webConferencing =
-                                           (WebConferencingService) getContainer().getComponentInstanceOfType(WebConferencingService.class);
-    try {
-      Jws<Claims> jws = Jwts.parser()
-                            .setSigningKey(Keys.hmacShaKeyFor(webConferencing.getSecretKey().getBytes()))
-                            .parseClaimsJws(token);
-
-      return jws.getBody();
-    } catch (Exception e) {
-      LOG.warn("Couldn't validate the token: {} : {}", token, e.getMessage());
-      throw new IllegalArgumentException("The provided token is not valid");
-    }
-  }
-
-  /**
-   * Creates the state.
-   *
-   * @param userId the user id
-   * @return the conversation state
-   */
-  private ConversationState createState(String userId) {
-    Identity userIdentity = userIdentity(userId);
-    if (userIdentity != null) {
-      ConversationState state = new ConversationState(userIdentity);
-      // Keep subject as attribute in ConversationState.
-      state.setAttribute(ConversationState.SUBJECT, userIdentity.getSubject());
-      return state;
-    }
-    LOG.warn("User identity not found " + userId + " for setting conversation state");
-    return null;
-  }
-
-  /**
-   * Find or create user identity.
-   *
-   * @param userId the user id
-   * @return the identity can be null if not found and cannot be created via
-   *         current authenticator
-   */
-  protected Identity userIdentity(String userId) {
-    IdentityRegistry identityRegistry = (IdentityRegistry) getContainer().getComponentInstanceOfType(IdentityRegistry.class);
-    Authenticator authenticator = (Authenticator) getContainer().getComponentInstanceOfType(Authenticator.class);
-    Identity userIdentity = identityRegistry.getIdentity(userId);
-    if (userIdentity == null) {
-      // We create user identity by authenticator, but not register it in the
-      // registry
-      try {
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("User identity not registered, trying to create it for: " + userId);
-        }
-        userIdentity = authenticator.createIdentity(userId);
-      } catch (Exception e) {
-        LOG.warn("Failed to create user identity: " + userId, e);
-      }
-    }
-    return userIdentity;
-  }
+  
+  
+ 
 
 }
