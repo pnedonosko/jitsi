@@ -32,6 +32,7 @@
       var inviteId = getUrlParameter("inviteId");
       if (inviteId) {
         var url = "/jitsi/api/invite/" + inviteId;
+        // Todo: use promises
         $.get(url, function(data) {
           console.log(JSON.stringify(data));
           let trimmedUrl = window.location.href.substring(0, window.location.href.indexOf("?"));
@@ -39,7 +40,7 @@
           initJitsiIframe(data.username);
         });
       } else {
-        var url = "/jitsi/portal/rest/jitsi/user/me";
+        var url = "/jitsi/portal/rest/jitsi/context";
         $.get(url, function(data) {
           console.log(JSON.stringify(data));
           let trimmedUrl = window.location.href.substring(0, window.location.href.indexOf("?"));

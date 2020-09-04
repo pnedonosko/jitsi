@@ -167,7 +167,6 @@ public class JitsiProvider extends CallProvider {
                            .claim("email", email)
                            .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
                            .compact();
-    LOG.info("PUT AUTH TOKEN. ClientId: " + clientId + " token: " + authToken);
     authTokens.put(clientId, authToken);
   }
 
@@ -179,7 +178,6 @@ public class JitsiProvider extends CallProvider {
    */
   public String getAuthToken(String clientId) {
     String token = authTokens.get(clientId);
-    LOG.info("Get AUTH TOKEN. ClientId: " + clientId + " token: " + token);
     return token;
   }
 
@@ -189,7 +187,6 @@ public class JitsiProvider extends CallProvider {
    * @param clientId the client id
    */
   public void removeClient(String clientId) {
-    LOG.info("Get AUTH TOKEN. ClientId: " + clientId);
     authTokens.remove(clientId);
   }
 

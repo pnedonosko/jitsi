@@ -19,7 +19,8 @@
     02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>addons-parent-pom</artifactId>
@@ -27,21 +28,21 @@
     <version>13-M01</version>
     <relativePath></relativePath>
   </parent>
-  
+
   <groupId>org.exoplatform.addons.jitsi</groupId>
   <artifactId>exo-jitsi</artifactId>
   <version>1.0.x-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>eXo Jitsi</name>
   <description>eXo Jitsi portal extension (connector for Web Conferencing)</description>
-  
+
   <modules>
     <module>apps</module>
     <module>services</module>
     <module>webapp</module>
     <module>packaging</module>
   </modules>
-  
+
   <properties>
     <!-- Defaut compiler settings -->
     <!--<maven.compiler.optimize>true</maven.compiler.optimize>-->
@@ -67,7 +68,7 @@
     <npm.version>6.14.5</npm.version>
     <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
   </properties>
-  
+
   <dependencyManagement>
     <dependencies>
       <!-- Import versions of external dependencies to use -->
@@ -79,7 +80,7 @@
         <scope>import</scope>
       </dependency>
       <!-- Import versions from platform project -->
-        <dependency>
+      <dependency>
         <groupId>org.exoplatform.ecms</groupId>
         <artifactId>ecms</artifactId>
         <version>${org.exoplatform.version}</version>
@@ -89,6 +90,20 @@
       <dependency>
         <groupId>org.exoplatform.social</groupId>
         <artifactId>social</artifactId>
+        <version>${org.exoplatform.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.exoplatform.jcr</groupId>
+        <artifactId>exo.jcr.component.core</artifactId>
+        <version>${org.exoplatform.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.exoplatform.jcr</groupId>
+        <artifactId>exo.jcr.component.ext</artifactId>
         <version>${org.exoplatform.version}</version>
         <type>pom</type>
         <scope>import</scope>
@@ -127,7 +142,7 @@
         <version>${junit.version}</version>
         <scope>test</scope>
       </dependency>
-        <dependency>
+      <dependency>
         <groupId>io.jsonwebtoken</groupId>
         <artifactId>jjwt-api</artifactId>
         <version>${io.jsonwebtoken.version}</version>

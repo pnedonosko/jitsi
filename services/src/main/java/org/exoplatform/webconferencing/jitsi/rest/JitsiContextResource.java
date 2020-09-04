@@ -10,8 +10,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.exoplatform.services.rest.resource.ResourceContainer;
 
-@Path("/jitsi/user")
-public class JitsiUserResource implements ResourceContainer {
+@Path("/jitsi")
+public class JitsiContextResource implements ResourceContainer {
 
   /**
    * Content.
@@ -23,9 +23,9 @@ public class JitsiUserResource implements ResourceContainer {
    * @return the response
    */
   @GET
-  @Path("/me")
+  @Path("/context")
   public Response me(@Context HttpServletRequest request) {
-
+    // TODO: return context info to init comet
     return Response.status(Status.OK)
                    .entity("{\"username\": \"" + request.getRemoteUser() + "\"}")
                    .type(MediaType.APPLICATION_JSON)
