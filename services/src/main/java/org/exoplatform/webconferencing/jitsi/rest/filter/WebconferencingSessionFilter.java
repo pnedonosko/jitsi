@@ -1,6 +1,7 @@
 package org.exoplatform.webconferencing.jitsi.rest.filter;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -22,6 +23,7 @@ import org.exoplatform.services.security.Identity;
 import org.exoplatform.services.security.IdentityRegistry;
 import org.exoplatform.web.filter.Filter;
 import org.exoplatform.webconferencing.WebConferencingService;
+import org.exoplatform.webconferencing.jitsi.JitsiProvider;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -31,10 +33,13 @@ import io.jsonwebtoken.security.Keys;
 public class WebconferencingSessionFilter extends AbstractFilter implements Filter {
 
   /** The Constant LOG. */
-  private static final Log    LOG                        = ExoLogger.getLogger(WebconferencingSessionFilter.class);
+  private static final Log    LOG                           = ExoLogger.getLogger(WebconferencingSessionFilter.class);
 
   /** The Constant AUTH_TOKEN_HEADER. */
-  private final static String INTERNAL_AUTH_TOKEN_HEADER = "X-Exoplatform-Internal-Auth";
+  private final static String INTERNAL_AUTH_TOKEN_ATTRIBUTE = "X-Exoplatform-Internal-Auth";
+
+  /** The Constant INTERNAL_AUTH. */
+  private static final String INTERNAL_AUTH                 = "internal-auth";
 
   /**
    * Do filter.
@@ -48,9 +53,11 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
     HttpServletRequest req = (HttpServletRequest) request;
+    WebConferencingService webConferencing =
+                                           (WebConferencingService) getContainer().getComponentInstanceOfType(WebConferencingService.class);
     if (validAuthToken(req)) {
       String webconfToken = getCookie(req, WebConferencingService.SESSION_TOKEN_COOKIE);
-      Claims claims = getClaims(webconfToken);
+      Claims claims = getClaims(webconfToken, webConferencing.getSecretKey());
       if (claims != null && claims.containsKey("username")) {
         try {
           String username = String.valueOf(claims.get("username"));
@@ -81,6 +88,11 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
       } else {
         chain.doFilter(request, response);
       }
+    } else {
+      LOG.warn("The request doesn't contain valid access token for internal auth");
+      response.setContentType("application/json");
+      response.setCharacterEncoding("UTF-8");
+      response.getWriter().write("{\"error\":\"The request is not authorized\"}");
     }
 
   }
@@ -116,17 +128,12 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
    * @return the claims
    */
   @SuppressWarnings("unchecked")
-  private Claims getClaims(String token) {
+  private Claims getClaims(String token, String secret) {
     if (token == null || token.trim().isEmpty()) {
       return null;
     }
-    WebConferencingService webConferencing =
-                                           (WebConferencingService) getContainer().getComponentInstanceOfType(WebConferencingService.class);
     try {
-      Jws<Claims> jws = Jwts.parser()
-                            .setSigningKey(Keys.hmacShaKeyFor(webConferencing.getSecretKey().getBytes()))
-                            .parseClaimsJws(token);
-
+      Jws<Claims> jws = Jwts.parser().setSigningKey(Keys.hmacShaKeyFor(secret.getBytes())).parseClaimsJws(token);
       return jws.getBody();
     } catch (Exception e) {
       LOG.warn("Couldn't validate the token: {} : {}", token, e.getMessage());
@@ -179,11 +186,18 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
   }
 
   protected boolean validAuthToken(HttpServletRequest request) {
-    String authHeader = request.getHeader(INTERNAL_AUTH_TOKEN_HEADER);
-    if (authHeader == null || authHeader.trim().isEmpty()) {
-      return false;
+    if (request.getAttribute(INTERNAL_AUTH_TOKEN_ATTRIBUTE) != null) {
+      JitsiProvider jitsiProvider = (JitsiProvider) getContainer().getComponentInstanceOfType(JitsiProvider.class);
+      String token = String.valueOf(request.getAttribute(INTERNAL_AUTH_TOKEN_ATTRIBUTE));
+      Map<String, Object> claims = getClaims(token, jitsiProvider.getInternalAuthSecret());
+      if (claims != null && claims.containsKey("action")) {
+        String action = String.valueOf(claims.get("action"));
+        if (INTERNAL_AUTH.equals(action)) {
+          return true;
+        }
+      }
     }
-    
-    return true;
+
+    return false;
   }
 }

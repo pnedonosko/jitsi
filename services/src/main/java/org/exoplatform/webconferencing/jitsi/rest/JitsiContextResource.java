@@ -1,6 +1,5 @@
 package org.exoplatform.webconferencing.jitsi.rest;
 
-import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

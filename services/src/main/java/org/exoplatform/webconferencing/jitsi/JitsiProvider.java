@@ -228,7 +228,7 @@ public class JitsiProvider extends CallProvider {
    * @return the external auth secret
    */
   public String getExternalAuthSecret() {
-    return this.internalAuthSecret;
+    return this.externalAuthSecret;
   }
 
   /**

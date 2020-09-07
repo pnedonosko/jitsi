@@ -51,7 +51,7 @@
     <load-on-startup>0</load-on-startup>
     <async-supported>true</async-supported>
   </servlet>
- 
+
   <servlet-mapping>
     <servlet-name>GateInServlet</servlet-name>
     <url-pattern>/gateinservlet</url-pattern>
@@ -60,6 +60,6 @@
     <servlet-name>JitsiGateway</servlet-name>
     <url-pattern>/*</url-pattern>
   </servlet-mapping>
- 
+
 
 </web-app>
