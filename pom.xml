@@ -53,7 +53,7 @@
     <!-- Dependencies versions                    -->
     <!-- **************************************** -->
     <web-conferencing.version>2.1.x-SNAPSHOT</web-conferencing.version>
-    <org.exoplatform.depmgt.version>18.x-SNAPSHOT</org.exoplatform.depmgt.version>
+    <org.exoplatform.depmgt.version>17</org.exoplatform.depmgt.version>
     <org.exoplatform.version>6.0.0</org.exoplatform.version>
     <!-- for tests -->
     <junit.version>4.12</junit.version>
