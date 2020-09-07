@@ -34,7 +34,6 @@ import org.exoplatform.social.core.profile.settings.UserProfileSettingsService;
 import org.exoplatform.webconferencing.CallProvider;
 import org.exoplatform.webconferencing.UserInfo.IMInfo;
 
-import antlr.Token;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
@@ -49,26 +48,32 @@ import io.jsonwebtoken.security.Keys;
 public class JitsiProvider extends CallProvider {
 
   /** The Constant LOG. */
-  protected static final Log        LOG                = ExoLogger.getLogger(JitsiProvider.class);
+  protected static final Log        LOG                         = ExoLogger.getLogger(JitsiProvider.class);
 
   /** The Constant TYPE. */
-  public static final String        TYPE               = "jitsi";
+  public static final String        TYPE                        = "jitsi";
 
-  /** The Constant CONFIG_SECRET. */
-  public static final String        CONFIG_SECRET      = "secret";
+  /** The Constant CONFIG_CLIENT_SECRET. */
+  public static final String        CONFIG_CLIENT_SECRET        = "client-secret";
+
+  /** The Constant CONFIG_EXTERNAL_AUTH_SECRET. */
+  public static final String        CONFIG_INTERNAL_AUTH_SECRET = "internal-auth-secret";
+
+  /** The Constant CONFIG_EXTERNAL_AUTH_SECRET. */
+  public static final String        CONFIG_EXTERNAL_AUTH_SECRET = "external-auth-secret";
 
   /** The Constant CONFIG_SERVICE_URL. */
-  public static final String        CONFIG_SERVICE_URL = "service-url";
+  public static final String        CONFIG_SERVICE_URL          = "service-url";
 
   /** The Constant TITLE. */
-  public static final String        TITLE              = "Jitsi";
+  public static final String        TITLE                       = "Jitsi";
 
   /** The Constant VERSION. */
-  public static final String        VERSION            = "1.0.0";
+  public static final String        VERSION                     = "1.0.0";
 
-  /** The auth tokens. */
+  /** The client tokens. */
   // TODO: should be cache with expiration
-  protected HashMap<String, String> authTokens         = new HashMap<>();
+  protected HashMap<String, String> clientTokens                = new HashMap<>();
 
   /**
    * Settings for My Call provider.
@@ -105,7 +110,13 @@ public class JitsiProvider extends CallProvider {
   }
 
   /** The secret. */
-  protected final String secret;
+  protected final String clientSecret;
+
+  /** The internal auth secret. */
+  protected final String internalAuthSecret;
+
+  /** The external auth secret. */
+  protected final String externalAuthSecret;
 
   /** The connector web-services URL (will be used to generate Call page URLs). */
   protected final String url;
@@ -120,11 +131,23 @@ public class JitsiProvider extends CallProvider {
   public JitsiProvider(UserProfileSettingsService profileSettings, InitParams params) throws ConfigurationException {
     super(params);
 
-    String secret = this.config.get(CONFIG_SECRET);
-    if (secret == null || (secret = secret.trim()).length() == 0) {
-      throw new ConfigurationException(CONFIG_SECRET + " required and should be non empty.");
+    String clientSecret = this.config.get(CONFIG_CLIENT_SECRET);
+    if (clientSecret == null || (clientSecret = clientSecret.trim()).length() == 0) {
+      throw new ConfigurationException(CONFIG_CLIENT_SECRET + " required and should be non empty.");
     }
-    this.secret = secret;
+    this.clientSecret = clientSecret;
+
+    String internalAuthSecret = this.config.get(CONFIG_INTERNAL_AUTH_SECRET);
+    if (internalAuthSecret == null || (internalAuthSecret = internalAuthSecret.trim()).length() == 0) {
+      throw new ConfigurationException(CONFIG_INTERNAL_AUTH_SECRET + " required and should be non empty.");
+    }
+    this.internalAuthSecret = internalAuthSecret;
+
+    String externalAuthSecret = this.config.get(CONFIG_EXTERNAL_AUTH_SECRET);
+    if (externalAuthSecret == null || (externalAuthSecret = externalAuthSecret.trim()).length() == 0) {
+      throw new ConfigurationException(CONFIG_EXTERNAL_AUTH_SECRET + " required and should be non empty.");
+    }
+    this.externalAuthSecret = externalAuthSecret;
 
     String serviceUrl = this.config.get(CONFIG_SERVICE_URL);
     if (serviceUrl == null || (serviceUrl = serviceUrl.trim()).length() == 0) {
@@ -161,13 +184,13 @@ public class JitsiProvider extends CallProvider {
     String name = identity.getProfile().getFullName();
     String email = identity.getProfile().getEmail();
 
-    String authToken = Jwts.builder()
-                           .setSubject("jitsi")
-                           .claim("name", name)
-                           .claim("email", email)
-                           .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
-                           .compact();
-    authTokens.put(clientId, authToken);
+    String token = Jwts.builder()
+                       .setSubject("jitsi")
+                       .claim("name", name)
+                       .claim("email", email)
+                       .signWith(Keys.hmacShaKeyFor(clientSecret.getBytes()))
+                       .compact();
+    clientTokens.put(clientId, token);
   }
 
   /**
@@ -176,8 +199,8 @@ public class JitsiProvider extends CallProvider {
    * @param clientId the client id
    * @return the auth token
    */
-  public String getAuthToken(String clientId) {
-    String token = authTokens.get(clientId);
+  public String getClientToken(String clientId) {
+    String token = clientTokens.get(clientId);
     return token;
   }
 
@@ -187,7 +210,25 @@ public class JitsiProvider extends CallProvider {
    * @param clientId the client id
    */
   public void removeClient(String clientId) {
-    authTokens.remove(clientId);
+    clientTokens.remove(clientId);
+  }
+
+  /**
+   * Gets the internal auth secret.
+   *
+   * @return the internal auth secret
+   */
+  public String getInternalAuthSecret() {
+    return this.internalAuthSecret;
+  }
+
+  /**
+   * Gets the external auth secret.
+   *
+   * @return the external auth secret
+   */
+  public String getExternalAuthSecret() {
+    return this.internalAuthSecret;
   }
 
   /**

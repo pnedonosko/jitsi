@@ -51,7 +51,7 @@ public class JitsiGateway extends AbstractHttpServlet {
   protected static final Log  LOG                      = ExoLogger.getLogger(JitsiGateway.class);
 
   /** The Constant CALL_URL. */
-  private final static String JITSI_APP_URL            = "http://192.168.0.105:9080";
+  private final static String JITSI_APP_URL            = "http://192.168.1.103:9080";
 
   /** The Constant AUTH_TOKEN_HEADER. */
   private final static String AUTH_TOKEN_HEADER        = "X-Exoplatform-Auth";

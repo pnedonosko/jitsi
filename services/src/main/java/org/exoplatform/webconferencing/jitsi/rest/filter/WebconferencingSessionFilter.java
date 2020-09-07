@@ -9,6 +9,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
+import org.exoplatform.container.ExoContainer;
+import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.web.AbstractFilter;
 import org.exoplatform.services.jcr.ext.app.SessionProviderService;
 import org.exoplatform.services.jcr.ext.common.SessionProvider;
@@ -29,7 +31,10 @@ import io.jsonwebtoken.security.Keys;
 public class WebconferencingSessionFilter extends AbstractFilter implements Filter {
 
   /** The Constant LOG. */
-  private static final Log LOG = ExoLogger.getLogger(WebconferencingSessionFilter.class);
+  private static final Log    LOG                        = ExoLogger.getLogger(WebconferencingSessionFilter.class);
+
+  /** The Constant AUTH_TOKEN_HEADER. */
+  private final static String INTERNAL_AUTH_TOKEN_HEADER = "X-Exoplatform-Internal-Auth";
 
   /**
    * Do filter.
@@ -43,26 +48,41 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
     HttpServletRequest req = (HttpServletRequest) request;
-    String webconfToken = getCookie(req, WebConferencingService.SESSION_TOKEN_COOKIE);
-    Claims claims = getClaims(webconfToken);
-    if (claims != null && claims.containsKey("username")) {
-      String username = String.valueOf(claims.get("username"));
-      ConversationState state = createState(username);
-      ConversationState.setCurrent(state);
-      SessionProviderService sessionProviders =
-                                              (SessionProviderService) getContainer().getComponentInstanceOfType(SessionProviderService.class);
+    if (validAuthToken(req)) {
+      String webconfToken = getCookie(req, WebConferencingService.SESSION_TOKEN_COOKIE);
+      Claims claims = getClaims(webconfToken);
+      if (claims != null && claims.containsKey("username")) {
+        try {
+          String username = String.valueOf(claims.get("username"));
+          ExoContainer container = getContainer();
+          ExoContainerContext.setCurrentContainer(container);
+          ConversationState state = createState(username);
+          ConversationState.setCurrent(state);
+          SessionProviderService sessionProviders =
+                                                  (SessionProviderService) getContainer().getComponentInstanceOfType(SessionProviderService.class);
 
-      SessionProvider userProvider = new SessionProvider(state);
-      sessionProviders.setSessionProvider(null, userProvider);
-      chain.doFilter(request, response);
-      try {
-        ConversationState.setCurrent(null);
-      } catch (Exception e) {
-        LOG.warn("An error occured while cleaning the ConversationState", e);
+          SessionProvider userProvider = new SessionProvider(state);
+          sessionProviders.setSessionProvider(null, userProvider);
+          chain.doFilter(request, response);
+          try {
+            ConversationState.setCurrent(null);
+          } catch (Exception e) {
+            LOG.warn("An error occured while cleaning the ConversationState", e);
+          }
+          try {
+            ExoContainerContext.setCurrentContainer(null);
+          } catch (Exception e) {
+            LOG.warn("An error occured while cleaning the ThreadLocal", e);
+          }
+        } catch (Exception e) {
+          LOG.warn("Cannot set ConversationState based on provided token", e);
+          chain.doFilter(request, response);
+        }
+      } else {
+        chain.doFilter(request, response);
       }
-    } else {
-      chain.doFilter(request, response);
     }
+
   }
 
   /**
@@ -156,5 +176,14 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
       }
     }
     return userIdentity;
+  }
+
+  protected boolean validAuthToken(HttpServletRequest request) {
+    String authHeader = request.getHeader(INTERNAL_AUTH_TOKEN_HEADER);
+    if (authHeader == null || authHeader.trim().isEmpty()) {
+      return false;
+    }
+    
+    return true;
   }
 }
