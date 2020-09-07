@@ -1,4 +1,4 @@
-package org.exoplatform.webconferencing.jitsi.rest;
+package org.exoplatform.webconferencing.jitsi.rest.filter;
 
 import java.io.IOException;
 
@@ -10,6 +10,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.exoplatform.container.web.AbstractFilter;
+import org.exoplatform.services.jcr.ext.app.SessionProviderService;
+import org.exoplatform.services.jcr.ext.common.SessionProvider;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.security.Authenticator;
@@ -40,39 +42,27 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
    */
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-    // TODO: read cookie, parse token, set convo state, do chain, clear convo state
-    // TODO: configure this filter in .xml
-    /*
-    if (req.getRemoteUser() == null) {
+    HttpServletRequest req = (HttpServletRequest) request;
     String webconfToken = getCookie(req, WebConferencingService.SESSION_TOKEN_COOKIE);
-    if (webconfToken == null || webconfToken.trim().isEmpty()) {
-      // Forward to login page
-    } else {
-      Claims claims = getClaims(webconfToken);
-      if (claims != null && claims.containsKey("username")) {
-        String username = String.valueOf(claims.get("username"));
-        if (username != null) {
-          ConversationState state = createState(username);
-          ConversationState.setCurrent(state);
-          SessionProviderService sessionProviders =
-                                                  (SessionProviderService) getContainer().getComponentInstanceOfType(SessionProviderService.class);
-    
-          SessionProvider userProvider = new SessionProvider(state);
-          sessionProviders.setSessionProvider(null, userProvider);
-          // Do forwarding
-         
-          try {
-            ConversationState.setCurrent(null);
-          } catch (Exception e) {
-            LOG.warn("An error occured while cleaning the ThreadLocal", e);
-          }
-        }
+    Claims claims = getClaims(webconfToken);
+    if (claims != null && claims.containsKey("username")) {
+      String username = String.valueOf(claims.get("username"));
+      ConversationState state = createState(username);
+      ConversationState.setCurrent(state);
+      SessionProviderService sessionProviders =
+                                              (SessionProviderService) getContainer().getComponentInstanceOfType(SessionProviderService.class);
+
+      SessionProvider userProvider = new SessionProvider(state);
+      sessionProviders.setSessionProvider(null, userProvider);
+      chain.doFilter(request, response);
+      try {
+        ConversationState.setCurrent(null);
+      } catch (Exception e) {
+        LOG.warn("An error occured while cleaning the ConversationState", e);
       }
-    }
     } else {
-    forwardInternally(req, resp);
+      chain.doFilter(request, response);
     }
-     */
   }
 
   /**
@@ -107,6 +97,9 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
    */
   @SuppressWarnings("unchecked")
   private Claims getClaims(String token) {
+    if (token == null || token.trim().isEmpty()) {
+      return null;
+    }
     WebConferencingService webConferencing =
                                            (WebConferencingService) getContainer().getComponentInstanceOfType(WebConferencingService.class);
     try {
@@ -117,7 +110,7 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
       return jws.getBody();
     } catch (Exception e) {
       LOG.warn("Couldn't validate the token: {} : {}", token, e.getMessage());
-      throw new IllegalArgumentException("The provided token is not valid");
+      return null;
     }
   }
 

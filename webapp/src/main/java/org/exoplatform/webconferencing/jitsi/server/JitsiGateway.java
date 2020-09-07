@@ -24,7 +24,6 @@ import javax.servlet.AsyncContext;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,20 +36,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import org.exoplatform.container.web.AbstractHttpServlet;
-import org.exoplatform.services.jcr.ext.app.SessionProviderService;
-import org.exoplatform.services.jcr.ext.common.SessionProvider;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.services.security.Authenticator;
-import org.exoplatform.services.security.ConversationState;
-import org.exoplatform.services.security.Identity;
-import org.exoplatform.services.security.IdentityRegistry;
-import org.exoplatform.webconferencing.WebConferencingService;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 
 /**
  * The Class JitsiCallGateway.
@@ -131,10 +118,4 @@ public class JitsiGateway extends AbstractHttpServlet {
       log("Cannot forward request to /portal" + uri, e);
     }
   }
-
-
-  
-  
- 
-
 }

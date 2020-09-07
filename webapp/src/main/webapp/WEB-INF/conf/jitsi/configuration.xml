@@ -118,4 +118,30 @@
     </component-plugin>
   </external-component-plugins>
 
+  <external-component-plugins>
+    <target-component>org.exoplatform.web.filter.ExtensibleFilter</target-component>
+    <component-plugin>
+      <name>Webconferencing session filter plugin</name>
+      <set-method>addFilterDefinitions</set-method>
+      <type>org.exoplatform.web.filter.FilterDefinitionPlugin</type>
+      <init-params>
+        <object-param>
+          <name>Webconferencing session filter plugin</name>
+          <object type="org.exoplatform.web.filter.FilterDefinition">
+            <field name="filter">
+              <object type="org.exoplatform.webconferencing.jitsi.rest.filter.WebconferencingSessionFilter" />
+            </field>
+            <field name="patterns">
+              <collection type="java.util.ArrayList" item-type="java.lang.String">
+                <value>
+                  <string>/rest/jitsi/.*</string>
+                </value>
+              </collection>
+            </field>
+          </object>
+        </object-param>
+      </init-params>
+    </component-plugin>
+  </external-component-plugins>
+
 </configuration>
