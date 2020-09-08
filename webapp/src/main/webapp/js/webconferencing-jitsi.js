@@ -32,7 +32,7 @@
 			 * MUST return a call type name. If several types supported, this one is assumed as major one
 			 * and it will be used for referring this connector in getProvider() and similar methods. 
 			 * This type also should listed in getSupportedTypes(). 
-			 * Call type is the same as used in user profile as IM type.
+			 * Call type is the same as used in user profile.
 			 */
 			this.getType = function() {
 				if (settings) {
@@ -81,36 +81,22 @@
 			this.callButton = function(context) {
 				var button = $.Deferred();
 				if (settings && context && context.currentUser) {
-					// You may obtain the user IM Id via this method. Can be useful when connector supports several call types.
-					// But it's optionally to get an IM account. If you connector doesn't have IM types in user profile - don't do this.
-					// IM object is a serialized to JSON Java class IMInfo. It has id and type fields. Where id is for an user IM ID. 
-					var currentUserIMID = webConferencing.imAccount(context.currentUser, "jitsi");
-					// In the code below, it's assumed that Jitsi has IM type 'jitsi' and calls only possible with 
-					// users having the same IM type in their profiles.
-					if (currentUserIMID) {
 						context.details().done(function(target) {
-							var ims = [];
-							var addParticipant = function(user) {
-								var uim = webConferencing.imAccount(user, "jitsi");
-								if (uim) {
-									// Optionally you may check for validity of the account and decide to skip it and warn current user
-									ims.push(uim.id);
-								} // else, skip this user
-							};
+							var callMembers = [];
 							if (target.group) {
 								// If target is a group: go through its members (this will work for both space and chat room)
 								for ( var uname in target.members) {
 									if (target.members.hasOwnProperty(uname)) {
 										var u = target.members[uname];
-										addParticipant(u);
+										callMembers.push(u);
 									}
 								}								
 							} else {
 								// Otherwise it's 1:1 call
-								addParticipant(context.currentUser);
-								addParticipant(target);
+								callMembers.push(context.currentUser);
+								callMembers.push(target);
 							}
-							if (ims.length > 1) {
+							if (callMembers.length > 1) {
 								// If we have more than single user, then we have participants for a call.
 								// Build jQuery element of the call button:
 								// It can be an anchor or button. It may use any custom CSS class (like myCallAction) we know that 
@@ -158,10 +144,10 @@
 										if (target.group) {
 											callId = "g/" + (target.type == "chat_room" ? context.roomName : target.id);
 										} else {
-											// Sort IMs to have always the same ID for two parts independently on who started the call
-											var imsAsc = ims.slice();
-											imsAsc.sort();
-											callId = "p/" + imsAsc.join("-");
+											// Sort call members to have always the same ID for two parts independently on who started the call
+											var callMembersAsc = callMembers.slice();
+											callMembersAsc.sort();
+											callId = "p/" + callMembersAsc.join("-");
 										}
 										// Next we need ensure this call not yet already started (e.g. remotely),
 										// it's actual especially for group calls where user can join already running conversations
@@ -188,8 +174,7 @@
 														provider : self.getType(),
 														// tagret's title is a group or user full name
 														title : target.title,
-														// In general, not all group members can be participants, see above ims variable
-														participants : ims.join(";") // string build from array separated by ';'
+														participants : callMembers.join(";") // string build from array separated by ';'
 													};
 													webConferencing.addCall(callId, callInfo).done(function(call) {
 														log.info("Call created: " + callId);
@@ -254,12 +239,6 @@
 								button.reject(msg, err);
 							}
 						});
-					} else {
-						// If current user has no Jitsi IM - we don't show the button to him
-						var msg = "Not Jitsi user " + context.currentUser.id;
-						log.debug(msg);
-						button.reject(msg);
-					}
 				} else {
 					// If not initialized, we don't show the button for this context
 					var msg = "Not configured or empty context";
