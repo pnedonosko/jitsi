@@ -39,7 +39,7 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
   private final static String INTERNAL_AUTH_TOKEN_ATTRIBUTE = "X-Exoplatform-Internal-Auth";
 
   /** The Constant INTERNAL_AUTH. */
-  private static final String INTERNAL_AUTH                 = "internal-auth";
+  private static final String INTERNAL_AUTH                 = "internal_auth";
 
   /**
    * Do filter.
@@ -55,7 +55,8 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
     HttpServletRequest req = (HttpServletRequest) request;
     WebConferencingService webConferencing =
                                            (WebConferencingService) getContainer().getComponentInstanceOfType(WebConferencingService.class);
-    if (validAuthToken(req)) {
+    JitsiProvider jitsiProvider = (JitsiProvider) webConferencing.getProvider(JitsiProvider.TYPE);
+    if (validAuthToken(req, jitsiProvider.getInternalAuthSecret())) {
       String webconfToken = getCookie(req, WebConferencingService.SESSION_TOKEN_COOKIE);
       Claims claims = getClaims(webconfToken, webConferencing.getSecretKey());
       if (claims != null && claims.containsKey("username")) {
@@ -185,11 +186,10 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
     return userIdentity;
   }
 
-  protected boolean validAuthToken(HttpServletRequest request) {
-    if (request.getAttribute(INTERNAL_AUTH_TOKEN_ATTRIBUTE) != null) {
-      JitsiProvider jitsiProvider = (JitsiProvider) getContainer().getComponentInstanceOfType(JitsiProvider.class);
-      String token = String.valueOf(request.getAttribute(INTERNAL_AUTH_TOKEN_ATTRIBUTE));
-      Map<String, Object> claims = getClaims(token, jitsiProvider.getInternalAuthSecret());
+  protected boolean validAuthToken(HttpServletRequest request, String secret) {
+    if (request.getHeader(INTERNAL_AUTH_TOKEN_ATTRIBUTE) != null) {
+      String token = request.getHeader(INTERNAL_AUTH_TOKEN_ATTRIBUTE);
+      Map<String, Object> claims = getClaims(token, secret);
       if (claims != null && claims.containsKey("action")) {
         String action = String.valueOf(claims.get("action"));
         if (INTERNAL_AUTH.equals(action)) {

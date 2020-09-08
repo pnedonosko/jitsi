@@ -25,7 +25,7 @@ public class JitsiContextResource implements ResourceContainer {
    */
   @GET
   @Path("/context")
-  public Response me(@Context HttpServletRequest request) {
+  public Response context(@Context HttpServletRequest request) {
     // TODO: return context info to init comet
     String userId = null;
     ConversationState state = ConversationState.getCurrent();

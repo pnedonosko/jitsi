@@ -21,9 +21,8 @@ package org.exoplatform.webconferencing.jitsi.server;
 import java.io.IOException;
 
 import javax.servlet.AsyncContext;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,8 +34,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
-import org.exoplatform.container.ExoContainer;
-import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.web.AbstractHttpServlet;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -51,41 +48,45 @@ import io.jsonwebtoken.security.Keys;
  */
 public class JitsiGateway extends AbstractHttpServlet {
 
+  private enum Action {
+    EXTERNAL_AUTH, INTERNAL_AUTH
+  }
+
   /** The Constant serialVersionUID. */
-  private static final long        serialVersionUID              = -6075521943684342671L;
+  private static final long   serialVersionUID           = -6075521943684342671L;
 
   /** The Constant LOG. */
-  protected static final Log       LOG                           = ExoLogger.getLogger(JitsiGateway.class);
+  protected static final Log  LOG                        = ExoLogger.getLogger(JitsiGateway.class);
 
   /** The Constant CALL_URL. */
-  private final static String      JITSI_APP_URL                 = "http://192.168.1.103:9080";
+  private final static String JITSI_APP_URL              = "http://192.168.1.103:9080";
 
   /** The Constant EXTERNAL_AUTH_TOKEN_HEADER. */
-  private final static String      EXTERNAL_AUTH_TOKEN_HEADER    = "X-Exoplatform-External-Auth";
+  private final static String EXTERNAL_AUTH_TOKEN_HEADER = "X-Exoplatform-External-Auth";
 
   /** The Constant INTERNAL_AUTH_TOKEN_HEADER. */
-  private final static String      INTERNAL_AUTH_TOKEN_ATTRIBUTE = "X-Exoplatform-Internal-Auth";
+  private final static String INTERNAL_AUTH_TOKEN_HEADER = "X-Exoplatform-Internal-Auth";
 
   /** The Constant TRANSFER_ENCODING_HEADER. */
-  private final static String      TRANSFER_ENCODING_HEADER      = "Transfer-Encoding";
-
-  /** The webconferencing. */
-  protected WebConferencingService webconferencing;
+  private final static String TRANSFER_ENCODING_HEADER   = "Transfer-Encoding";
 
   /**
    * {@inheritDoc}
    */
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    ExoContainer container = ExoContainerContext.getCurrentContainer();
-    webconferencing = (WebConferencingService) container.getComponentInstanceOfType(WebConferencingService.class);
     final AsyncContext ctx = req.startAsync();
     ctx.start(new Runnable() {
       public void run() {
+        String uri = req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "");
+        uri = uri.substring(uri.indexOf("/jitsi/") + 6);
         if (req.getRequestURI().startsWith("/jitsi/portal/")) {
-          forwardInternally(req, resp);
+
+          String requestUrl = new StringBuilder(getPlatformUrl(req)).append(uri).toString();
+          forward(requestUrl, Action.INTERNAL_AUTH, req, resp);
         } else {
-          forwardToCallApp(req, resp);
+          String requestUrl = new StringBuilder(JITSI_APP_URL).append(uri).toString();
+          forward(requestUrl, Action.EXTERNAL_AUTH, req, resp);
         }
         ctx.complete();
       }
@@ -100,22 +101,29 @@ public class JitsiGateway extends AbstractHttpServlet {
     doGet(req, resp);
   }
 
-  private void forwardToCallApp(HttpServletRequest req, HttpServletResponse resp) {
-
-    String uri = req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "");
-    uri = uri.substring(uri.indexOf("/jitsi/") + 6);
-    StringBuilder requestUrl = new StringBuilder(JITSI_APP_URL).append(uri);
-    HttpGet request = new HttpGet(requestUrl.toString());
-
+  private void forward(String requestUrl, Action action, HttpServletRequest req, HttpServletResponse resp) {
+    WebConferencingService webconferencing =
+                                           (WebConferencingService) getContainer().getComponentInstanceOfType(WebConferencingService.class);
     JitsiProvider jitsiProvider = (JitsiProvider) webconferencing.getProvider(JitsiProvider.TYPE);
-
+    HttpGet request = new HttpGet(requestUrl);
+    String secret;
+    String authHeader;
+    if (action == Action.INTERNAL_AUTH) {
+      // Pass cookies for internal auth
+      request.setHeader("Cookie", getCookiesAsString(req));
+      secret = jitsiProvider.getInternalAuthSecret();
+      authHeader = INTERNAL_AUTH_TOKEN_HEADER;
+    } else {
+      secret = jitsiProvider.getExternalAuthSecret();
+      authHeader = EXTERNAL_AUTH_TOKEN_HEADER;
+    }
     String token = Jwts.builder()
                        .setSubject("exo-webconf")
-                       .claim("action", "external-auth")
-                       .signWith(Keys.hmacShaKeyFor(jitsiProvider.getExternalAuthSecret().getBytes()))
+                       .claim("action", action.toString().toLowerCase())
+                       .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
                        .compact();
 
-    request.setHeader(EXTERNAL_AUTH_TOKEN_HEADER, token);
+    request.setHeader(authHeader, token);
     try (CloseableHttpClient httpClient = HttpClients.createDefault();
         CloseableHttpResponse response = httpClient.execute(request)) {
       for (Header header : response.getAllHeaders()) {
@@ -132,24 +140,38 @@ public class JitsiGateway extends AbstractHttpServlet {
     }
   }
 
-  private void forwardInternally(HttpServletRequest req, HttpServletResponse resp) {
-    String uri = req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "");
-    uri = uri.substring(uri.indexOf("/jitsi/portal/") + 13);
-    ServletContext servletContext = getServletContext().getContext("/portal");
-    RequestDispatcher requestDispatcher = servletContext.getRequestDispatcher(uri);
-    JitsiProvider jitsiProvider = (JitsiProvider) webconferencing.getProvider(JitsiProvider.TYPE);
-    String token = Jwts.builder()
-                       .setSubject("exo-webconf")
-                       .claim("action", "internal-auth")
-                       .signWith(Keys.hmacShaKeyFor(jitsiProvider.getInternalAuthSecret().getBytes()))
-                       .compact();
-
-    req.setAttribute(INTERNAL_AUTH_TOKEN_ATTRIBUTE, token);
-    try {
-      requestDispatcher.forward(req, resp);
-    } catch (Exception e) {
-      log("Cannot forward request to /portal" + uri, e);
+  /**
+   * Gets the cookies as string.
+   *
+   * @param req the req
+   * @return the cookies as string
+   */
+  private String getCookiesAsString(HttpServletRequest req) {
+    StringBuilder builder = new StringBuilder();
+    for (Cookie cookie : req.getCookies()) {
+      if (builder.length() != 0) {
+        builder.append(" ");
+      }
+      builder.append(cookie.getName()).append("=").append(cookie.getValue()).append(";");
     }
+    return builder.toString();
+  }
+
+  /**
+   * Gets the platform url.
+   *
+   * @param req the req
+   * @return the platform url
+   */
+  private String getPlatformUrl(HttpServletRequest req) {
+    return new StringBuilder(req.getScheme()).append("://")
+                                             .append(req.getServerName())
+                                             .append(("http".equals(req.getScheme()) && req.getServerPort() == 80
+                                                 || "https".equals(req.getScheme()) && req.getServerPort() == 443
+                                                                                                                  ? ""
+                                                                                                                  : ":"
+                                                                                                                      + req.getServerPort()))
+                                             .toString();
   }
 
 }
