@@ -19,6 +19,11 @@
 package org.exoplatform.webconferencing.jitsi.server;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
@@ -30,8 +35,11 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
 
 import org.exoplatform.container.web.AbstractHttpServlet;
@@ -58,9 +66,6 @@ public class JitsiGateway extends AbstractHttpServlet {
   /** The Constant LOG. */
   protected static final Log  LOG                        = ExoLogger.getLogger(JitsiGateway.class);
 
-  /** The Constant CALL_URL. */
-  private final static String JITSI_APP_URL              = "http://192.168.1.103:9080";
-
   /** The Constant EXTERNAL_AUTH_TOKEN_HEADER. */
   private final static String EXTERNAL_AUTH_TOKEN_HEADER = "X-Exoplatform-External-Auth";
 
@@ -74,19 +79,23 @@ public class JitsiGateway extends AbstractHttpServlet {
    * {@inheritDoc}
    */
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    final AsyncContext ctx = req.startAsync();
+  protected void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
+    WebConferencingService webconferencing =
+                                           (WebConferencingService) getContainer().getComponentInstanceOfType(WebConferencingService.class);
+    JitsiProvider jitsiProvider = (JitsiProvider) webconferencing.getProvider(JitsiProvider.TYPE);
+    final AsyncContext ctx = httpRequest.startAsync();
     ctx.start(new Runnable() {
       public void run() {
+        HttpServletRequest req = (HttpServletRequest) ctx.getRequest();
+        HttpServletResponse resp = (HttpServletResponse) ctx.getResponse();
         String uri = req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "");
         uri = uri.substring(uri.indexOf("/jitsi/") + 6);
         if (req.getRequestURI().startsWith("/jitsi/portal/")) {
-
           String requestUrl = new StringBuilder(getPlatformUrl(req)).append(uri).toString();
-          forward(requestUrl, Action.INTERNAL_AUTH, req, resp);
+          forward(requestUrl, Action.INTERNAL_AUTH, jitsiProvider.getInternalAuthSecret(), req, resp);
         } else {
-          String requestUrl = new StringBuilder(JITSI_APP_URL).append(uri).toString();
-          forward(requestUrl, Action.EXTERNAL_AUTH, req, resp);
+          String requestUrl = new StringBuilder(jitsiProvider.getSettings().getUrl()).append(uri).toString();
+          forward(requestUrl, Action.EXTERNAL_AUTH, jitsiProvider.getExternalAuthSecret(), req, resp);
         }
         ctx.complete();
       }
@@ -101,20 +110,17 @@ public class JitsiGateway extends AbstractHttpServlet {
     doGet(req, resp);
   }
 
-  private void forward(String requestUrl, Action action, HttpServletRequest req, HttpServletResponse resp) {
-    WebConferencingService webconferencing =
-                                           (WebConferencingService) getContainer().getComponentInstanceOfType(WebConferencingService.class);
-    JitsiProvider jitsiProvider = (JitsiProvider) webconferencing.getProvider(JitsiProvider.TYPE);
+  private void forward(String requestUrl, Action action, String secret, HttpServletRequest req, HttpServletResponse resp) {
     HttpGet request = new HttpGet(requestUrl);
-    String secret;
     String authHeader;
+    // TODO: Use servlet forwarding for accessing internal resources. Solve the issue with filters (not invoked when forwarding)
     if (action == Action.INTERNAL_AUTH) {
       // Pass cookies for internal auth
-      request.setHeader("Cookie", getCookiesAsString(req));
-      secret = jitsiProvider.getInternalAuthSecret();
+      if (req.getCookies() != null) {
+        request.setHeader("Cookie", getCookiesAsString(req));
+      }
       authHeader = INTERNAL_AUTH_TOKEN_HEADER;
     } else {
-      secret = jitsiProvider.getExternalAuthSecret();
       authHeader = EXTERNAL_AUTH_TOKEN_HEADER;
     }
     String token = Jwts.builder()
@@ -124,7 +130,35 @@ public class JitsiGateway extends AbstractHttpServlet {
                        .compact();
 
     request.setHeader(authHeader, token);
-    try (CloseableHttpClient httpClient = HttpClients.createDefault();
+
+    SSLContextBuilder builder = new SSLContextBuilder();
+    try {
+      builder.loadTrustMaterial(null, new TrustStrategy() {
+        @Override
+        public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+          return true;
+        }
+      });
+    } catch (NoSuchAlgorithmException e2) {
+      // TODO Auto-generated catch block
+      e2.printStackTrace();
+    } catch (KeyStoreException e2) {
+      // TODO Auto-generated catch block
+      e2.printStackTrace();
+    }
+
+    SSLConnectionSocketFactory sslSF = null;
+    try {
+      sslSF = new SSLConnectionSocketFactory(builder.build(), SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+    } catch (KeyManagementException e2) {
+      // TODO Auto-generated catch block
+      e2.printStackTrace();
+    } catch (NoSuchAlgorithmException e2) {
+      // TODO Auto-generated catch block
+      e2.printStackTrace();
+    }
+
+    try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslSF).build();
         CloseableHttpResponse response = httpClient.execute(request)) {
       for (Header header : response.getAllHeaders()) {
         if (!header.getName().equals(TRANSFER_ENCODING_HEADER)) {
@@ -136,7 +170,14 @@ public class JitsiGateway extends AbstractHttpServlet {
         resp.getWriter().write(EntityUtils.toString(entity));
       }
     } catch (IOException e) {
-      log("Error occured while requesting remote resource", e);
+      LOG.warn("Error occured while requesting remote resource", e.getMessage());
+      try {
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+        resp.getWriter().write("{\"error\":\"Cannot connect to the remote resource\"}");
+      } catch (IOException e1) {
+        LOG.error("Cannot write response", e.getMessage());
+      }
     }
   }
 

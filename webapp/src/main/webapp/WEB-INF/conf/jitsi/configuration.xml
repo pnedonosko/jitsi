@@ -40,8 +40,7 @@
         <properties-param>
           <name>provider-configuration</name>
           <property name="active" value="${webconferencing.jitsi.active:true}" />
-          <property name="service-url"
-            value="${webconferencing.jitsi.url:https://jitsi-dev.francecentral.cloudapp.azure.com:8486}" />
+          <property name="service-url" value="${webconferencing.jitsi.url:http://192.168.1.103:9080}" />
           <property name="client-secret"
             value="${webconferencing.jitsi.client.secret:mQzPudDBpSAqUwM0FY2r86gNAd6be5tN1xqwdFDOb4Us1DT4Tc}" />
           <property name="internal-auth-secret"

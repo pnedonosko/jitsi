@@ -76,9 +76,9 @@ public class JitsiProvider extends CallProvider {
   protected HashMap<String, String> clientTokens                = new HashMap<>();
 
   /**
-   * Settings for My Call provider.
+   * Settings for Jitsi provider.
    */
-  public class MySettings extends Settings {
+  public class JitsiSettings extends Settings {
 
     /**
      * Gets the url.
@@ -236,8 +236,8 @@ public class JitsiProvider extends CallProvider {
    *
    * @return the settings
    */
-  public MySettings getSettings() {
-    return new MySettings();
+  public JitsiSettings getSettings() {
+    return new JitsiSettings();
   }
 
   /**

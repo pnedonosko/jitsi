@@ -21,6 +21,8 @@ import org.exoplatform.services.security.Authenticator;
 import org.exoplatform.services.security.ConversationState;
 import org.exoplatform.services.security.Identity;
 import org.exoplatform.services.security.IdentityRegistry;
+import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
+import org.exoplatform.social.core.manager.IdentityManager;
 import org.exoplatform.web.filter.Filter;
 import org.exoplatform.webconferencing.WebConferencingService;
 import org.exoplatform.webconferencing.jitsi.JitsiProvider;
@@ -30,6 +32,9 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
+/**
+ * The Class WebconferencingSessionFilter.
+ */
 public class WebconferencingSessionFilter extends AbstractFilter implements Filter {
 
   /** The Constant LOG. */
@@ -40,6 +45,9 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
 
   /** The Constant INTERNAL_AUTH. */
   private static final String INTERNAL_AUTH                 = "internal_auth";
+
+  /** The Constant USERNAME. */
+  private static final String USERNAME                      = "username";
 
   /**
    * Do filter.
@@ -59,28 +67,33 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
     if (validAuthToken(req, jitsiProvider.getInternalAuthSecret())) {
       String webconfToken = getCookie(req, WebConferencingService.SESSION_TOKEN_COOKIE);
       Claims claims = getClaims(webconfToken, webConferencing.getSecretKey());
-      if (claims != null && claims.containsKey("username")) {
+      if (claims != null && claims.containsKey(USERNAME)) {
         try {
-          String username = String.valueOf(claims.get("username"));
-          ExoContainer container = getContainer();
-          ExoContainerContext.setCurrentContainer(container);
-          ConversationState state = createState(username);
-          ConversationState.setCurrent(state);
-          SessionProviderService sessionProviders =
-                                                  (SessionProviderService) getContainer().getComponentInstanceOfType(SessionProviderService.class);
+          String username = String.valueOf(claims.get(USERNAME));
+          if (isActiveUser(username)) {
+            ExoContainer container = getContainer();
+            ExoContainerContext.setCurrentContainer(container);
+            ConversationState state = createState(username);
+            ConversationState.setCurrent(state);
+            SessionProviderService sessionProviders =
+                                                    (SessionProviderService) getContainer().getComponentInstanceOfType(SessionProviderService.class);
 
-          SessionProvider userProvider = new SessionProvider(state);
-          sessionProviders.setSessionProvider(null, userProvider);
-          chain.doFilter(request, response);
-          try {
-            ConversationState.setCurrent(null);
-          } catch (Exception e) {
-            LOG.warn("An error occured while cleaning the ConversationState", e);
-          }
-          try {
-            ExoContainerContext.setCurrentContainer(null);
-          } catch (Exception e) {
-            LOG.warn("An error occured while cleaning the ThreadLocal", e);
+            SessionProvider userProvider = new SessionProvider(state);
+            sessionProviders.setSessionProvider(null, userProvider);
+            chain.doFilter(request, response);
+            try {
+              ConversationState.setCurrent(null);
+            } catch (Exception e) {
+              LOG.warn("An error occured while cleaning the ConversationState", e);
+            }
+            try {
+              ExoContainerContext.setCurrentContainer(null);
+            } catch (Exception e) {
+              LOG.warn("An error occured while cleaning the ThreadLocal", e);
+            }
+          } else {
+            LOG.warn("The user {} is not active", username);
+            writeError(response, "The user is not active");
           }
         } catch (Exception e) {
           LOG.warn("Cannot set ConversationState based on provided token", e);
@@ -91,11 +104,22 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
       }
     } else {
       LOG.warn("The request doesn't contain valid access token for internal auth");
-      response.setContentType("application/json");
-      response.setCharacterEncoding("UTF-8");
-      response.getWriter().write("{\"error\":\"The request is not authorized\"}");
+      writeError(response, "The request is not authorized");
     }
 
+  }
+
+  /**
+   * Writes error message to the response.
+   *
+   * @param response the response
+   * @param error the error
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private void writeError(ServletResponse response, String error) throws IOException {
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
+    response.getWriter().write("{\"error\":\"" + error + "\"}");
   }
 
   /**
@@ -126,6 +150,7 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
    * Gets the claims.
    *
    * @param token the token
+   * @param secret the secret
    * @return the claims
    */
   @SuppressWarnings("unchecked")
@@ -150,6 +175,7 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
    */
   private ConversationState createState(String userId) {
     Identity userIdentity = userIdentity(userId);
+
     if (userIdentity != null) {
       ConversationState state = new ConversationState(userIdentity);
       // Keep subject as attribute in ConversationState.
@@ -186,6 +212,27 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
     return userIdentity;
   }
 
+  /**
+   * Checks if is active user.
+   *
+   * @param userId the user id
+   * @return true, if is active user
+   */
+  protected boolean isActiveUser(String userId) {
+    IdentityManager identityManager = (IdentityManager) getContainer().getComponentInstanceOfType(IdentityManager.class);
+    org.exoplatform.social.core.identity.model.Identity identity =
+                                                                 identityManager.getOrCreateIdentity(OrganizationIdentityProvider.NAME,
+                                                                                                     userId);
+    return !identity.isDeleted() && identity.isEnable();
+  }
+
+  /**
+   * Valid auth token.
+   *
+   * @param request the request
+   * @param secret the secret
+   * @return true, if successful
+   */
   protected boolean validAuthToken(HttpServletRequest request, String secret) {
     if (request.getHeader(INTERNAL_AUTH_TOKEN_ATTRIBUTE) != null) {
       String token = request.getHeader(INTERNAL_AUTH_TOKEN_ATTRIBUTE);
