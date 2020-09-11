@@ -9,7 +9,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.exoplatform.common.http.HTTPStatus;
 import org.exoplatform.container.ExoContainer;
 import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.web.AbstractFilter;
@@ -61,6 +63,7 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
     HttpServletRequest req = (HttpServletRequest) request;
+    HttpServletResponse resp = (HttpServletResponse) response;
     WebConferencingService webConferencing =
                                            (WebConferencingService) getContainer().getComponentInstanceOfType(WebConferencingService.class);
     JitsiProvider jitsiProvider = (JitsiProvider) webConferencing.getProvider(JitsiProvider.TYPE);
@@ -93,10 +96,10 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
             }
           } else {
             LOG.warn("The user {} is not active", username);
-            writeError(response, "The user is not active");
+            writeError(resp, HTTPStatus.FORBIDDEN, "The user is not active");
           }
         } catch (Exception e) {
-          LOG.warn("Cannot set ConversationState based on provided token", e);
+          LOG.warn("Cannot set ConversationState based on provided token", e.getMessage());
           chain.doFilter(request, response);
         }
       } else {
@@ -104,7 +107,7 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
       }
     } else {
       LOG.warn("The request doesn't contain valid access token for internal auth");
-      writeError(response, "The request is not authorized");
+      writeError(resp, HTTPStatus.UNAUTHORIZED, "The request is not authorized");
     }
 
   }
@@ -116,10 +119,11 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
    * @param error the error
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  private void writeError(ServletResponse response, String error) throws IOException {
+  private void writeError(HttpServletResponse response, int status, String message) throws IOException {
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
-    response.getWriter().write("{\"error\":\"" + error + "\"}");
+    response.setStatus(status);
+    response.getWriter().write("{\"error\":\"" + message + "\"}");
   }
 
   /**

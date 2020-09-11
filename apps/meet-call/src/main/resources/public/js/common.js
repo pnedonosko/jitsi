@@ -8,8 +8,7 @@ var require = {
   baseUrl : "/portal/scripts/" + resorcesVersion,
   waitSeconds : 60,
   paths : {
-    "jquery" : "https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery",
-    "main" : "../../../jitsi/js/main"
+    "call" : "../../../jitsi/js/call"
   }
 };
 

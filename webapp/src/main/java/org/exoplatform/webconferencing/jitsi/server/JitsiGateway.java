@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -131,6 +132,7 @@ public class JitsiGateway extends AbstractHttpServlet {
 
     request.setHeader(authHeader, token);
 
+    // XXX: working with invalid SSL
     SSLContextBuilder builder = new SSLContextBuilder();
     try {
       builder.loadTrustMaterial(null, new TrustStrategy() {
@@ -139,23 +141,14 @@ public class JitsiGateway extends AbstractHttpServlet {
           return true;
         }
       });
-    } catch (NoSuchAlgorithmException e2) {
-      // TODO Auto-generated catch block
-      e2.printStackTrace();
-    } catch (KeyStoreException e2) {
-      // TODO Auto-generated catch block
-      e2.printStackTrace();
+    } catch (KeyStoreException | NoSuchAlgorithmException e) {
+      LOG.warn("Cannot load trust material for SSL", e.getMessage());
     }
-
     SSLConnectionSocketFactory sslSF = null;
     try {
       sslSF = new SSLConnectionSocketFactory(builder.build(), SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-    } catch (KeyManagementException e2) {
-      // TODO Auto-generated catch block
-      e2.printStackTrace();
-    } catch (NoSuchAlgorithmException e2) {
-      // TODO Auto-generated catch block
-      e2.printStackTrace();
+    } catch (KeyManagementException | NoSuchAlgorithmException e) {
+      LOG.warn("Cannot create SSLConnectionSockerFactory: {}", e.getMessage());
     }
 
     try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslSF).build();
@@ -165,6 +158,7 @@ public class JitsiGateway extends AbstractHttpServlet {
           resp.setHeader(header.getName(), header.getValue());
         }
       }
+      resp.setStatus(response.getStatusLine().getStatusCode());
       HttpEntity entity = response.getEntity();
       if (entity != null) {
         resp.getWriter().write(EntityUtils.toString(entity));

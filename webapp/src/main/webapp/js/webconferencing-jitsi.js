@@ -79,6 +79,7 @@
 			 * will not be added to the call button and user will not see it.
 			 */
 			this.callButton = function(context) {
+			  console.log("CONTEXT: " + JSON.stringify(context));
 				var button = $.Deferred();
 				if (settings && context && context.currentUser) {
 						context.details().done(function(target) {
@@ -119,8 +120,7 @@
 										// When user clicked the button - create an actual call.
 										// Use Web Conferencing helper to open a new window
 										// Build a call page URL on your own and for your needs.
-										var callUrl = self.getUrl() + "/call?apiClientId=" + self.getApiClientId() 
-													+ "&topic=" + encodeURIComponent(target.title);
+										
 										// You can save this call in eXo to inform other parts and be able restore the call in case of page reload
 										// or on other Platform pages. Respectively, you'll need to delete the call - this could be done from a call
 										// page, but also may be done from server-side (on some event, external call, timer, etc.). 
@@ -142,13 +142,16 @@
 										// find more in https://docs.cometd.org/current/reference/#_bayeux_protocol_elements
 										var callId;
 										if (target.group) {
-											callId = "g/" + (target.type == "chat_room" ? context.roomName : target.id);
+											callId = "g_" + (target.type == "chat_room" ? context.roomName : target.id);
 										} else {
 											// Sort call members to have always the same ID for two parts independently on who started the call
-											var callMembersAsc = callMembers.slice();
+											var callMembersAsc = callMembers.map(function(member){ 
+											  return member.id;
+											}).slice();
 											callMembersAsc.sort();
-											callId = "p/" + callMembersAsc.join("-");
+											callId = "p_" + callMembersAsc.join("-");
 										}
+										
 										// Next we need ensure this call not yet already started (e.g. remotely),
 										// it's actual especially for group calls where user can join already running conversations
 										// As we have two cases: new call and joining a call, we use promise to complete the call page for any of cases

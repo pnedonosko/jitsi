@@ -5,6 +5,7 @@ import static org.exoplatform.webconferencing.Utils.getCurrentContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -16,6 +17,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 import org.exoplatform.services.security.ConversationState;
+import org.exoplatform.services.security.IdentityConstants;
 import org.exoplatform.webconferencing.ContextInfo;
 import org.exoplatform.webconferencing.IdentityStateException;
 import org.exoplatform.webconferencing.UserInfo;
@@ -49,23 +51,41 @@ public class JitsiContextResource implements ResourceContainer {
    * @return the response
    */
   @GET
-  @Path("/context")
-  public Response context(@Context HttpServletRequest request) {
+  @Path("/context/{userId}")
+  public Response context(@Context HttpServletRequest request, @PathParam("userId") String userId) {
     // TODO: return context info to init comet
-    String userId = null;
-    UserInfo userInfo = null;
+    ContextInfo context = getCurrentContext(userId, request.getLocale());
+    return Response.status(Status.OK).entity(context).type(MediaType.APPLICATION_JSON).build();
+  }
+
+  /**
+   * Content.
+   *
+   * @param request the request
+   * @return the response
+   */
+  @GET
+  @Path("/userinfo")
+  public Response userInfo(@Context HttpServletRequest request) {
     ConversationState state = ConversationState.getCurrent();
-    ContextInfo context = null;
-    if (state != null) {
-      userId = state.getIdentity().getUserId();
+    if (state != null && !state.getIdentity().getUserId().equals(IdentityConstants.ANONIM)) {
+      String userId = state.getIdentity().getUserId();
       try {
-        userInfo = webconferencing.getUserInfo(userId);
-        context = getCurrentContext(userId, request.getLocale());
+        UserInfo userInfo = webconferencing.getUserInfo(userId);
+        return Response.status(Status.OK).entity(userInfo).type(MediaType.APPLICATION_JSON).build();
       } catch (IdentityStateException e) {
         LOG.warn("Cannot find identity with id: {}", userId);
+        return Response.status(Status.INTERNAL_SERVER_ERROR)
+                       .entity("{\"error\":\"Cannot find identity with id: " + userId + "\"}")
+                       .type(MediaType.APPLICATION_JSON)
+                       .build();
       }
     }
-    return Response.status(Status.OK).entity(new InitContext(userId, userInfo, context)).type(MediaType.APPLICATION_JSON).build();
+    return Response.status(Status.UNAUTHORIZED)
+                   .entity("{\"error\":\"Current user is not authorized\"}")
+                   .type(MediaType.APPLICATION_JSON)
+                   .build();
+
   }
 
   /**
@@ -77,9 +97,7 @@ public class JitsiContextResource implements ResourceContainer {
   @GET
   @Path("/resources/version")
   public Response resourcesVersion() {
-    return Response.status(Status.OK)
-                   .entity(ResourceRequestHandler.VERSION)
-                   .build();
+    return Response.status(Status.OK).entity(ResourceRequestHandler.VERSION).build();
   }
 
   /**
