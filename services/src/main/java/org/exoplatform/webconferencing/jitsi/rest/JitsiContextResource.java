@@ -1,5 +1,6 @@
 package org.exoplatform.webconferencing.jitsi.rest;
 
+import static org.exoplatform.webconferencing.Utils.asJSON;
 import static org.exoplatform.webconferencing.Utils.getCurrentContext;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ import org.exoplatform.webconferencing.ContextInfo;
 import org.exoplatform.webconferencing.IdentityStateException;
 import org.exoplatform.webconferencing.UserInfo;
 import org.exoplatform.webconferencing.WebConferencingService;
+import org.exoplatform.webconferencing.jitsi.JitsiProvider;
 
 /**
  * The Class JitsiContextResource.
@@ -58,6 +60,25 @@ public class JitsiContextResource implements ResourceContainer {
     return Response.status(Status.OK).entity(context).type(MediaType.APPLICATION_JSON).build();
   }
 
+  @GET
+  @Path("/settings")
+  public Response settings() {
+    try {
+      JitsiProvider provider = (JitsiProvider) webconferencing.getProvider(JitsiProvider.TYPE);
+      if (provider != null) {
+        return Response.status(Status.OK).entity(provider.getSettings()).type(MediaType.APPLICATION_JSON).build();
+      }
+    } catch (ClassCastException e) {
+      LOG.error("Provider " + JitsiProvider.TYPE + " isn't an instance of " + JitsiProvider.class.getName(), e);
+    }
+    return Response.status(Status.INTERNAL_SERVER_ERROR)
+                   .entity("{\"error\":\"Cannot find valid Jitsi provider \"}")
+                   .type(MediaType.APPLICATION_JSON)
+                   .build();
+
+  }
+
+  // TODO: replace by default one
   /**
    * Content.
    *

@@ -1,8 +1,9 @@
-require([ "SHARED/jquery", "SHARED/webConferencing" ], function(jquery, webconferencing) {
+require([ "SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jitsi"], function(jquery, webconferencing, provider) {
 
   var MeetApp = function() {
 
     var currentUserInfo;
+    var callId;
 
     var getUrlParameter = function(sParam) {
       var sPageURL = window.location.search.substring(1), sURLVariables = sPageURL.split('&'), sParameterName, i;
@@ -36,16 +37,29 @@ require([ "SHARED/jquery", "SHARED/webConferencing" ], function(jquery, webconfe
         url : "/jitsi/portal/rest/jitsi/context/" + userId,
       });
     };
-
-    var initCall = function(userInfo, contextInfo) {
-      webconferencing.init(userInfo, contextInfo);
-      webconferencing.getProvider("jitsi").done(function(provider){
-        console.log("JITSI PROVIDER: " + JSON.stringify(provider));
-      }).fail(function(err){
-        console.log("ERROR: " + err);
+    
+    var getSettings = function() {
+      return $.get({
+        type : "GET",
+        url : "/jitsi/portal/rest/jitsi/settings",
       });
+    };
+
+    var beforeunloadListener = function() {
+      webConferencing.deleteCall(callId).done(function() {
+        log.info("Call deleted: " + callId);
+        process.resolve();
+      })
+    };
+    
+    // Not inited callId
+    var initCall = function(userInfo, contextInfo, settings) {
+      webconferencing.init(userInfo, contextInfo);
+      provider.configure(settings);
+      webconferencing.addProvider(provider);
+      webconferencing.update();
       var fullname = userInfo.firstName + " " + userInfo.lastName;
-      const domain = "meet.jit.si";
+      const domain = "dev03.exoplatform.org:8443";
       const options = {
         roomName : "Jitsi Meet Example",
         width : 1000,
@@ -58,10 +72,14 @@ require([ "SHARED/jquery", "SHARED/webConferencing" ], function(jquery, webconfe
       new JitsiMeetExternalAPI(domain, options);
     };
 
+    
     /**
      * Inits current user and context
      */
-    this.init = function() {
+    this.init = function(call) {
+      if(call) {
+        callId = call.id;
+      }
       // TODO: get jitsi settings: url of app, jwt..
       var inviteId = getUrlParameter("inviteId");
       if (inviteId) {
@@ -70,7 +88,9 @@ require([ "SHARED/jquery", "SHARED/webConferencing" ], function(jquery, webconfe
           getContextInfo(userInfo.id).then(function(contextInfo) {
             let trimmedUrl = window.location.href.substring(0, window.location.href.indexOf("?"));
             window.history.pushState({}, "", trimmedUrl);
-            initCall(userInfo, contextInfo);
+            getSettings().then(function(settings){
+              initCall(userInfo, contextInfo, settings);
+            });
           });
         }).catch(function(err) {
           console.log("Cannot get guest user info: " + JSON.stringify(err));
@@ -80,17 +100,28 @@ require([ "SHARED/jquery", "SHARED/webConferencing" ], function(jquery, webconfe
         getExoUserInfo().then(function(userInfo){
           currentUserInfo = userInfo;
           getContextInfo(userInfo.id).then(function(contextInfo) {
-            initCall(userInfo, contextInfo);
+            getSettings().then(function(settings){
+              initCall(userInfo, contextInfo, settings);
+            });
           });
         }).catch(function(err) {
           console.log("Cannot get exo user info: " + JSON.stringify(err));
           // TODO: redirect to login page if the satus code is 401 or 403?
         });
       }
+      
+      window.beforeunloadListener = beforeunloadListener;
+      
+      
     };
 
   };
 
   var meetApp = new MeetApp();
-  meetApp.init();
+  window.startCall = function(call, isNew){
+    meetApp.init(call);
+    var promise = $.Deferred();
+    promise.resolve("started");
+    return promise;
+  };
 });
