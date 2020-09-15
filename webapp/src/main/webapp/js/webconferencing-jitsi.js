@@ -90,7 +90,6 @@
        * button and user will not see it.
        */
       this.callButton = function(context) {
-        console.log("CONTEXT: " + JSON.stringify(context));
         var button = $.Deferred();
         if (settings && context && context.currentUser) {
           context.details().done(
@@ -182,7 +181,7 @@
                       // https://docs.cometd.org/current/reference/#_bayeux_protocol_elements
                       var callId;
                       if (target.group) {
-                        callId = "g/" + (target.type == "chat_room" ? context.roomName : target.id);
+                        callId = "g_" + (target.type == "chat_room" ? context.roomName : target.id);
                       } else {
                         // Sort call members to have always the same ID for two
                         // parts independently on who started the call
@@ -190,12 +189,11 @@
                           return member.id;
                         }).slice();
                         callMembersAsc.sort();
-                        callId = "p/" + callMembersAsc.join("-");
+                        callId = "p_" + callMembersAsc.join("-");
                       }
 
-                      var callUrl = window.location.protocol + "//" + window.location.host + "/jitsi/meet/"
-                          + callId.replace("/", "-");
-                      var rand = Math.floor(Math.random() * 100) + 1
+                      var callUrl = window.location.protocol + "//" + window.location.host + "/jitsi/meet/" + callId;
+
                       // Next we need ensure this call not yet already started
                       // (e.g. remotely),
                       // it's actual especially for group calls where user can
@@ -206,10 +204,9 @@
                       var callProcess = $.Deferred();
                       // Open call window before asynchronous requests to avoid
                       // browser's popup blocker
-                      var callWindow = callWindow = webConferencing.showCallPopup(callUrl, target.title);
-                      callWindow.document.title = target.title; // window title
-                                                                // visible to
-                                                                // user
+                      // window title
+                      // visible to
+                      // user
                       // Try get a call by the ID to know is it exists already -
                       // it why we need stable ID clearly defining the target
                       webConferencing.getCall(callId).done(function(call) {
@@ -254,6 +251,8 @@
                       // We wait for call readiness and invoke start it in the
                       // popup window
                       callProcess.done(function(call, isNew) {
+                        var callWindow = callWindow = webConferencing.showCallPopup(callUrl, target.title);
+                        callWindow.document.title = target.title;
                         // Next, we invoke a call window to initialize the call.
                         // Note: it's assumed below that startCall() method
                         // added by the call page script,
@@ -261,35 +260,20 @@
                         // use any namespace and way to invoke your
                         // connector methods - it's up to the implementation.
                         // Ensure the call window loaded before calling it.
-                        $(callWindow).on(
-                            "load",
-                            function() {
-                              if (callWindow.startCall) {
-                                callWindow.startCall(call, isNew).done(function(state) {
-                                  log.info("Call " + state + ": " + callId);
-                                  $button.addClass("callDisabled"); // should be
-                                                                    // removed
-                                                                    // on
-                                                                    // stop/leaved
-                                                                    // event in
-                                                                    // init()
-                                  $button.data("callid", callId); // Assign call
-                                                                  // ID to the
-                                                                  // button for
-                                                                  // later use
-                                                                  // (see above)
-                                }).fail(
-                                    function(err) {
-                                      log.error("Failed to start/join call: " + callId, err);
-                                      webConferencing.showError("Error " + (isNewCall ? "starting" : "joining") + " call",
-                                          webConferencing.errorText(err));
-                                    });
-                              } else {
-                                log.error("Failed to start/join call: " + callId + ". Call window not loaded");
-                                webConferencing.showError("Error " + (isNewCall ? "starting" : "joining") + " call",
-                                    "Call window failed to load");
-                              }
-                            });
+                        $(callWindow).on("load", function() {
+                          $button.addClass("callDisabled"); // should be
+                          // removed
+                          // on
+                          // stop/leaved
+                          // event in
+                          // init()
+                          $button.data("callid", callId); // Assign call
+                          // ID to the
+                          // button for
+                          // later use
+                          // (see above)
+
+                        });
                       });
                     } else {
                       log.debug("Call disabled for " + target.id);
@@ -460,7 +444,7 @@
                 // $button.data("targetid"));
                 $button.removeClass("callDisabled");
                 $button.removeData("callid"); // we don't touch targetid, it
-                                              // managed by callButton()
+                // managed by callButton()
               }
             });
           };
@@ -474,7 +458,7 @@
                 // (not used for the moment)
                 // rely on logic implemented in callButton() here: group call ID
                 // starts with 'g/'
-                var isGroup = callId.startsWith("g/");
+                var isGroup = callId.startsWith("g_");
                 log.trace(">>> User call state updated: " + JSON.stringify(update));
                 if (update.callState == "started") {
                   // When call started it means we have an incoming call for
@@ -489,8 +473,8 @@
                         var callerMessage = call.owner.title + " is calling you...";
                         var callerRoom = callerId;
                         call.title = call.owner.title; // for callee the call
-                                                        // title is a caller
-                                                        // name
+                        // title is a caller
+                        // name
                         // Get current user status, we need this to figure out a
                         // need of playing ringtone
                         // we'll do for users with status 'Available' or 'Away',
@@ -517,8 +501,9 @@
                                 // User accepted the call...
                                 log.info("User " + msg + " call: " + callId);
                                 var longTitle = self.getTitle() + " " + self.getCallTitle();
-                                var callUrl = self.getUrl() + "/call?apiClientId=" + self.getApiClientId() + "&id="
-                                    + encodeURIComponent(callId);
+                                
+                                var callUrl = window.location.protocol + "//" + window.location.host + "/jitsi/meet/" + encodeURIComponent(callId);
+                                
                                 var callWindow = webConferencing.showCallPopup(callUrl, longTitle);
                                 callWindow.document.title = call.title;
                                 // Optionally, we may invoke a call window to
@@ -526,19 +511,7 @@
                                 // First wait the call window loaded
                                 $(callWindow).on("load", function() {
                                   log.debug("Call page loaded: " + callId);
-                                  // And tell the window to start a call
-                                  if (callWindow.startCall) {
-                                    callWindow.startCall(call).done(function(state) {
-                                      log.info("Call " + state + ": " + callId);
-                                      lockCallButton(update.owner.id, callId);
-                                    }).fail(function(err) {
-                                      log.error("Failed to start/join call: " + callId, err);
-                                      webConferencing.showError("Error starting call", webConferencing.errorText(err));
-                                    });
-                                  } else {
-                                    log.error("Call window failed to load: " + callId, err);
-                                    webConferencing.showError("Error starting call", "Call window failed to load");
-                                  }
+                                  lockCallButton(update.owner.id, callId);
                                 });
                               });
                               popover.fail(function(err) {
