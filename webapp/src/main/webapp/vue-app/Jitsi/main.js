@@ -1,9 +1,7 @@
 import Jitsi from "./components/Jitsi.vue";
 
-
-
-
 Vue.use(Vuetify);
+Vue.component("Jitsi", Jitsi)
 const vuetify = new Vuetify({
   dark: true,
   iconfont: ""
