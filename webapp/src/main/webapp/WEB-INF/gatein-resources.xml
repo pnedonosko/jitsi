@@ -23,6 +23,12 @@
   xsi:schemaLocation="http://www.gatein.org/xml/ns/gatein_resources_1_3 http://www.gatein.org/xml/ns/gatein_resources_1_3"
   xmlns="http://www.gatein.org/xml/ns/gatein_resources_1_3">
 
+   <javascript>
+    <param>
+      <js-module>JitsiPlugin</js-module>
+      <js-path>/js/JitsiPlugin.js</js-path>
+    </param>
+  </javascript>
   <!-- CSS for MyConnector Calls support in Platform -->
   <portlet-skin>
     <application-name>jitsi</application-name>
@@ -54,5 +60,25 @@
       <module>webConferencing</module>
     </depends>
   </module>
-
+  <module>
+    <name>Jitsi</name>
+    <script>
+      <path>/js/Jitsi.bundle.js</path>
+    </script>
+    <depends>
+      <module>webConferencing</module>
+    </depends>
+    <depends>
+      <module>vue</module>
+    </depends>
+    <depends>
+      <module>vuetify</module>
+    </depends>
+    <depends>
+      <module>eXoVueI18n</module>
+    </depends>
+    <depends>
+      <module>extensionRegistry</module>
+    </depends>
+  </module>
 </gatein-resources>
