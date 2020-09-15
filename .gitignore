@@ -5,6 +5,7 @@
 #
 # Default excludes
 #
+webapp/node_modules/
 
 # Binaries
 *.7z
