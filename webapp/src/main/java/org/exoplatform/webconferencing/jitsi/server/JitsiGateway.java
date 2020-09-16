@@ -19,6 +19,12 @@
 package org.exoplatform.webconferencing.jitsi.server;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -33,7 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.StatusLine;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -57,7 +63,11 @@ import io.jsonwebtoken.security.Keys;
  */
 public class JitsiGateway extends AbstractHttpServlet {
 
+  /**
+   * The Enum Action.
+   */
   private enum Action {
+    
     EXTERNAL_AUTH, INTERNAL_AUTH
   }
 
@@ -94,6 +104,25 @@ public class JitsiGateway extends AbstractHttpServlet {
         if (req.getRequestURI().startsWith("/jitsi/portal/")) {
           String requestUrl = new StringBuilder(getPlatformUrl(req)).append(uri).toString();
           forward(requestUrl, Action.INTERNAL_AUTH, jitsiProvider.getInternalAuthSecret(), req, resp);
+        } else if (req.getRequestURI().startsWith("/jitsi/resources")) {
+          try {
+            uri = uri.substring(uri.indexOf("/resources") + 10);
+            InputStream is = httpRequest.getServletContext().getResourceAsStream(uri);
+            if (is != null) {
+              httpResponse.setContentLength(is.available());
+              stream(is, httpResponse.getOutputStream());
+            } else {
+              httpResponse.sendError(HttpStatus.SC_NOT_FOUND, "Resource is not found");
+            }
+          } catch (Exception e) {
+            LOG.warn("Cannot load local resource: {}", e.getMessage());
+            try {
+              httpResponse.sendError(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Error while loading local resource");
+            } catch (IOException ex) {
+              LOG.warn("Cannot send error response: {}", e.getMessage());
+            }
+          }
+
         } else {
           String requestUrl = new StringBuilder(jitsiProvider.getSettings().getUrl()).append(uri).toString();
           forward(requestUrl, Action.EXTERNAL_AUTH, jitsiProvider.getExternalAuthSecret(), req, resp);
@@ -111,6 +140,15 @@ public class JitsiGateway extends AbstractHttpServlet {
     doGet(req, resp);
   }
 
+  /**
+   * Forward.
+   *
+   * @param requestUrl the request url
+   * @param action the action
+   * @param secret the secret
+   * @param req the req
+   * @param resp the resp
+   */
   private void forward(String requestUrl, Action action, String secret, HttpServletRequest req, HttpServletResponse resp) {
     HttpGet request = new HttpGet(requestUrl);
     String authHeader;
@@ -207,6 +245,30 @@ public class JitsiGateway extends AbstractHttpServlet {
                                                                                                                   : ":"
                                                                                                                       + req.getServerPort()))
                                              .toString();
+  }
+
+  /**
+   * Writes inputstream to outputstream using NIO.
+   *
+   * @param input the input
+   * @param output the output
+   * @return the long
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private long stream(InputStream input, OutputStream output) throws IOException {
+    try (ReadableByteChannel inputChannel = Channels.newChannel(input);
+        WritableByteChannel outputChannel = Channels.newChannel(output);) {
+      ByteBuffer buffer = ByteBuffer.allocateDirect(10240);
+      long size = 0;
+
+      while (inputChannel.read(buffer) != -1) {
+        buffer.flip();
+        size += outputChannel.write(buffer);
+        buffer.clear();
+      }
+
+      return size;
+    }
   }
 
 }
