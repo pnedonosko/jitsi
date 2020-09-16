@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,13 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api")
 public class APIController {
 
-  /** The Constant AUTH_TOKEN_HEADER. */
-  private final static String AUTH_TOKEN_HEADER = "X-Exoplatform-External-Auth";
 
   // Auth endpoint ( will be open in iframe from eXo for setting the token to local storage )
   @GetMapping("/userinfo/{inviteId}")
-  public Map<String, String> userinfo(@RequestHeader(AUTH_TOKEN_HEADER) String authToken,
-                                      @PathVariable("inviteId") String inviteId) {
+  public Map<String, String> userinfo(@PathVariable("inviteId") String inviteId) {
     HashMap<String, String> map = new HashMap<>();
     map.put("id", "guest-" + inviteId);
     map.put("firstName", "Special");
