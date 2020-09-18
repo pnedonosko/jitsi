@@ -368,13 +368,13 @@
           // Start ringing incoming sound only if requested (depends on user
           // status)
           var $ring = $("<audio loop autoplay style='display: none;'>" // controls
-              + "<source src='/jitsi/audio/incoming.mp3' type='audio/mpeg'>"
+              + "<source src='/jitsi/resources/audio/incoming.mp3' type='audio/mpeg'>"
               + "Your browser does not support the audio element.</audio>");
           $(document.body).append($ring);
           process.fail(function() {
             if ($call.callState != "joined") {
               var $cancel = $("<audio autoplay style='display: none;'>" // controls
-                  + "<source src='/jitsi/audio/incoming_cancel.mp3' type='audio/mpeg'>"
+                  + "<source src='/jitsi/resources/audio/incoming_cancel.mp3' type='audio/mpeg'>"
                   + "Your browser does not support the audio element.</audio>");
               $(document.body).append($cancel);
               setTimeout(function() {
