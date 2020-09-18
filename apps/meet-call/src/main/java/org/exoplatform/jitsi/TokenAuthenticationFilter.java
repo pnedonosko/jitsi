@@ -28,7 +28,7 @@ public class TokenAuthenticationFilter implements Filter {
 
   /** The Constant AUTH_TOKEN_HEADER. */
   private final static String AUTH_TOKEN_HEADER = "X-Exoplatform-External-Auth";
-  
+
   /**
    * Instantiates a new token authentication filter.
    *
@@ -53,11 +53,17 @@ public class TokenAuthenticationFilter implements Filter {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
     String authToken = req.getHeader(AUTH_TOKEN_HEADER);
-    if (authToken != null && verifyToken(authToken)) {
-      chain.doFilter(request, response);
+    if (authToken != null && !authToken.trim().isEmpty()) {
+      if (verifyToken(authToken)) {
+        chain.doFilter(request, response);
+      } else {
+        res.setStatus(HttpStatus.UNAUTHORIZED.value());
+        res.getWriter().write("{\"error\":\"The auth token is not valid\"}");
+        res.flushBuffer();
+      }
     } else {
       res.setStatus(HttpStatus.UNAUTHORIZED.value());
-      res.getWriter().write("{\"error\":\"The auth token is not provider or invalid\"}");
+      res.getWriter().write("{\"error\":\"The auth token is not provided\"}");
       res.flushBuffer();
     }
   }

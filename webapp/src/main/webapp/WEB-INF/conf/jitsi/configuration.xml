@@ -40,13 +40,12 @@
         <properties-param>
           <name>provider-configuration</name>
           <property name="active" value="${webconferencing.jitsi.active:true}" />
-          <property name="service-url" value="${webconferencing.jitsi.url:http://192.168.1.103:9080}" />
-          <property name="client-secret"
-            value="${webconferencing.jitsi.client.secret:mQzPudDBpSAqUwM0FY2r86gNAd6be5tN1xqwdFDOb4Us1DT4Tc}" />
+          <property name="service-url" value="${webconferencing.jitsi.url:http://dev03.exoplatform.org:8001}" />
+          <!-- property name="service-url" value="${webconferencing.jitsi.url:http://exodev.alwaysdata.net:8001}" / -->
           <property name="internal-auth-secret"
             value="${webconferencing.jitsi.internal.secret:mQzPudDBpSAqUwM0FY2r86gNAd6be5tN1xqwdFDOb4Us1DT4Ti}" />
           <property name="external-auth-secret"
-            value="${webconferencing.jitsi.external.secret:mQzPudDBpSAqUwM0FY2r86gNAd6be5tN1xqwdFDOb4Us1DT4Te}" />
+            value="${webconferencing.jitsi.external.secret:mQzPudDBpSAqUwM0FY2r86gNAd6be5tN1xqwdFDOb4Us1DT4Tx}" />
         </properties-param>
       </init-params>
     </component-plugin>

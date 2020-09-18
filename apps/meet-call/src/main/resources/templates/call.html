@@ -6,15 +6,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" type="text/css" href="../skin/call.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-<script src="https://dev03.exoplatform.org:8443/external_api.js"></script>
+<script id="jitsi-api" th:src="${appUrl} + '/external_api.js'"></script>
 <script type="text/javascript" src="../js/common.js"></script>
 <script type="text/javascript" data-main="call" src="../js/require.js"></script>
 </head>
 <body>
   <div id="app"></div>
   <script>
-</script>
+      
+    </script>
   <script src="../jitsi/js/jitsi-app.bundle.js"></script>
 </body>
 </html>
