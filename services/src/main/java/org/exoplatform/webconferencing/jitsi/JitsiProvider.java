@@ -18,24 +18,16 @@
  */
 package org.exoplatform.webconferencing.jitsi;
 
-import java.util.HashMap;
 import java.util.Locale;
 
-import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.configuration.ConfigurationException;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.social.core.identity.model.Identity;
-import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
-import org.exoplatform.social.core.manager.IdentityManager;
 import org.exoplatform.social.core.profile.settings.IMType;
 import org.exoplatform.social.core.profile.settings.UserProfileSettingsService;
 import org.exoplatform.webconferencing.CallProvider;
 import org.exoplatform.webconferencing.UserInfo.IMInfo;
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 
 /**
  * Jitsi provider implementation.
@@ -71,10 +63,6 @@ public class JitsiProvider extends CallProvider {
   /** The Constant VERSION. */
   public static final String        VERSION                     = "1.0.0";
 
-  /** The client tokens. */
-  // TODO: should be cache with expiration
-  protected HashMap<String, String> clientTokens                = new HashMap<>();
-
   /**
    * Settings for Jitsi provider.
    */
@@ -108,10 +96,7 @@ public class JitsiProvider extends CallProvider {
     // You may add other specific methods here. Getters will be serialized to JSON and available on client
     // side (in Javascript provider module).
   }
-
-  /** The secret. */
-  protected final String clientSecret;
-
+  
   /** The internal auth secret. */
   protected final String internalAuthSecret;
 
@@ -130,12 +115,6 @@ public class JitsiProvider extends CallProvider {
    */
   public JitsiProvider(UserProfileSettingsService profileSettings, InitParams params) throws ConfigurationException {
     super(params);
-
-    String clientSecret = this.config.get(CONFIG_CLIENT_SECRET);
-    if (clientSecret == null || (clientSecret = clientSecret.trim()).length() == 0) {
-      throw new ConfigurationException(CONFIG_CLIENT_SECRET + " required and should be non empty.");
-    }
-    this.clientSecret = clientSecret;
 
     String internalAuthSecret = this.config.get(CONFIG_INTERNAL_AUTH_SECRET);
     if (internalAuthSecret == null || (internalAuthSecret = internalAuthSecret.trim()).length() == 0) {
@@ -170,47 +149,6 @@ public class JitsiProvider extends CallProvider {
    */
   public JitsiProvider(InitParams params) throws ConfigurationException {
     this(null, params);
-  }
-
-  /**
-   * Adds the client.
-   *
-   * @param clientId the client id
-   * @param userId the user id
-   */
-  public void addClient(String clientId, String userId) {
-    IdentityManager identityManager = PortalContainer.getInstance().getComponentInstanceOfType(IdentityManager.class);
-    Identity identity = identityManager.getOrCreateIdentity(OrganizationIdentityProvider.NAME, userId);
-    String name = identity.getProfile().getFullName();
-    String email = identity.getProfile().getEmail();
-
-    String token = Jwts.builder()
-                       .setSubject("jitsi")
-                       .claim("name", name)
-                       .claim("email", email)
-                       .signWith(Keys.hmacShaKeyFor(clientSecret.getBytes()))
-                       .compact();
-    clientTokens.put(clientId, token);
-  }
-
-  /**
-   * Gets the auth token.
-   *
-   * @param clientId the client id
-   * @return the auth token
-   */
-  public String getClientToken(String clientId) {
-    String token = clientTokens.get(clientId);
-    return token;
-  }
-
-  /**
-   * Removes the client.
-   *
-   * @param clientId the client id
-   */
-  public void removeClient(String clientId) {
-    clientTokens.remove(clientId);
   }
 
   /**
