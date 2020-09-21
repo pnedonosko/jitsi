@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.exoplatform.webconferencing.jitsi.rest.filter;
 
 import java.io.IOException;
@@ -30,9 +33,12 @@ import org.exoplatform.webconferencing.WebConferencingService;
 import org.exoplatform.webconferencing.jitsi.JitsiProvider;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.impl.crypto.JwtSignatureValidator;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 
 /**
  * The Class WebconferencingSessionFilter.
@@ -40,16 +46,22 @@ import io.jsonwebtoken.security.Keys;
 public class WebconferencingSessionFilter extends AbstractFilter implements Filter {
 
   /** The Constant LOG. */
-  private static final Log    LOG                           = ExoLogger.getLogger(WebconferencingSessionFilter.class);
+  private static final Log       LOG                  = ExoLogger.getLogger(WebconferencingSessionFilter.class);
 
-  /** The Constant AUTH_TOKEN_HEADER. */
-  private final static String INTERNAL_AUTH_TOKEN_ATTRIBUTE = "X-Exoplatform-Internal-Auth";
+  /** The Constant AUTH_TOKEN_ATTRIBUTE. */
+  private static final String    AUTH_TOKEN_ATTRIBUTE = "X-Exoplatform-Auth";
 
   /** The Constant INTERNAL_AUTH. */
-  private static final String INTERNAL_AUTH                 = "internal_auth";
+  private static final String    INTERNAL_AUTH        = "internal_auth";
+
+  /** The Constant EXTERNAL_AUTH. */
+  private static final String    EXTERNAL_AUTH        = "external_auth";
 
   /** The Constant USERNAME. */
-  private static final String USERNAME                      = "username";
+  private static final String    USERNAME             = "username";
+
+  /** The webconferencing. */
+  private WebConferencingService webconferencing;
 
   /**
    * Do filter.
@@ -64,12 +76,9 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse resp = (HttpServletResponse) response;
-    WebConferencingService webConferencing =
-                                           (WebConferencingService) getContainer().getComponentInstanceOfType(WebConferencingService.class);
-    JitsiProvider jitsiProvider = (JitsiProvider) webConferencing.getProvider(JitsiProvider.TYPE);
-    if (validAuthToken(req, jitsiProvider.getInternalAuthSecret())) {
+    if (checkAuthToken(req)) {
       String webconfToken = getCookie(req, WebConferencingService.SESSION_TOKEN_COOKIE);
-      Claims claims = getClaims(webconfToken, webConferencing.getSecretKey());
+      Claims claims = getClaims(webconfToken, getWebconferencing().getSecretKey());
       if (claims != null && claims.containsKey(USERNAME)) {
         try {
           String username = String.valueOf(claims.get(USERNAME));
@@ -116,7 +125,8 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
    * Writes error message to the response.
    *
    * @param response the response
-   * @param error the error
+   * @param status the status
+   * @param message the message
    * @throws IOException Signals that an I/O exception has occurred.
    */
   private void writeError(HttpServletResponse response, int status, String message) throws IOException {
@@ -165,10 +175,14 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
     try {
       Jws<Claims> jws = Jwts.parser().setSigningKey(Keys.hmacShaKeyFor(secret.getBytes())).parseClaimsJws(token);
       return jws.getBody();
+    } catch (SignatureException | ExpiredJwtException e) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("The token is not valid: {} : {}", token, e.getMessage());
+      }
     } catch (Exception e) {
       LOG.warn("Couldn't validate the token: {} : {}", token, e.getMessage());
-      return null;
     }
+    return null;
   }
 
   /**
@@ -234,21 +248,42 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
    * Valid auth token.
    *
    * @param request the request
-   * @param secret the secret
    * @return true, if successful
    */
-  protected boolean validAuthToken(HttpServletRequest request, String secret) {
-    if (request.getHeader(INTERNAL_AUTH_TOKEN_ATTRIBUTE) != null) {
-      String token = request.getHeader(INTERNAL_AUTH_TOKEN_ATTRIBUTE);
-      Map<String, Object> claims = getClaims(token, secret);
+  protected boolean checkAuthToken(HttpServletRequest request) {
+    JitsiProvider provider = (JitsiProvider) getWebconferencing().getProvider(JitsiProvider.TYPE);
+    if (request.getHeader(AUTH_TOKEN_ATTRIBUTE) != null) {
+      String token = request.getHeader(AUTH_TOKEN_ATTRIBUTE);
+
+      Map<String, Object> claims = getClaims(token, provider.getInternalAuthSecret());
+      // Try to get claims using externalAuthSecret
+      if (claims == null) {
+        claims = getClaims(token, provider.getExternalAuthSecret());
+      }
       if (claims != null && claims.containsKey("action")) {
         String action = String.valueOf(claims.get("action"));
-        if (INTERNAL_AUTH.equals(action)) {
+        if (INTERNAL_AUTH.equals(action) || EXTERNAL_AUTH.equals(action)) {
+          request.getServletContext().setAttribute("auth_type", action);
+          request.getServletContext().setAttribute("token", token);
           return true;
         }
       }
+      return false;
     }
-
+    LOG.warn("The request doesn't contain auth token header");
     return false;
+
+  }
+
+  /**
+   * Gets the webconferencing.
+   *
+   * @return the webconferencing
+   */
+  private WebConferencingService getWebconferencing() {
+    if (webconferencing == null) {
+      webconferencing = (WebConferencingService) getContainer().getComponentInstanceOfType(WebConferencingService.class);
+    }
+    return webconferencing;
   }
 }

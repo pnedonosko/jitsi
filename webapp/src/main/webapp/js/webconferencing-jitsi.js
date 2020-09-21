@@ -258,7 +258,7 @@
                         var callStarted = false;
                         webConferencing.onCallUpdate(callId, function(update){
                           console.log("Received update: " + JSON.stringify(update));
-                          if (update.exoId === context.currentUser && update.action === "started") {
+                          if (update.exoId === context.currentUser.id && update.action === "started") {
                             callStarted = true;
                           }
                         });

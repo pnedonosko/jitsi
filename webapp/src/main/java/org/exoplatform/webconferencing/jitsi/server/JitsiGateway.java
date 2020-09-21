@@ -67,7 +67,7 @@ public class JitsiGateway extends AbstractHttpServlet {
    * The Enum Action.
    */
   private enum Action {
-    
+
     EXTERNAL_AUTH, INTERNAL_AUTH
   }
 
@@ -81,7 +81,7 @@ public class JitsiGateway extends AbstractHttpServlet {
   private final static String EXTERNAL_AUTH_TOKEN_HEADER = "X-Exoplatform-External-Auth";
 
   /** The Constant INTERNAL_AUTH_TOKEN_HEADER. */
-  private final static String INTERNAL_AUTH_TOKEN_HEADER = "X-Exoplatform-Internal-Auth";
+  private final static String AUTH_TOKEN_HEADER          = "X-Exoplatform-Auth";
 
   /** The Constant TRANSFER_ENCODING_HEADER. */
   private final static String TRANSFER_ENCODING_HEADER   = "Transfer-Encoding";
@@ -158,7 +158,7 @@ public class JitsiGateway extends AbstractHttpServlet {
       if (req.getCookies() != null) {
         request.setHeader("Cookie", getCookiesAsString(req));
       }
-      authHeader = INTERNAL_AUTH_TOKEN_HEADER;
+      authHeader = AUTH_TOKEN_HEADER;
     } else {
       authHeader = EXTERNAL_AUTH_TOKEN_HEADER;
     }

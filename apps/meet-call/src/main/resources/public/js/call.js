@@ -19,13 +19,14 @@ require(["SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jits
       }
     };
 
+    // Request userinfo of exo user via Gateway
     var getExoUserInfo = function() {
       return $.get({
         type: "GET",
         url: "/jitsi/portal/rest/jitsi/userinfo",
       });
     };
-
+    // Request userinfo of guest via Gateway
     var getGuestUserInfo = function(inviteId) {
       return $.get({
         type: "GET",
@@ -33,17 +34,25 @@ require(["SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jits
       });
     };
 
-    var getContextInfo = function(userId) {
+    // Request contextinfo
+    var getContextInfo = function(userId, token) {
       return $.get({
         type: "GET",
-        url: "/jitsi/portal/rest/jitsi/context/" + userId,
+        beforeSend: function(request) {
+          request.setRequestHeader("X-Exoplatform-Auth", token);
+        },
+        url: "/portal/rest/jitsi/context/" + userId,
       });
     };
 
-    var getSettings = function() {
+    // Request provider settings
+    var getSettings = function(token) {
       return $.get({
         type: "GET",
-        url: "/jitsi/portal/rest/jitsi/settings",
+        beforeSend: function(request) {
+          request.setRequestHeader("X-Exoplatform-Auth", token);
+        },
+        url: "/portal/rest/jitsi/settings",
       });
     };
 
@@ -90,11 +99,12 @@ require(["SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jits
       });
     };
 
-    var initCall = function(userInfo) {
-      console.log("Init call with userInfo: " + JSON.stringify(userInfo));
+    var initCall = function(userinfo) {
+      console.log("Init call with userInfo: " + JSON.stringify(userinfo));
       var apiUrl = document.getElementById("jitsi-api").getAttribute("src");
       const domain = apiUrl.substring(apiUrl.indexOf("://") + 3, apiUrl.lastIndexOf("/external_api.js"));
       var windowHeight = window.innerHeight - 20;
+      var name = userinfo.firstName + " " + userinfo.lastName;
       const options = {
         roomName: "Jitsi Exo Meet",
         width: '100%',
@@ -107,13 +117,13 @@ require(["SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jits
           ]
         },
         userInfo: {
-          displayName: userInfo.title
+          displayName: name
         }
       };
       var api = new JitsiMeetExternalAPI(domain, options);
       webconferencing.updateCall(callId, "joined");
       console.log("Joined to the call " + callId);
-      subscribeCall(userInfo.id);
+      subscribeCall(userinfo.id);
       webconferencing.toCallUpdate(callId, {action : "started"});
     };
 
@@ -129,17 +139,17 @@ require(["SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jits
         if (inviteId) {
           let trimmedUrl = window.location.href.substring(0, window.location.href.indexOf("?"));
           window.history.pushState({}, "", trimmedUrl);
-          getGuestUserInfo(inviteId).then(function(userInfo) {
+          getGuestUserInfo(inviteId).then(function(data) {
             isGuest = true;
-            $initUser.resolve(userInfo);
+            $initUser.resolve(data.userInfo, data.authToken);
           }).catch(function(err) {
             console.log("Cannot get guest user info: " + JSON.stringify(err));
             $initUser.fail(err);
             // TODO: show user-friendly error?
           });
         } else {
-          getExoUserInfo().then(function(userInfo) {
-            $initUser.resolve(userInfo);
+          getExoUserInfo().then(function(data) {
+            $initUser.resolve(data.userInfo, data.authToken);
           }).catch(function(err) {
             console.log("Cannot get exo user info: " + JSON.stringify(err));
             $initUser.fail(err);
@@ -147,11 +157,11 @@ require(["SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jits
           });
         }
 
-        $initUser.then(function(userInfo) {
-          getContextInfo(userInfo.id).then(function(contextInfo) {
-            getSettings().then(function(settings) {
-              eXo.env.portal.profileOwner = userInfo.id;
-              webconferencing.init(userInfo, contextInfo);
+        $initUser.then(function(userinfo, authToken) {
+          getContextInfo(userinfo.id, authToken).then(function(contextInfo) {
+            getSettings(authToken).then(function(settings) {
+              eXo.env.portal.profileOwner = userinfo.id;
+              webconferencing.init(userinfo, contextInfo);
               provider.configure(settings);
               webconferencing.addProvider(provider);
               webconferencing.update();
@@ -159,14 +169,14 @@ require(["SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jits
                 // Check if user allowed
                 if (!isGuest) {
                   var user = call.participants.filter(function(participant) {
-                    return participant.id === userInfo.id;
+                    return participant.id === userinfo.id;
                   });
                   if (user.length == 0) {
                     alert("User is not allowed for this call");
                     return;
                   }
                 }
-                initCall(userInfo, call);
+                initCall(userinfo, call);
               }).catch(function(err) {
                 console.log("Cannot init call:" + JSON.stringify(err));
                 alert("Error occured while initializing the call.");

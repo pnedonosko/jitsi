@@ -1,12 +1,12 @@
 package org.exoplatform.webconferencing.jitsi.rest;
 
-import static org.exoplatform.webconferencing.Utils.asJSON;
 import static org.exoplatform.webconferencing.Utils.getCurrentContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -32,8 +32,7 @@ import org.exoplatform.webconferencing.jitsi.JitsiProvider;
 public class JitsiContextResource implements ResourceContainer {
 
   /** The Constant LOG. */
-  private static final Log             LOG = ExoLogger.getLogger(JitsiContextResource.class);
-
+  private static final Log             LOG                           = ExoLogger.getLogger(JitsiContextResource.class);
   /** The Constant webconferencing. */
   private final WebConferencingService webconferencing;
 
@@ -50,16 +49,21 @@ public class JitsiContextResource implements ResourceContainer {
    * Content.
    *
    * @param request the request
+   * @param userId the user id
    * @return the response
    */
   @GET
   @Path("/context/{userId}")
-  public Response context(@Context HttpServletRequest request, @PathParam("userId") String userId) {
-    // TODO: return context info to init comet
-    ContextInfo context = getCurrentContext(userId, request.getLocale());
-    return Response.status(Status.OK).entity(context).type(MediaType.APPLICATION_JSON).build();
+  @Produces(MediaType.APPLICATION_JSON)
+  public ContextInfo context(@Context HttpServletRequest request, @PathParam("userId") String userId) {
+    return getCurrentContext(userId, request.getLocale());
   }
 
+  /**
+   * Settings.
+   *
+   * @return the response
+   */
   @GET
   @Path("/settings")
   public Response settings() {
@@ -78,7 +82,6 @@ public class JitsiContextResource implements ResourceContainer {
 
   }
 
-  // TODO: replace by default one
   /**
    * Content.
    *
@@ -93,7 +96,11 @@ public class JitsiContextResource implements ResourceContainer {
       String userId = state.getIdentity().getUserId();
       try {
         UserInfo userInfo = webconferencing.getUserInfo(userId);
-        return Response.status(Status.OK).entity(userInfo).type(MediaType.APPLICATION_JSON).build();
+        String authToken = String.valueOf(request.getServletContext().getAttribute("token"));
+        return Response.status(Status.OK)
+                       .entity(new UserInfoResponse(userInfo, authToken))
+                       .type(MediaType.APPLICATION_JSON)
+                       .build();
       } catch (IdentityStateException e) {
         LOG.warn("Cannot find identity with id: {}", userId);
         return Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -112,7 +119,6 @@ public class JitsiContextResource implements ResourceContainer {
   /**
    * Content.
    *
-   * @param request the request
    * @return the response
    */
   @GET
@@ -175,5 +181,46 @@ public class JitsiContextResource implements ResourceContainer {
       return context;
     }
 
+  }
+
+  /**
+   * The Class UserInfoResponse.
+   */
+  public class UserInfoResponse {
+
+    /** The user info. */
+    private final UserInfo userInfo;
+
+    /** The auth token. */
+    private final String   authToken;
+
+    /**
+     * Instantiates a new user info response.
+     *
+     * @param userInfo the user info
+     * @param authToken the auth token
+     */
+    public UserInfoResponse(UserInfo userInfo, String authToken) {
+      this.userInfo = userInfo;
+      this.authToken = authToken;
+    }
+
+    /**
+     * Gets the user info.
+     *
+     * @return the user info
+     */
+    public UserInfo getUserInfo() {
+      return userInfo;
+    }
+
+    /**
+     * Gets the auth token.
+     *
+     * @return the auth token
+     */
+    public String getAuthToken() {
+      return authToken;
+    }
   }
 }
