@@ -253,6 +253,26 @@
                       callProcess.done(function(call, isNew) {
                         var callWindow = callWindow = webConferencing.showCallPopup(callUrl, target.title);
                         callWindow.document.title = target.title;
+                        
+                       
+                        var callStarted = false;
+                        webConferencing.onCallUpdate(callId, function(update){
+                          console.log("Received update: " + JSON.stringify(update));
+                          if (update.exoId === context.currentUser && update.action === "started") {
+                            callStarted = true;
+                          }
+                        });
+                        // Delete call if it hasn't been started for 15 secs after openning the call page
+                        setTimeout(function(){
+                          if (!callStarted) {
+                            // Smth went wrong on call page. Delete call.
+                            webConferencing.deleteCall(callId).then(function(){
+                              console.log("The call " + callId + " hasn't been started. Deleted call");
+                            });
+                          }
+                        }, 15000);
+                        
+                        
                         // Next, we invoke a call window to initialize the call.
                         // Note: it's assumed below that startCall() method
                         // added by the call page script,

@@ -4,6 +4,7 @@ require(["SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jits
 
     var callId;
     var isStopped = false;
+    var isStopping = false;
     var getUrlParameter = function(sParam) {
       var sPageURL = window.location.search.substring(1),
         sURLVariables = sPageURL.split('&'),
@@ -51,6 +52,7 @@ require(["SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jits
         webconferencing.updateCall(callId, "leaved");
         // 1 to 1 call
         if (call.participants.length == 2 && !isStopped) {
+          isStopping = true;
           webConferencing.deleteCall(callId).done(function() {
             log.info("Call deleted: " + callId);
           })
@@ -74,7 +76,7 @@ require(["SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jits
         if (update.providerType == "jitsi") {
           var callId = update.callId;
           if (update.eventType == "call_state") {
-            if (update.callState == "stopped") {
+            if (update.callState == "stopped" && !isStopping) {
               alert("Call stopped remotely. Closing window in 5 seconds");
               isStopped = true;
               setTimeout(function() {
@@ -112,6 +114,7 @@ require(["SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jits
       webconferencing.updateCall(callId, "joined");
       console.log("Joined to the call " + callId);
       subscribeCall(userInfo.id);
+      webconferencing.toCallUpdate(callId, {action : "started"});
     };
 
 
