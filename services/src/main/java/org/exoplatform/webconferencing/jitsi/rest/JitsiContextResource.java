@@ -32,7 +32,8 @@ import org.exoplatform.webconferencing.jitsi.JitsiProvider;
 public class JitsiContextResource implements ResourceContainer {
 
   /** The Constant LOG. */
-  private static final Log             LOG                           = ExoLogger.getLogger(JitsiContextResource.class);
+  private static final Log             LOG = ExoLogger.getLogger(JitsiContextResource.class);
+
   /** The Constant webconferencing. */
   private final WebConferencingService webconferencing;
 
@@ -79,6 +80,28 @@ public class JitsiContextResource implements ResourceContainer {
                    .entity("{\"error\":\"Cannot find valid Jitsi provider \"}")
                    .type(MediaType.APPLICATION_JSON)
                    .build();
+
+  }
+
+  /**
+   * Settings.
+   *
+   * @return the response
+   */
+  @GET
+  @Path("/token/{username}")
+  public Response token(@PathParam("username") String username) {
+    try {
+      JitsiProvider provider = (JitsiProvider) webconferencing.getProvider(JitsiProvider.TYPE);
+      String token = provider.createToken(username);
+      return Response.ok().entity(token).build();
+    } catch (ClassCastException e) {
+      LOG.error("Provider " + JitsiProvider.TYPE + " isn't an instance of " + JitsiProvider.class.getName(), e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR)
+                     .entity("{\"error\":\"Cannot find valid Jitsi provider \"}")
+                     .type(MediaType.APPLICATION_JSON)
+                     .build();
+    }
 
   }
 

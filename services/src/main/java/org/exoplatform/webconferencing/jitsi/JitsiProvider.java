@@ -18,7 +18,11 @@
  */
 package org.exoplatform.webconferencing.jitsi;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.exoplatform.container.configuration.ConfigurationException;
 import org.exoplatform.container.xml.InitParams;
@@ -28,6 +32,9 @@ import org.exoplatform.social.core.profile.settings.IMType;
 import org.exoplatform.social.core.profile.settings.UserProfileSettingsService;
 import org.exoplatform.webconferencing.CallProvider;
 import org.exoplatform.webconferencing.UserInfo.IMInfo;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 
 /**
  * Jitsi provider implementation.
@@ -40,28 +47,31 @@ import org.exoplatform.webconferencing.UserInfo.IMInfo;
 public class JitsiProvider extends CallProvider {
 
   /** The Constant LOG. */
-  protected static final Log        LOG                         = ExoLogger.getLogger(JitsiProvider.class);
+  protected static final Log LOG                         = ExoLogger.getLogger(JitsiProvider.class);
 
   /** The Constant TYPE. */
-  public static final String        TYPE                        = "jitsi";
+  public static final String TYPE                        = "jitsi";
 
   /** The Constant CONFIG_CLIENT_SECRET. */
-  public static final String        CONFIG_CLIENT_SECRET        = "client-secret";
+  public static final String CONFIG_CLIENT_SECRET        = "client-secret";
 
   /** The Constant CONFIG_EXTERNAL_AUTH_SECRET. */
-  public static final String        CONFIG_INTERNAL_AUTH_SECRET = "internal-auth-secret";
+  public static final String CONFIG_INTERNAL_AUTH_SECRET = "internal-auth-secret";
 
   /** The Constant CONFIG_EXTERNAL_AUTH_SECRET. */
-  public static final String        CONFIG_EXTERNAL_AUTH_SECRET = "external-auth-secret";
+  public static final String CONFIG_EXTERNAL_AUTH_SECRET = "external-auth-secret";
+
+  /** The Constant CONFIG_APP_ID. */
+  public static final String CONFIG_APP_ID               = "app-id";
 
   /** The Constant CONFIG_SERVICE_URL. */
-  public static final String        CONFIG_SERVICE_URL          = "service-url";
+  public static final String CONFIG_SERVICE_URL          = "service-url";
 
   /** The Constant TITLE. */
-  public static final String        TITLE                       = "Jitsi";
+  public static final String TITLE                       = "Jitsi";
 
   /** The Constant VERSION. */
-  public static final String        VERSION                     = "1.0.0";
+  public static final String VERSION                     = "1.0.0";
 
   /**
    * Settings for Jitsi provider.
@@ -96,7 +106,7 @@ public class JitsiProvider extends CallProvider {
     // You may add other specific methods here. Getters will be serialized to JSON and available on client
     // side (in Javascript provider module).
   }
-  
+
   /** The internal auth secret. */
   protected final String internalAuthSecret;
 
@@ -105,6 +115,9 @@ public class JitsiProvider extends CallProvider {
 
   /** The connector web-services URL (will be used to generate Call page URLs). */
   protected final String url;
+
+  /** The app id. */
+  protected final String appId;
 
   /**
    * Instantiates a new JitsiProvider provider.
@@ -128,6 +141,12 @@ public class JitsiProvider extends CallProvider {
     }
     this.externalAuthSecret = externalAuthSecret;
 
+    String appId = this.config.get(CONFIG_APP_ID);
+    if (appId == null || (appId = appId.trim()).length() == 0) {
+      throw new ConfigurationException(CONFIG_APP_ID + " required and should be non empty.");
+    }
+    this.appId = appId;
+
     String serviceUrl = this.config.get(CONFIG_SERVICE_URL);
     if (serviceUrl == null || (serviceUrl = serviceUrl.trim()).length() == 0) {
       throw new ConfigurationException(CONFIG_SERVICE_URL + " required and should be non empty.");
@@ -149,6 +168,31 @@ public class JitsiProvider extends CallProvider {
    */
   public JitsiProvider(InitParams params) throws ConfigurationException {
     this(null, params);
+  }
+
+  /**
+   * Creates the token.
+   *
+   * @param username the username
+   * @return the string
+   */
+  public String createToken(String username) {
+    // TODO: replace maps by objects
+    Map<String, Object> context = new HashMap<>();
+    Map<String, String> user = new HashMap<>();
+    user.put("name", username);
+    context.put("user", user);
+    String token = Jwts.builder()
+                       .setHeaderParam("typ", "JWT")
+                       .setExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                       .setSubject("*")
+                       .setIssuer(appId)
+                       .setAudience(appId)
+                       .claim("context", context)
+                       .claim("room", "*")
+                       .signWith(Keys.hmacShaKeyFor(externalAuthSecret.getBytes()))
+                       .compact();
+    return token;
   }
 
   /**

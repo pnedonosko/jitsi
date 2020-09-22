@@ -5,6 +5,7 @@ require(["SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jits
     var callId;
     var isStopped = false;
     var isStopping = false;
+    var authToken;
     var getUrlParameter = function(sParam) {
       var sPageURL = window.location.search.substring(1),
         sURLVariables = sPageURL.split('&'),
@@ -35,24 +36,35 @@ require(["SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jits
     };
 
     // Request contextinfo
-    var getContextInfo = function(userId, token) {
+    var getContextInfo = function(userId) {
       return $.get({
         type: "GET",
         beforeSend: function(request) {
-          request.setRequestHeader("X-Exoplatform-Auth", token);
+          request.setRequestHeader("X-Exoplatform-Auth", authToken);
         },
         url: "/portal/rest/jitsi/context/" + userId,
       });
     };
 
     // Request provider settings
-    var getSettings = function(token) {
+    var getSettings = function() {
       return $.get({
         type: "GET",
         beforeSend: function(request) {
-          request.setRequestHeader("X-Exoplatform-Auth", token);
+          request.setRequestHeader("X-Exoplatform-Auth", authToken);
         },
         url: "/portal/rest/jitsi/settings",
+      });
+    };
+    
+    // Request provider settings
+    var getToken = function(username) {
+      return $.get({
+        type: "GET",
+        beforeSend: function(request) {
+          request.setRequestHeader("X-Exoplatform-Auth", authToken);
+        },
+        url: "/portal/rest/jitsi/token/" + username,
       });
     };
 
@@ -105,26 +117,27 @@ require(["SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jits
       const domain = apiUrl.substring(apiUrl.indexOf("://") + 3, apiUrl.lastIndexOf("/external_api.js"));
       var windowHeight = window.innerHeight - 20;
       var name = userinfo.firstName + " " + userinfo.lastName;
-      const options = {
-        roomName: "Jitsi Exo Meet",
-        width: '100%',
-        height: windowHeight,
-        parentNode: document.querySelector("#meet"),
-        interfaceConfigOverwrite: {
-          TOOLBAR_BUTTONS: ['microphone', 'camera', 'desktop', 'fullscreen',
-            'fodeviceselection', 'hangup', 'profile', 'sharedvideo', 'settings',
-            'videoquality', 'tileview', 'videobackgroundblur', 'mute-everyone', 'security'
-          ]
-        },
-        userInfo: {
-          displayName: name
-        }
-      };
-      var api = new JitsiMeetExternalAPI(domain, options);
-      webconferencing.updateCall(callId, "joined");
-      console.log("Joined to the call " + callId);
-      subscribeCall(userinfo.id);
-      webconferencing.toCallUpdate(callId, {action : "started"});
+      getToken(name).then(function(token){
+        const options = {
+            roomName: "Jitsi Exo Meet",
+            width: '100%',
+            jwt : token,
+            height: windowHeight,
+            parentNode: document.querySelector("#meet"),
+            interfaceConfigOverwrite: {
+              TOOLBAR_BUTTONS: ['microphone', 'camera', 'desktop', 'fullscreen',
+                'fodeviceselection', 'hangup', 'profile', 'sharedvideo', 'settings',
+                'videoquality', 'tileview', 'videobackgroundblur', 'mute-everyone', 'security'
+              ]
+            }
+          };
+          var api = new JitsiMeetExternalAPI(domain, options);
+          webconferencing.updateCall(callId, "joined");
+          console.log("Joined to the call " + callId);
+          subscribeCall(userinfo.id);
+          webconferencing.toCallUpdate(callId, {action : "started"});
+      });
+      
     };
 
 
@@ -157,9 +170,10 @@ require(["SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jits
           });
         }
 
-        $initUser.then(function(userinfo, authToken) {
-          getContextInfo(userinfo.id, authToken).then(function(contextInfo) {
-            getSettings(authToken).then(function(settings) {
+        $initUser.then(function(userinfo, token) {
+          authToken = token;
+          getContextInfo(userinfo.id).then(function(contextInfo) {
+            getSettings().then(function(settings) {
               eXo.env.portal.profileOwner = userinfo.id;
               webconferencing.init(userinfo, contextInfo);
               provider.configure(settings);
@@ -176,7 +190,7 @@ require(["SHARED/jquery", "SHARED/webConferencing", "SHARED/webConferencing_jits
                     return;
                   }
                 }
-                initCall(userinfo, call);
+                initCall(userinfo);
               }).catch(function(err) {
                 console.log("Cannot init call:" + JSON.stringify(err));
                 alert("Error occured while initializing the call.");

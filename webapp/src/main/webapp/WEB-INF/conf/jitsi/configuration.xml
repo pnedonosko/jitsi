@@ -46,6 +46,7 @@
             value="${webconferencing.jitsi.internal.secret:mQzPudDBpSAqUwM0FY2r86gNAd6be5tN1xqwdFDOb4Us1DT4Ti}" />
           <property name="external-auth-secret"
             value="${webconferencing.jitsi.external.secret:mQzPudDBpSAqUwM0FY2r86gNAd6be5tN1xqwdFDOb4Us1DT4Tx}" />
+          <property name="app-id" value="${webconferencing.jitsi.appid:exo-jitsi}" />
         </properties-param>
       </init-params>
     </component-plugin>
