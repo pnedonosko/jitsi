@@ -5,7 +5,10 @@
 #
 # Default excludes
 #
+
+# Node,js stuff
 webapp/node_modules/
+package-lock.json
 
 # Binaries
 *.7z
