@@ -37,7 +37,6 @@
   <description>eXo Jitsi portal extension (connector for Web Conferencing)</description>
 
   <modules>
-    <module>apps</module>
     <module>services</module>
     <module>webapp</module>
     <module>packaging</module>

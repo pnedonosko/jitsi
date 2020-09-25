@@ -138,7 +138,7 @@
                   // embedded on the current page)
                   $button.click(function() {
                     // handle only of not disabled (see init())
-                    if (!$button.hasClass("callDisabled")) {
+                  //  if (!$button.hasClass("callDisabled")) {
                       // When user clicked the button - create an actual call.
                       // Use Web Conferencing helper to open a new window
                       // Build a call page URL on your own and for your needs.
@@ -295,9 +295,9 @@
 
                         });
                       });
-                    } else {
-                      log.debug("Call disabled for " + target.id);
-                    }
+                //    } else {
+                //      log.debug("Call disabled for " + target.id);
+                //    }
                   });
                   // Assign target ID to the button for later use on started
                   // event in init()
@@ -449,7 +449,8 @@
               if ($button.data("targetid") == targetId) {
                 if (!$button.hasClass("callDisabled")) {
                   // log.trace(">> lockCallButton " + targetId);
-                  $button.addClass("callDisabled");
+                  // TODO: add class (removed for testing)
+                  // $button.addClass("callDisabled");
                   $button.data("callid", callId);
                 }
               }

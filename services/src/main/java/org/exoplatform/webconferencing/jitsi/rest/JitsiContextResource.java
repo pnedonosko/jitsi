@@ -84,28 +84,6 @@ public class JitsiContextResource implements ResourceContainer {
   }
 
   /**
-   * Settings.
-   *
-   * @return the response
-   */
-  @GET
-  @Path("/token/{username}")
-  public Response token(@PathParam("username") String username) {
-    try {
-      JitsiProvider provider = (JitsiProvider) webconferencing.getProvider(JitsiProvider.TYPE);
-      String token = provider.createToken(username);
-      return Response.ok().entity(token).build();
-    } catch (ClassCastException e) {
-      LOG.error("Provider " + JitsiProvider.TYPE + " isn't an instance of " + JitsiProvider.class.getName(), e);
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-                     .entity("{\"error\":\"Cannot find valid Jitsi provider \"}")
-                     .type(MediaType.APPLICATION_JSON)
-                     .build();
-    }
-
-  }
-
-  /**
    * Content.
    *
    * @param request the request

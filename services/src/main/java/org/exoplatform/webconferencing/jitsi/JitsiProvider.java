@@ -61,9 +61,6 @@ public class JitsiProvider extends CallProvider {
   /** The Constant CONFIG_EXTERNAL_AUTH_SECRET. */
   public static final String CONFIG_EXTERNAL_AUTH_SECRET = "external-auth-secret";
 
-  /** The Constant CONFIG_APP_ID. */
-  public static final String CONFIG_APP_ID               = "app-id";
-
   /** The Constant CONFIG_SERVICE_URL. */
   public static final String CONFIG_SERVICE_URL          = "service-url";
 
@@ -116,9 +113,6 @@ public class JitsiProvider extends CallProvider {
   /** The connector web-services URL (will be used to generate Call page URLs). */
   protected final String url;
 
-  /** The app id. */
-  protected final String appId;
-
   /**
    * Instantiates a new JitsiProvider provider.
    *
@@ -141,12 +135,6 @@ public class JitsiProvider extends CallProvider {
     }
     this.externalAuthSecret = externalAuthSecret;
 
-    String appId = this.config.get(CONFIG_APP_ID);
-    if (appId == null || (appId = appId.trim()).length() == 0) {
-      throw new ConfigurationException(CONFIG_APP_ID + " required and should be non empty.");
-    }
-    this.appId = appId;
-
     String serviceUrl = this.config.get(CONFIG_SERVICE_URL);
     if (serviceUrl == null || (serviceUrl = serviceUrl.trim()).length() == 0) {
       throw new ConfigurationException(CONFIG_SERVICE_URL + " required and should be non empty.");
@@ -168,31 +156,6 @@ public class JitsiProvider extends CallProvider {
    */
   public JitsiProvider(InitParams params) throws ConfigurationException {
     this(null, params);
-  }
-
-  /**
-   * Creates the token.
-   *
-   * @param username the username
-   * @return the string
-   */
-  public String createToken(String username) {
-    // TODO: replace maps by objects
-    Map<String, Object> context = new HashMap<>();
-    Map<String, String> user = new HashMap<>();
-    user.put("name", username);
-    context.put("user", user);
-    String token = Jwts.builder()
-                       .setHeaderParam("typ", "JWT")
-                       .setExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
-                       .setSubject("*")
-                       .setIssuer(appId)
-                       .setAudience(appId)
-                       .claim("context", context)
-                       .claim("room", "*")
-                       .signWith(Keys.hmacShaKeyFor(externalAuthSecret.getBytes()))
-                       .compact();
-    return token;
   }
 
   /**
