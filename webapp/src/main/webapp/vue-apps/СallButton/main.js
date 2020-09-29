@@ -1,7 +1,7 @@
-import CallButton from "./components/CallButton.vue";
+import JitsiMeetButton from "./components/JitsiMeetButton.vue";
 
 Vue.use(Vuetify);
-Vue.component("JitsiCallButton", CallButton);
+Vue.component("JitsiCallButton", JitsiMeetButton);
 const vuetify = new Vuetify({
   dark: true,
   iconfont: ""
@@ -19,7 +19,7 @@ export function init(callSettings) {
     // init Vue app when locale ressources are ready
   return new Vue({
       render: h =>
-        h(CallButton, { props: {...callSettings, i18n: i18n, language: lang, resourceBundleName: resourceBundleName } }),
+        h(JitsiMeetButton, { props: {...callSettings, i18n: i18n, language: lang, resourceBundleName: resourceBundleName } }),
       i18n,
       vuetify
     });

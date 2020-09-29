@@ -61,7 +61,7 @@
       <module>webConferencing</module>
     </depends>
     <depends>
-      <module>callButton</module>
+      <module>webConferencing_jitsi_meet</module>
     </depends>
   </module>
   <module>
@@ -86,10 +86,10 @@
     </depends>
   </module>
   <module>
-    <name>callButton</name>
-    <load-group>webConferencingJitsiGRP</load-group>
+    <name>webConferencing_jitsi_meet</name>
+    <load-group>webConferencingGRP</load-group>
     <script>
-      <path>/js/callButton.bundle.js</path>
+      <path>/js/?allButton.bundle.js</path>
     </script>
     <depends>
       <module>webConferencing</module>
