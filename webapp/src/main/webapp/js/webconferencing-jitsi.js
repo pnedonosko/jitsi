@@ -89,7 +89,7 @@
        * directly to an user), the connector will not be added to the call
        * button and user will not see it.
        */
-      this.callButton = async function(context, buttonType) {
+      this.callButton = function(context, buttonType) {
         var button = $.Deferred();
         if (settings && context && context.currentUser) {
           context.details().done(
@@ -116,12 +116,11 @@
                     callSettings.context = context;
                     callSettings.callMembers = callMembers;
                     //callSettings.callWindow = callWindow;
-
-                    const jitsiCallButton = await callButton.init(callSettings);
-
+                    callButton.init(callSettings).then(jitsiCallButton => {
+                      button.resolve(jitsiCallButton);
+                   })
                     // Resolve with our button - return Vue object here, so it
                     // will be appended to Call Button UI in the Platform
-                    button.resolve(jitsiCallButton);
                   } else {
                     // If we have more than single user, then we have participants
                     // for a call.

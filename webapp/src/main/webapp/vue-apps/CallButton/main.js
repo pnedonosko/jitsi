@@ -14,11 +14,10 @@ const resourceBundleName = "Jitsi";
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/${localePortlet}.${resourceBundleName}-${lang}.json`;
 
 export function init(callSettings) {
-  const process = new Promise(function (resolve, reject) {
     // getting locale ressources
-    exoi18n.loadLanguageAsync(lang, url).then(i18n => {
+    return exoi18n.loadLanguageAsync(lang, url).then(i18n => {
       // init Vue app when locale ressources are ready
-      const thevue = new Vue({
+      return new Vue({
         render : h =>
           h(JitsiMeetButton, {
             props : {
@@ -31,12 +30,5 @@ export function init(callSettings) {
         i18n,
         vuetify
       });
-
-      resolve(thevue);
     });
-  });
-
-  return process;
 }
-
-  
