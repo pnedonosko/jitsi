@@ -27,7 +27,7 @@
      * An object that implements Web Conferencing SPI contract for a call
      * provider.
      */
-    function MyProvider() {
+    function JitsiProvider() {
 
       var self = this;
       var settings;
@@ -695,7 +695,7 @@
       };
     }
 
-    var provider = new MyProvider();
+    var provider = new JitsiProvider();
 
     // Add Jitsi provider into webConferencing object of global eXo namespace (for non AMD uses)
     if (globalWebConferencing) {
@@ -711,4 +711,4 @@
         && window.console
             .log("WARN: webConferencing not given and eXo.webConferencing not defined. Jitsi provider registration skipped.");
   }
-})($, typeof webConferencing != "undefined" ? webConferencing : null);
+})($, webConferencing, callButton);
