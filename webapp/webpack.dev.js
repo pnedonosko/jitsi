@@ -3,7 +3,7 @@ const merge = require("webpack-merge");
 const webpackCommonConfig = require("./webpack.common.js");
 
 // the display name of the war
-const app = "Jitsi";
+const app = "jitsi";
 
 // add the server path to your server location path (it's a symlink in webapp folder to a real server')
 const exoServerPath = "../web-conferencing/webapp/exo-server/";

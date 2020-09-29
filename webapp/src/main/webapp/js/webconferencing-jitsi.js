@@ -3,7 +3,7 @@
  * provider to Web Conferencing module and then handle calls for portal
  * user/groups.
  */
-(function($, webConferencing) {
+(function($, webConferencing, callButton) {
   "use strict";
 
   var globalWebConferencing = typeof eXo != "undefined" && eXo && eXo.webConferencing ? eXo.webConferencing : null;
@@ -89,7 +89,7 @@
        * directly to an user), the connector will not be added to the call
        * button and user will not see it.
        */
-      this.callButton = function(context) {
+      this.callButton = function(context, buttonType) {
         var button = $.Deferred();
         if (settings && context && context.currentUser) {
           context.details().done(
@@ -110,35 +110,48 @@
                   callMembers.push(target);
                 }
                 if (callMembers.length > 1) {
-                  // If we have more than single user, then we have participants
-                  // for a call.
-                  // Build jQuery element of the call button:
-                  // It can be an anchor or button. It may use any custom CSS
-                  // class (like myCallAction) we know that
-                  // Web Conferencing may add btn class (from PLF's styles) if
-                  // this connector will be a single compatible
-                  // for an user.
-                  // You need provide an icon and title for the button.
-                  // An icon should have 'uiIconLightGray' class to look like
-                  // other buttons of the Platform;
-                  // any other style starting with 'uiIcon' will also inherit
-                  // style settings of the Platform.
-                  // Here we use 'uiIconVideoPortlet' class from Platform UI, it
-                  // provides actual icon of the button.
-                  // A title should be in non-block element marked by a class
-                  // 'callTitle'. This will let remove
-                  // a title when button should appear without it. You may add
-                  // any other styles to the title.
-                  var $button = $("<a title='" + target.title + "' href='javascript:void(0)' class='myCallAction'>"
+                  if (buttonType === "vue") {
+                    const callSettings = {};
+                    callSettings.target = target;
+                    callSettings.context = context;
+                    callSettings.callMembers = callMembers;
+                    //callSettings.callWindow = callWindow;
+
+                    const jitsiCallButton = callButton.init(callSettings);
+
+                    // Resolve with our button - return Vue object here, so it
+                    // will be appended to Call Button UI in the Platform
+                    button.resolve(jitsiCallButton);
+                  } else {
+                    // If we have more than single user, then we have participants
+                    // for a call.
+                    // Build jQuery element of the call button:
+                    // It can be an anchor or button. It may use any custom CSS
+                    // class (like myCallAction) we know that
+                    // Web Conferencing may add btn class (from PLF's styles) if
+                    // this connector will be a single compatible
+                    // for an user.
+                    // You need provide an icon and title for the button.
+                    // An icon should have 'uiIconLightGray' class to look like
+                    // other buttons of the Platform;
+                    // any other style starting with 'uiIcon' will also inherit
+                    // style settings of the Platform.
+                    // Here we use 'uiIconVideoPortlet' class from Platform UI, it
+                    // provides actual icon of the button.
+                    // A title should be in non-block element marked by a class
+                    // 'callTitle'. This will let remove
+                    // a title when button should appear without it. You may add
+                    // any other styles to the title.
+                    var $button = $("<a title='" + target.title + "' href='javascript:void(0)' class='myCallAction'>"
                       + "<i class='uiIconMyCall uiIconVideoPortlet uiIconLightGray'></i>" + "<span class='callTitle'>"
                       + self.getCallTitle() + "</span></a>");
-                  // Add click handler to the button and add logic to open a
-                  // link of call window (here we assume it needs
-                  // a dedicated page, but it also could be possible to run it
-                  // embedded on the current page)
-                  $button.click(function() {
-                    // handle only of not disabled (see init())
-                  //  if (!$button.hasClass("callDisabled")) {
+                    // Add click handler to the button and add logic to open a
+                    // link of call window (here we assume it needs
+                    // a dedicated page, but it also could be possible to run it
+                    // embedded on the current page)
+                    $button.click(function() {
+                      // handle only of not disabled (see init())
+                      //  if (!$button.hasClass("callDisabled")) {
                       // When user clicked the button - create an actual call.
                       // Use Web Conferencing helper to open a new window
                       // Build a call page URL on your own and for your needs.
@@ -233,7 +246,7 @@
                               // tagret's title is a group or user full name
                               title : target.title,
                               participants : participatntsIds
-                            // string build from array separated by ';'
+                              // string build from array separated by ';'
                             };
                             webConferencing.addCall(callId, callInfo).done(function(call) {
                               log.info("Call created: " + callId);
@@ -253,8 +266,8 @@
                       callProcess.done(function(call, isNew) {
                         var callWindow = callWindow = webConferencing.showCallPopup(callUrl, target.title);
                         callWindow.document.title = target.title;
-                        
-                       
+
+
                         var callStarted = false;
                         webConferencing.onCallUpdate(callId, function(update){
                           console.log("Received update: " + JSON.stringify(update));
@@ -271,8 +284,8 @@
                             });
                           }
                         }, 15000);
-                        
-                        
+
+
                         // Next, we invoke a call window to initialize the call.
                         // Note: it's assumed below that startCall() method
                         // added by the call page script,
@@ -295,16 +308,17 @@
 
                         });
                       });
-                //    } else {
-                //      log.debug("Call disabled for " + target.id);
-                //    }
-                  });
-                  // Assign target ID to the button for later use on started
-                  // event in init()
-                  $button.data("targetid", target.id);
-                  // Resolve with our button - return jQuery object here, so it
-                  // will be appended to Call Button UI in the Platform
-                  button.resolve($button);
+                      //    } else {
+                      //      log.debug("Call disabled for " + target.id);
+                      //    }
+                    });
+                    // Assign target ID to the button for later use on started
+                    // event in init()
+                    $button.data("targetid", target.id);
+                    // Resolve with our button - return jQuery object here, so it
+                    // will be appended to Call Button UI in the Platform
+                    button.resolve($button);
+                  }
                 } else {
                   // If not users compatible with Jitsi IM type found, we
                   // reject, thus don't show the button for this context

@@ -49,8 +49,9 @@
   
   <module>
     <name>webConferencing_jitsi</name>
-    <load-group>webConferencingMyGRP</load-group>
+    <load-group>webConferencingJitsiGRP</load-group>
     <script>
+      <minify>false</minify>
       <path>/js/webconferencing-jitsi.js</path>
     </script>
     <depends>
@@ -58,6 +59,9 @@
     </depends>
     <depends>
       <module>webConferencing</module>
+    </depends>
+    <depends>
+      <module>callButton</module>
     </depends>
   </module>
   <module>
@@ -79,6 +83,25 @@
     </depends>
     <depends>
       <module>extensionRegistry</module>
+    </depends>
+  </module>
+  <module>
+    <name>callButton</name>
+    <load-group>webConferencingJitsiGRP</load-group>
+    <script>
+      <path>/js/callButton.bundle.js</path>
+    </script>
+    <depends>
+      <module>webConferencing</module>
+    </depends>
+    <depends>
+      <module>vue</module>
+    </depends>
+    <depends>
+      <module>vuetify</module>
+    </depends>
+    <depends>
+      <module>eXoVueI18n</module>
     </depends>
   </module>
 </gatein-resources>

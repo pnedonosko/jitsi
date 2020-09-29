@@ -6,7 +6,8 @@ let config = {
   // set the entry point of the application
   // can use multiple entry
   entry: {
-    Jitsi: "./src/main/webapp/vue-app/Jitsi/main.js"
+    Jitsi: "./src/main/webapp/vue-apps/Jitsi/main.js",
+    callButton: "./src/main/webapp/vue-apps/callButton/main.js"
   },
   output: {
     filename: "js/[name].bundle.js",
