@@ -105,6 +105,7 @@ public class JitsiGateway extends AbstractHttpServlet {
           String requestUrl = new StringBuilder(getPlatformUrl(req)).append(uri).toString();
           forward(requestUrl, Action.INTERNAL_AUTH, jitsiProvider.getInternalAuthSecret(), req, resp);
         } else if (req.getRequestURI().startsWith("/jitsi/resources")) {
+          // TODO: separate the Gateway from local resources, make two .wars
           try {
             uri = uri.substring(uri.indexOf("/resources") + 10);
             InputStream is = httpRequest.getServletContext().getResourceAsStream(uri);
@@ -112,12 +113,12 @@ public class JitsiGateway extends AbstractHttpServlet {
               httpResponse.setContentLength(is.available());
               stream(is, httpResponse.getOutputStream());
             } else {
-              httpResponse.sendError(HttpStatus.SC_NOT_FOUND, "Resource is not found");
+              httpResponse.sendError(HttpStatus.SC_NOT_FOUND, "Resource " + uri + " is not found");
             }
           } catch (Exception e) {
-            LOG.warn("Cannot load local resource: {}", e.getMessage());
+            LOG.warn("Cannot load local resource {}, {}", uri, e.getMessage());
             try {
-              httpResponse.sendError(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Error while loading local resource");
+              httpResponse.sendError(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Error while loading " + uri + " resource");
             } catch (IOException ex) {
               LOG.warn("Cannot send error response: {}", e.getMessage());
             }
@@ -155,8 +156,9 @@ public class JitsiGateway extends AbstractHttpServlet {
     // TODO: Use servlet forwarding for accessing internal resources. Solve the issue with filters (not invoked when forwarding)
     if (action == Action.INTERNAL_AUTH) {
       // Pass cookies for internal auth
-      if (req.getCookies() != null) {
-        request.setHeader("Cookie", getCookiesAsString(req));
+      String cookies = getCookiesAsString(req);
+      if (cookies != null) {
+        request.setHeader("Cookie", cookies);
       }
       authHeader = AUTH_TOKEN_HEADER;
     } else {
@@ -169,7 +171,6 @@ public class JitsiGateway extends AbstractHttpServlet {
                        .compact();
 
     request.setHeader(authHeader, token);
-
     // XXX: working with invalid SSL
     SSLContextBuilder builder = new SSLContextBuilder();
     try {
@@ -202,11 +203,9 @@ public class JitsiGateway extends AbstractHttpServlet {
         resp.getWriter().write(EntityUtils.toString(entity));
       }
     } catch (IOException e) {
-      LOG.warn("Error occured while requesting remote resource", e.getMessage());
+      LOG.warn("Error occured while requesting remote resource [{}]", requestUrl, e.getMessage());
       try {
-        resp.setContentType("application/json");
-        resp.setCharacterEncoding("UTF-8");
-        resp.getWriter().write("{\"error\":\"Cannot connect to the remote resource\"}");
+        resp.sendError(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Cannot connect to " + requestUrl);
       } catch (IOException e1) {
         LOG.error("Cannot write response", e.getMessage());
       }
@@ -220,14 +219,15 @@ public class JitsiGateway extends AbstractHttpServlet {
    * @return the cookies as string
    */
   private String getCookiesAsString(HttpServletRequest req) {
-    StringBuilder builder = new StringBuilder();
-    for (Cookie cookie : req.getCookies()) {
-      if (builder.length() != 0) {
-        builder.append(" ");
+    Cookie[] cookies = req.getCookies();
+    if (cookies != null) {
+      StringBuilder builder = new StringBuilder();
+      for (Cookie cookie : cookies) {
+        builder.append(cookie.getName()).append("=").append(cookie.getValue()).append(";");
       }
-      builder.append(cookie.getName()).append("=").append(cookie.getValue()).append(";");
+      return builder.toString();
     }
-    return builder.toString();
+    return null;
   }
 
   /**
