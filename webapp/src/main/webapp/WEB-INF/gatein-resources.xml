@@ -51,7 +51,6 @@
     <name>webConferencing_jitsi</name>
     <load-group>webConferencingJitsiGRP</load-group>
     <script>
-      <minify>false</minify>
       <path>/js/webconferencing-jitsi.js</path>
     </script>
     <depends>
