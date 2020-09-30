@@ -1,13 +1,11 @@
 <template>
   <v-btn
     ref="jitsi"
-    color="white"
-    elevation="1"
     class="myCallAction"
-    @click.native="startCall"
     outlined="true"
     height="33px"
-    min-width="fit-content">
+    min-width="fit-content"
+    @click.native="startCall">
     <i class="uiIconMyCall uiIconVideoPortlet uiIconLightGray"></i>
     {{ i18n.te("UICallButton.label.jitsi")
       ? $t("UICallButton.label.jitsi")
@@ -44,20 +42,26 @@ export default {
       log: null,
       callWindow: null,
       // eslint-disable-next-line quotes
-      icon: `<i class="uiIconMyCall uiIconVideoPortlet uiIconLightGray"></i>`,
-      call: this.i18n.te("UICallButton.label.jitsi")
-      ? this.$t("UICallButton.label.jitsi")
-    : "Call with Jitsi" 
+      // icon: `<i class="uiIconMyCall uiIconVideoPortlet uiIconLightGray"></i>`,
+    //   call: this.i18n.te("UICallButton.label.jitsi")
+    //   ? this.$t("UICallButton.label.jitsi")
+    // : "Call with Jitsi" 
     };
   },
   created() {
     this.log = webConferencing.getLog("jitsi");
   },
-<<<<<<< HEAD
+  mounted() {
+    // Assign target ID to the button for later use on started
+    // event in init()
+    const callButton = this.$refs.jitsi;
+    console.log(this.$refs.jitsi)
+    callButton.$el.dataset.targetid = this.settings.target.id;
+  },
   methods: {
     startCall: function (event) {
-      thevue.log.trace("Click on Jitsi call button");
       const thevue = this;
+      this.log.trace("Click on Jitsi call button");
       // handle only of not disabled (see init())
       //  if (!$button.hasClass("callDisabled")) {
       // When user clicked the button - create an actual call.
@@ -101,18 +105,18 @@ export default {
       // find more in
       // https://docs.cometd.org/current/reference/#_bayeux_protocol_elements
       let callId;
-      if (thevue.settings.target.group) {
-        callId = `g_${(thevue.settings.target.type === "chat_room" ? thevue.settings.context.roomName : thevue.settings.target.id)}`;
+      if (this.settings.target.group) {
+        callId = `g_${(this.settings.target.type === "chat_room" ? this.settings.context.roomName : this.settings.target.id)}`;
       } else {
         // Sort call members to have always the same ID for two
         // parts independently on who started the call
-        const callMembersAsc = thevue.settings.callMembers.map(function(member) {
+        const callMembersAsc = this.settings.callMembers.map(function(member) {
           return member.id;
         }).slice();
         callMembersAsc.sort();
         callId = `p_${callMembersAsc.join("-")}`;
       }
-      thevue.log.trace(`Jitsi call id: ${callId}`);
+      this.log.trace(`Jitsi call id: ${callId}`);
 
       const callUrl = `${window.location.protocol}//${window.location.host}/jitsi/meet/${callId}`;
 
@@ -134,7 +138,7 @@ export default {
         // it why we need stable ID clearly defining the target
         webConferencing.getCall(callId).done(function(call) {
           // Call already running - join it
-          thevue.log.info(`Joining call: ${callId}`);
+          this.log.info(`Joining call: ${callId}`);
           const promiseResult = {
             call: call,
             isNew: false
@@ -151,19 +155,19 @@ export default {
                 // for group calls an owner is a group entity
                 // (space or room), otherwise it's 1:1 and who
                 // started is an owner
-                owner : thevue.settings.target.group ? thevue.settings.target.id : thevue.settings.context.currentUser.id,
+                owner : this.settings.target.group ? this.settings.target.id : this.settings.context.currentUser.id,
                 // ownerType can be 'user' for 1:1 calls, 'space'
                 // for group call in space, 'chat_room' for group
                 // call in Chat room
-                ownerType : thevue.settings.target.type, // use target type
-                provider : thevue.settings.provider.getType(),
+                ownerType : this.settings.target.type, // use target type
+                provider : this.settings.provider.getType(),
                 // tagret's title is a group or user full name
-                title : thevue.settings.target.title,
+                title : this.settings.target.title,
                 participants : participatntsIds
                 // string build from array separated by ';'
               };
               webConferencing.addCall(callId, callInfo).done(function(call) {
-                thevue.log.info(`Call created: ${callId}`);
+                this.log.info(`Call created: ${callId}`);
                 const promiseResult = {
                   call: call,
                   isNew: true
@@ -171,11 +175,11 @@ export default {
                 resolve(promiseResult);
               });
             } else {
-              thevue.log.error(`Failed to get call info: ${callId}`, err);
+              this.log.error(`Failed to get call info: ${callId}`, err);
               webConferencing.showError("Joining call error", webConferencing.errorText(err));
             }
           } else {
-            thevue.log.error(`Failed to get call info: ${callId}`);
+            this.log.error(`Failed to get call info: ${callId}`);
             webConferencing.showError("Joining call error", "Error read call information from the server");
           }
         });
@@ -184,17 +188,17 @@ export default {
       // We wait for call readiness and invoke start it in the
       // popup window
       callProcess.then(function(promiseResult) {
-        thevue.log.trace("Call is ready for opening");
+        this.log.trace("Call is ready for opening");
         const call = promiseResult.call;
         const isNew = promiseResult.isNew;
-        const callWindow = thevue.callWindow = webConferencing.showCallPopup(callUrl, thevue.target.title);
-        callWindow.document.title = thevue.settings.target.title;
+        const callWindow = this.callWindow = webConferencing.showCallPopup(callUrl, this.target.title);
+        callWindow.document.title = this.settings.target.title;
 
 
         let callStarted = false;
         webConferencing.onCallUpdate(callId, function(update) {
-          thevue.log.debug(`Received update: ${JSON.stringify(update)}`);
-          if (update.exoId === thevue.settings.context.currentUser.id && update.action === "started") {
+          this.log.debug(`Received update: ${JSON.stringify(update)}`);
+          if (update.exoId === this.settings.context.currentUser.id && update.action === "started") {
             callStarted = true;
           }
         });
@@ -203,27 +207,17 @@ export default {
           if (!callStarted) {
             // Smth went wrong on call page. Delete call.
             webConferencing.deleteCall(callId).then(function(){
-              thevue.log.debug(`The call ${callId} hasn't been started. Deleted call`);
+              this.log.debug(`The call ${callId} hasn't been started. Deleted call`);
             });
           }
         }, 15000);
 
         callWindow.addEventListener("load", function() {
-          thevue.log.trace("Call Window is loaded");
+          this.log.trace("Call Window is loaded");
         });
       });
     }
-  }
-=======
-  mounted() {
-    // Assign target ID to the button for later use on started
-    // event in init()
-    const callButton = this.$refs.jitsi;
-    console.log(this.$refs.jitsi)
-    callButton.$el.dataset.targetid = this.settings.target.id;
   },
-  methods: {}
->>>>>>> add some style for button
 };
 </script>
 <style>
