@@ -115,6 +115,7 @@
                     callSettings.target = target;
                     callSettings.context = context;
                     callSettings.callMembers = callMembers;
+                    callSettings.provider = self;
                     //callSettings.callWindow = callWindow;
                     callButton.init(callSettings).then(jitsiCallButton => {
                       button.resolve(jitsiCallButton);
