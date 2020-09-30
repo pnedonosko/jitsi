@@ -225,6 +225,12 @@
                       webConferencing.getCall(callId).done(function(call) {
                         // Call already running - join it
                         log.info("Joining call: " + callId);
+                        // For grop calls
+                        if (call.state === "stopped" && ( target.type === "space" || target.type === "chat_room")) {
+                          webConferencing.updateCall(callId, "started").done(function(){
+                            log.info("Updated call state to started");
+                          });
+                        }
                         callProcess.resolve(call, false);
                       }).fail(function(err) {
                         if (err) {
