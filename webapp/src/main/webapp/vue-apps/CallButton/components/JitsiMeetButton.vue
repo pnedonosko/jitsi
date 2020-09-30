@@ -139,6 +139,13 @@ export default {
         webConferencing.getCall(callId).done(function(call) {
           // Call already running - join it
           thevue.log.info(`Joining call: ${callId}`);
+          // For group calls
+          if (call.state === "stopped" && (this.settings.target.type === "space" || this.settings.target.type === "chat_room")) {
+            webConferencing.updateCall(callId, "started").done(function(){
+              this.log.info(`Changed call state to started: ${callId}`);
+            });
+          }
+          
           const promiseResult = {
             call: call,
             isNew: false
