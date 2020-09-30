@@ -54,9 +54,8 @@ export default {
   mounted() {
     // Assign target ID to the button for later use on started
     // event in init()
-    const callButton = this.$refs.jitsi;
-    console.log(this.$refs.jitsi)
-    callButton.$el.dataset.targetid = this.settings.target.id;
+    //const callButton = this.$refs.jitsi;
+    //callButton.$el.dataset.targetid = this.settings.target.id;
   },
   methods: {
     startCall: function (event) {
@@ -198,7 +197,7 @@ export default {
         thevue.log.trace("Call is ready for opening");
         const call = promiseResult.call;
         const isNew = promiseResult.isNew;
-        const callWindow = this.callWindow = webConferencing.showCallPopup(callUrl, this.target.title);
+        const callWindow = thevue.callWindow = webConferencing.showCallPopup(callUrl, thevue.settings.target.title);
         callWindow.document.title = thevue.settings.target.title;
 
 
