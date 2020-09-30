@@ -21,7 +21,7 @@ export function init(callSettings) {
         render : h =>
           h(JitsiMeetButton, {
             props : {
-              ...callSettings,
+              callSettings: callSettings,
               i18n : i18n,
               language : lang,
               resourceBundleName : resourceBundleName
@@ -32,3 +32,5 @@ export function init(callSettings) {
       });
     });
 }
+
+  

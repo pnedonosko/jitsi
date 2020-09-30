@@ -25,8 +25,8 @@
 
    <javascript>
     <param>
-      <js-module>JitsiPlugin</js-module>
-      <js-path>/js/JitsiPlugin.js</js-path>
+      <js-module>jitsi-plugin</js-module>
+      <js-path>/js/jitsi-plugin.js</js-path>
     </param>
   </javascript>
   <!-- CSS for MyConnector Calls support in Platform -->
