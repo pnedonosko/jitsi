@@ -118,7 +118,7 @@
                     //callSettings.callWindow = callWindow;
                     callButton.init(callSettings).then(jitsiCallButton => {
                       button.resolve(jitsiCallButton);
-                   })
+                    });
                     // Resolve with our button - return Vue object here, so it
                     // will be appended to Call Button UI in the Platform
                   } else {

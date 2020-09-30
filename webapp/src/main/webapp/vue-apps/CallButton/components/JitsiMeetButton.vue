@@ -172,7 +172,7 @@ export default {
 
         let callStarted = false;
         webConferencing.onCallUpdate(callId, function(update){
-          console.log(`Received update: ${JSON.stringify(update)}`);
+          thevue.log.debug(`Received update: ${JSON.stringify(update)}`);
           if (update.exoId === thevue.context.currentUser.id && update.action === "started") {
             callStarted = true;
           }
@@ -182,7 +182,7 @@ export default {
           if (!callStarted) {
             // Smth went wrong on call page. Delete call.
             webConferencing.deleteCall(callId).then(function(){
-              console.log(`The call ${callId} hasn't been started. Deleted call`);
+              thevue.log.debug(`The call ${callId} hasn't been started. Deleted call`);
             });
           }
         }, 15000);

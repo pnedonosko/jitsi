@@ -1,5 +1,6 @@
-console.log("start")
 const JitsiPlugin = [{
+    target: "webConferencing",
+    type: "webconferencing",
     // configuration defined here is used in portlet-clouddrives/src/main/webapp/vue-app/components/connectJitsi.vue with
     // ecm-wcm-extension/src/main/webapp/attachments-selector/components/ExoAttachments.vue and connects them
     // key should be unique and used in parent component as a ref to connectJitsi component
@@ -32,9 +33,10 @@ const JitsiPlugin = [{
     }
   }];
 require(["SHARED/extensionRegistry", "SHARED/webConferencing"], function(extensionRegistry, webConferencing) {
-  webConferencing.init()
+  webConferencing.init();
+  const log = webConferencing.getLog("jitsi-plugin");
   for (const extension of JitsiPlugin) {
-    extensionRegistry.registerExtension("webConferencing", "webconferencing", extension);
+    extensionRegistry.registerExtension(extension.target, extension.type, extension);
+    log.trace(`Register extension type of ${extension.type} for ${extension.target}`);
   }
-  console.log(extensionRegistry.loadExtensions("webConferencing", "webconferencing"), "extension in plugin")
 });
