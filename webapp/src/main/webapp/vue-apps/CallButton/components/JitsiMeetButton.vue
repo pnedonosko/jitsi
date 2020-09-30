@@ -1,15 +1,17 @@
 <template>
   <v-btn
-    id="jitsiCallButton"
     ref="jitsi"
     color="white"
     elevation="1"
     class="myCallAction"
-    @click.native="startCall">
+    @click.native="startCall"
+    outlined="true"
+    height="33px"
+    min-width="fit-content">
     <i class="uiIconMyCall uiIconVideoPortlet uiIconLightGray"></i>
-    {{ i18n.te('UICallButton.label.jitsi')
-      ? $t('UICallButton.label.jitsi')
-    : 'Call with Jitsi' }}
+    {{ i18n.te("UICallButton.label.jitsi")
+      ? $t("UICallButton.label.jitsi")
+    : "Call with Jitsi" }}
   </v-btn>
 </template>
 
@@ -34,17 +36,24 @@ export default {
       required: true
     }
   },
+
   data: function() {
     return {
       // callButtonClass: "",
       settings: this.callSettings,
       log: null,
-      callWindow: null
+      callWindow: null,
+      // eslint-disable-next-line quotes
+      icon: `<i class="uiIconMyCall uiIconVideoPortlet uiIconLightGray"></i>`,
+      call: this.i18n.te("UICallButton.label.jitsi")
+      ? this.$t("UICallButton.label.jitsi")
+    : "Call with Jitsi" 
     };
   },
   created() {
     this.log = webConferencing.getLog("jitsi");
   },
+<<<<<<< HEAD
   methods: {
     startCall: function (event) {
       thevue.log.trace("Click on Jitsi call button");
@@ -205,5 +214,22 @@ export default {
       });
     }
   }
+=======
+  mounted() {
+    // Assign target ID to the button for later use on started
+    // event in init()
+    const callButton = this.$refs.jitsi;
+    console.log(this.$refs.jitsi)
+    callButton.$el.dataset.targetid = this.settings.target.id;
+  },
+  methods: {}
+>>>>>>> add some style for button
 };
 </script>
+<style>
+  .VuetifyApp button:not(.ignore-vuetify-classes), .VuetifyApp input:not(.ignore-vuetify-classes), .VuetifyApp select:not(.ignore-vuetify-classes), .VuetifyApp textarea:not(.ignore-vuetify-classes) {
+    background-color: transparent;
+    border: 1px solid #e1e8ee;
+    border-radius: 2px;
+  }
+</style>

@@ -1,4 +1,4 @@
-import Jitsi from "./components/Jitsi.vue";
+import Jitsi from "./components/Admin.vue";
 
 Vue.use(Vuetify);
 Vue.component("Jitsi", Jitsi)
