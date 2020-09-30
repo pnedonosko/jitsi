@@ -138,7 +138,7 @@ export default {
         // it why we need stable ID clearly defining the target
         webConferencing.getCall(callId).done(function(call) {
           // Call already running - join it
-          this.log.info(`Joining call: ${callId}`);
+          thevue.log.info(`Joining call: ${callId}`);
           const promiseResult = {
             call: call,
             isNew: false
@@ -155,19 +155,19 @@ export default {
                 // for group calls an owner is a group entity
                 // (space or room), otherwise it's 1:1 and who
                 // started is an owner
-                owner : this.settings.target.group ? this.settings.target.id : this.settings.context.currentUser.id,
+                owner : thevue.settings.target.group ? thevue.settings.target.id : thevue.settings.context.currentUser.id,
                 // ownerType can be 'user' for 1:1 calls, 'space'
                 // for group call in space, 'chat_room' for group
                 // call in Chat room
-                ownerType : this.settings.target.type, // use target type
-                provider : this.settings.provider.getType(),
+                ownerType : thevue.settings.target.type, // use target type
+                provider : thevue.settings.provider.getType(),
                 // tagret's title is a group or user full name
-                title : this.settings.target.title,
+                title : thevue.settings.target.title,
                 participants : participatntsIds
                 // string build from array separated by ';'
               };
               webConferencing.addCall(callId, callInfo).done(function(call) {
-                this.log.info(`Call created: ${callId}`);
+                thevue.log.info(`Call created: ${callId}`);
                 const promiseResult = {
                   call: call,
                   isNew: true
@@ -175,11 +175,11 @@ export default {
                 resolve(promiseResult);
               });
             } else {
-              this.log.error(`Failed to get call info: ${callId}`, err);
+              thevue.log.error(`Failed to get call info: ${callId}`, err);
               webConferencing.showError("Joining call error", webConferencing.errorText(err));
             }
           } else {
-            this.log.error(`Failed to get call info: ${callId}`);
+            thevue.log.error(`Failed to get call info: ${callId}`);
             webConferencing.showError("Joining call error", "Error read call information from the server");
           }
         });
@@ -188,17 +188,17 @@ export default {
       // We wait for call readiness and invoke start it in the
       // popup window
       callProcess.then(function(promiseResult) {
-        this.log.trace("Call is ready for opening");
+        thevue.log.trace("Call is ready for opening");
         const call = promiseResult.call;
         const isNew = promiseResult.isNew;
         const callWindow = this.callWindow = webConferencing.showCallPopup(callUrl, this.target.title);
-        callWindow.document.title = this.settings.target.title;
+        callWindow.document.title = thevue.settings.target.title;
 
 
         let callStarted = false;
         webConferencing.onCallUpdate(callId, function(update) {
-          this.log.debug(`Received update: ${JSON.stringify(update)}`);
-          if (update.exoId === this.settings.context.currentUser.id && update.action === "started") {
+          thevue.log.debug(`Received update: ${JSON.stringify(update)}`);
+          if (update.exoId === thevue.settings.context.currentUser.id && update.action === "started") {
             callStarted = true;
           }
         });
@@ -207,13 +207,13 @@ export default {
           if (!callStarted) {
             // Smth went wrong on call page. Delete call.
             webConferencing.deleteCall(callId).then(function(){
-              this.log.debug(`The call ${callId} hasn't been started. Deleted call`);
+              thevue.log.debug(`The call ${callId} hasn't been started. Deleted call`);
             });
           }
         }, 15000);
 
         callWindow.addEventListener("load", function() {
-          this.log.trace("Call Window is loaded");
+          thevue.log.trace("Call Window is loaded");
         });
       });
     }
