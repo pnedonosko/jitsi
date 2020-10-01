@@ -139,9 +139,9 @@ export default {
           // Call already running - join it
           thevue.log.info(`Joining call: ${callId}`);
           // For group calls
-          if (call.state === "stopped" && (this.settings.target.type === "space" || this.settings.target.type === "chat_room")) {
+          if (call.state === "stopped" && (thevue.settings.target.type === "space" || thevue.settings.target.type === "chat_room")) {
             webConferencing.updateCall(callId, "started").done(function(){
-              this.log.info(`Changed call state to started: ${callId}`);
+              thevue.log.info(`Changed call state to started: ${callId}`);
             });
           }
           
@@ -202,6 +202,8 @@ export default {
 
 
         let callStarted = false;
+        // TODO: move this listener to button init phase
+        // Now it's executed every time the button clicked
         webConferencing.onCallUpdate(callId, function(update) {
           thevue.log.debug(`Received update: ${JSON.stringify(update)}`);
           if (update.exoId === thevue.settings.context.currentUser.id && update.action === "started") {

@@ -87,7 +87,7 @@
   </module>
   <module>
     <name>webConferencing_jitsi_meet</name>
-    <load-group>webConferencingGRP</load-group>
+    <load-group>webConferencingJitsiGRP</load-group>
     <script>
       <path>/js/CallButton.bundle.js</path>
     </script>
