@@ -117,8 +117,9 @@ export default {
       }
       this.log.trace(`Jitsi call id: ${callId}`);
 
-      const callUrl = `${window.location.protocol}//${window.location.host}/jitsi/meet/${callId}`;
-
+      
+      // open empty window, init call process
+      const callWindow = thevue.callWindow = webConferencing.showCallPopup("", thevue.settings.target.title);
       // Next we need ensure this call not yet already started
       // (e.g. remotely),
       // it's actual especially for group calls where user can
@@ -197,9 +198,9 @@ export default {
         thevue.log.trace("Call is ready for opening");
         const call = promiseResult.call;
         const isNew = promiseResult.isNew;
-        const callWindow = thevue.callWindow = webConferencing.showCallPopup(callUrl, thevue.settings.target.title);
+        const callUrl = `${window.location.protocol}//${window.location.host}/jitsi/meet/${callId}`;
+        callWindow.location = callUrl;
         callWindow.document.title = thevue.settings.target.title;
-
 
         let callStarted = false;
         // TODO: move this listener to button init phase
@@ -218,7 +219,7 @@ export default {
               thevue.log.debug(`The call ${callId} hasn't been started. Deleted call`);
             });
           }
-        }, 15000);
+        }, 10000);
 
         callWindow.addEventListener("load", function() {
           thevue.log.trace("Call Window is loaded");
