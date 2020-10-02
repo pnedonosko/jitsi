@@ -171,7 +171,7 @@
             }).fail(function(err) {
               if (err) {
                 if (err.code == "NOT_FOUND_ERROR") {
-                  createCall(callId, currentUser, target).done(function(call) {
+                  createCall(callId, context.currentUser, target).done(function(call) {
                     log.info("Call created: " + callId);
                     // Open new call window
                     callWindow = webConferencing.showCallPopup("", target.title);
