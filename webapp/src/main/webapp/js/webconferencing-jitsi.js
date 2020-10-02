@@ -9,8 +9,6 @@
 
   var globalWebConferencing = typeof eXo != "undefined" && eXo && eXo.webConferencing ? eXo.webConferencing : null;
 
-  var jitsiProviderCallButton = null;
-  var callButtonContext = null;
   // Use webConferencing from global eXo namespace (for non AMD uses).
   // This can be actual when running the script outside the portal page - e.g.
   // on a custom call page.
@@ -34,6 +32,7 @@
 
       var self = this;
       var settings;
+      var jitsiProviderCallButton = null;
 
       /**
        * MUST return a call type name. If several types supported, this one is
@@ -227,7 +226,6 @@
       this.callButton = function(context, buttonType) {
         var button = $.Deferred();
         if (settings && context && context.currentUser) {
-          callButtonContext = context;
           context.details().done(
             function(target) {
               if (buttonType === "vue") {
@@ -552,85 +550,8 @@
           });
 
           // Handle an event when select other contacts in chat
-          document.addEventListener(EVENT_ROOM_SELECTION_CHANGED, async function (target) {
-            if (jitsiProviderCallButton && callButtonContext && target && target.detail && webConferencing) {
-              const CHAT = webConferencing.getChat();
-
-              if (CHAT) {
-                //destroy old jitsi button
-                jitsiProviderCallButton.$destroy();
-                log.trace("Selected the other contact in chat");
-
-                let roomId = target.detail.user;
-                let roomTitle = target.detail.fullName;
-                let isSpace = target.detail.type === "s"; // roomId && roomId.startsWith("space-");
-                let isRoom = target.detail.type === "t"; // roomId && roomId.startsWith("team-");
-                let isGroup = isSpace || isRoom;
-                let isUser = !isGroup && target.detail.type === "u";
-
-                // It is a logic used in Chat, so reuse it here:
-                let roomName = roomTitle.toLowerCase().split(" ").join("_");
-
-                callButtonContext.roomId = roomId;
-                callButtonContext.roomName = roomName; // has no sense for team rooms, but for spaces it's pretty_name
-                callButtonContext.roomTitle = roomTitle;
-                callButtonContext.isGroup = isGroup;
-                callButtonContext.isSpace = isSpace;
-                callButtonContext.isRoom = isRoom;
-                callButtonContext.isUser = isUser;
-
-                callButtonContext.details = function () {
-                  let data = $.Deferred();
-                  if (isGroup) {
-                    if (isSpace) {
-                      let spaceId = roomName; // XXX no other way within Chat
-                      CHAT.getSpaceInfoReq(spaceId).done(function (space) {
-                        data.resolve(space);
-                      }).fail(function (err) {
-                        log.trace("Error getting space info " + spaceId + " for chat context", err);
-                        data.reject(err);
-                      });
-                    } else if (isRoom) {
-                      eXo.chat.getUsers(roomId).done(function (users) {
-                        var unames = [];
-                        for (var i = 0; i < users.length; i++) {
-                          var u = users[i];
-                          if (u && u.name && u.name != "null") {
-                            unames.push(u.name);
-                          }
-                        }
-                        CHAT.getRoomInfoReq(roomId, roomTitle, unames).done(function (info) {
-                          data.resolve(info);
-                        }).fail(function (err) {
-                          log.trace("Error getting Chat room info " + roomName + "/" + roomId + " for chat context", err);
-                          data.reject(err);
-                        });
-                      }).fail(function (err) {
-                        log.trace("Error getting Chat room users " + roomId + " for chat context", err);
-                        data.reject("Error reading Chat room users for " + roomId);
-                      });
-                    } else {
-                      data.reject("Unexpected context chat type for " + roomTitle);
-                    }
-                  } else {
-                    // roomId is an user name for P2P chats
-                    CHAT.getUserInfoReq(roomId).done(function (user) {
-                      data.resolve(user);
-                    }).fail(function (err) {
-                      log.trace("Error getting user info " + roomId + " for chat context", err);
-                      data.reject(err);
-                    });
-                  }
-                  return data.promise();
-                }
-
-                // Create the new vue button
-                jitsiProviderCallButton = await callButton(callButtonContext, "vue");
-
-                // Add the new vue button
-                jitsiProviderCallButton.$mount("#call-button-container");
-              }
-            }
+          document.addEventListener(EVENT_ROOM_SELECTION_CHANGED, function (target) {
+            self.replaceVueButton(target);
           });
         }
         process.resolve();
@@ -707,6 +628,97 @@
        */
       this.initSettings = function(mySettings) {
         // initialize IM type settings UI
+      };
+
+      // delete old and add new vue button
+      this.replaceVueButton = async function (target) {
+        if (target && target.detail) {
+          if (webConferencing && provider) {
+            let chat = webConferencing.getChat();
+            let callButtonContext = await webConferencing.getCallContext();
+
+            if (callButtonContext && jitsiProviderCallButton) {
+              if (chat) {
+                //destroy old jitsi button
+                jitsiProviderCallButton.$destroy();
+                log.trace("Selected the other contact in chat");
+
+                let roomId = target.detail.user;
+                let roomTitle = target.detail.fullName;
+                let isSpace = target.detail.type === "s"; // roomId && roomId.startsWith("space-");
+                let isRoom = target.detail.type === "t"; // roomId && roomId.startsWith("team-");
+                let isGroup = isSpace || isRoom;
+                let isUser = !isGroup && target.detail.type === "u";
+
+                // It is a logic used in Chat, so reuse it here:
+                let roomName = roomTitle.toLowerCase().split(" ").join("_");
+
+                callButtonContext.roomId = roomId;
+                callButtonContext.roomName = roomName; // has no sense for team rooms, but for spaces it's pretty_name
+                callButtonContext.roomTitle = roomTitle;
+                callButtonContext.isGroup = isGroup;
+                callButtonContext.isSpace = isSpace;
+                callButtonContext.isRoom = isRoom;
+                callButtonContext.isUser = isUser;
+
+                callButtonContext.details = function () {
+                  let data = $.Deferred();
+                  if (isGroup) {
+                    if (isSpace) {
+                      let spaceId = roomName; // XXX no other way within Chat
+                      chat.getSpaceInfoReq(spaceId).done(function (space) {
+                        data.resolve(space);
+                      }).fail(function (err) {
+                        log.trace("Error getting space info " + spaceId + " for chat context", err);
+                        data.reject(err);
+                      });
+                    } else if (isRoom) {
+                      eXo.chat.getUsers(roomId).done(function (users) {
+                        var unames = [];
+                        for (var i = 0; i < users.length; i++) {
+                          var u = users[i];
+                          if (u && u.name && u.name != "null") {
+                            unames.push(u.name);
+                          }
+                        }
+                        chat.getRoomInfoReq(roomId, roomTitle, unames).done(function (info) {
+                          data.resolve(info);
+                        }).fail(function (err) {
+                          log.trace("Error getting Chat room info " + roomName + "/" + roomId + " for chat context", err);
+                          data.reject(err);
+                        });
+                      }).fail(function (err) {
+                        log.trace("Error getting Chat room users " + roomId + " for chat context", err);
+                        data.reject("Error reading Chat room users for " + roomId);
+                      });
+                    } else {
+                      data.reject("Unexpected context chat type for " + roomTitle);
+                    }
+                  } else {
+                    // roomId is an user name for P2P chats
+                    chat.getUserInfoReq(roomId).done(function (user) {
+                      data.resolve(user);
+                    }).fail(function (err) {
+                      log.trace("Error getting user info " + roomId + " for chat context", err);
+                      data.reject(err);
+                    });
+                  }
+                  return data.promise();
+                }
+
+                // Create the new vue button
+                jitsiProviderCallButton = await self.callButton(callButtonContext, "vue");
+
+                // Add the new vue button
+                jitsiProviderCallButton.$mount("#call-button-container");
+              } else {
+                log.warn("No chat from web conferencing");
+              }
+            }
+          }
+        } else {
+          log.warn("No details provided for Chat room");
+        }
       };
     }
 
