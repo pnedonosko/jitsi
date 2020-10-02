@@ -65,6 +65,16 @@
       };
 
       /**
+       * Request a status of Jitsi Call App
+       */
+      var getStatus = function(inviteId) {
+        return $.get({
+          type: "GET",
+          url: "/jitsi",
+        });
+      };
+      
+      /**
        * Returns call members
        */
       var getCallMembers = function(currentUser, target) {
@@ -144,54 +154,52 @@
         var callId = getCallId(context, target);
         // Open call window
         var callWindow;
-
-        webConferencing.getCall(callId).done(function(call) {
-          // Call already running - join it
-          log.info("Call already exists. Joining call: " + callId);
-          // For grop calls
-          if (call.state === "stopped" && (target.type === "space" || target.type === "chat_room")) {
-            webConferencing.updateCall(callId, "started").done(function() {
-              log.info("Updated call state to started");
+        getStatus().then(function(response) {
+          if (response.status === "active") {
+            webConferencing.getCall(callId).done(function(call) {
+              // Call already running - join it
+              log.info("Call already exists. Joining call: " + callId);
+              // For grop calls
+              if (call.state === "stopped" && (target.type === "space" || target.type === "chat_room")) {
+                webConferencing.updateCall(callId, "started").done(function() {
+                  log.info("Updated call state to started");
+                });
+              }
+              // Open new call window
+              callWindow = webConferencing.showCallPopup("", target.title);
+              callProcess.resolve(call);
+            }).fail(function(err) {
+              if (err) {
+                if (err.code == "NOT_FOUND_ERROR") {
+                  createCall(callId, currentUser, target).done(function(call) {
+                    log.info("Call created: " + callId);
+                    // Open new call window
+                    callWindow = webConferencing.showCallPopup("", target.title);
+                    callProcess.resolve(call);
+                  });
+                } else {
+                  log.error("Failed to get call info: " + callId, err);
+                  webConferencing.showError("Joining call error", webConferencing.errorText(err));
+                }
+              } else {
+                log.error("Failed to get call info: " + callId);
+                webConferencing.showError("Joining call error", "Error read call information from the server");
+              }
             });
-          }
-          // Open new call window
-          callWindow = webConferencing.showCallPopup("", target.title);
-          callProcess.resolve(call);
-        }).fail(function(err) {
-          if (err) {
-            if (err.code == "NOT_FOUND_ERROR") {
-              createCall(callId, currentUser, target).done(function(call) {
-                log.info("Call created: " + callId);
-                // Open new call window
-                callWindow = webConferencing.showCallPopup("", target.title);
-                callProcess.resolve(call);
-              });
-            } else {
-              log.error("Failed to get call info: " + callId, err);
-              webConferencing.showError("Joining call error", webConferencing.errorText(err));
-            }
           } else {
-            log.error("Failed to get call info: " + callId);
-            webConferencing.showError("Joining call error", "Error read call information from the server");
+            callProcess.reject("The Call App is not active");
           }
+        }).catch(function(err) {
+          callProcess.reject("The Call App is temporary unavailable.");
         });
+        
         // We wait for call readiness and invoke start it in the
         // popup window
         callProcess.done(function(call) {
           callWindow.location = getCallUrl(callId);
           callWindow.document.title = target.title;
-
-          // TODO: check if call loaded and if not - leave the call
-          // This solution is not finished yet
-          /*
-          callWindow.addEventListener('load', function() {
-            if (!callWindow.callLoaded) {
-              webConferencing.updateCall(callId, "leaved").done(function(){
-                log.error("Call " + callId + " hasn't been loaded. Left the call.");
-              });
-            }
-          });*/
-
+        }).fail(function(msg){
+          alert("Cannot open call page. " + msg);
         });
       };
 
