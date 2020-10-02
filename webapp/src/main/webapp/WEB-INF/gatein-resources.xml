@@ -67,7 +67,7 @@
   <module>
     <name>Jitsi</name>
     <script>
-      <path>/js/Jitsi.bundle.js</path>
+      <path>/js/jitsi.bundle.js</path>
     </script>
     <depends>
       <module>webConferencing</module>
@@ -89,7 +89,7 @@
     <name>webConferencing_jitsi_meet</name>
     <load-group>webConferencingJitsiGRP</load-group>
     <script>
-      <path>/js/CallButton.bundle.js</path>
+      <path>/js/callButton.bundle.js</path>
     </script>
     <depends>
       <module>webConferencing</module>
