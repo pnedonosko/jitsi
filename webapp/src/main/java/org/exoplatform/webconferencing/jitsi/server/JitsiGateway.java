@@ -100,7 +100,7 @@ public class JitsiGateway extends AbstractHttpServlet {
         HttpServletRequest req = (HttpServletRequest) ctx.getRequest();
         HttpServletResponse resp = (HttpServletResponse) ctx.getResponse();
         String uri = req.getRequestURI() + (req.getQueryString() != null ? "?" + req.getQueryString() : "");
-        uri = uri.substring(uri.indexOf("/jitsi/") + 6);
+        uri = uri.substring(uri.indexOf("/jitsi") + 6);
         if (req.getRequestURI().startsWith("/jitsi/portal/")) {
           String requestUrl = new StringBuilder(getPlatformUrl(req)).append(uri).toString();
           forward(requestUrl, Action.INTERNAL_AUTH, jitsiProvider.getInternalAuthSecret(), req, resp);
