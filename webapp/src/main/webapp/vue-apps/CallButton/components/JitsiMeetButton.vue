@@ -3,13 +3,14 @@
     ref="jitsi"
     class="myCallAction"
     outlined="true"
-    height="33px"
-    min-width="fit-content"
+    height="36px"
+    min-width="80px"
     @click.native="startCall">
-    <i class="uiIconMyCall uiIconVideoPortlet uiIconLightGray"></i>
+    <!-- <i class="uiIconMyCall uiIconVideoPortlet uiIconLightGray"></i> -->
+    <i class="uiIconSocPhone uiIconSocBlue"></i>
     {{ i18n.te("UICallButton.label.jitsi")
       ? $t("UICallButton.label.jitsi")
-    : "Call with Jitsi" }}
+    : "Start Call" }}
   </v-btn>
 </template>
 
@@ -58,7 +59,24 @@ export default {
 .VuetifyApp select:not(.ignore-vuetify-classes),
 .VuetifyApp textarea:not(.ignore-vuetify-classes) {
   background-color: transparent;
-  border: 1px solid #e1e8ee;
-  border-radius: 2px;
+  border: 1px solid rgb(232, 238, 242);
+  border-radius: 3px;
+}
+.room-actions-container [class^="uiIcon"]:before {
+  color: unset;
+  height: 16px;
+  width: 16px;
+}
+[class^="uiIcon"] {
+  font-size: 12px;
+}
+
+.VuetifyApp .v-btn__content {
+  letter-spacing: 0.1px;
+  justify-content: space-between;
+}
+.VuetifyApp .v-btn:not(.v-btn--round).v-size--default {
+  padding: 0 10px;
+  margin-right: 10px;
 }
 </style>

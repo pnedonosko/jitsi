@@ -11,5 +11,10 @@
       <jitsi>Jitsi</jitsi>
     </label>
   </UIEditUserProfileForm>
+  <UICallButton>
+    <label>
+      <jitsi>Start Call</jitsi>
+    </label>
+  </UICallButton>
   <!-- Messages for Platform add-on -->
 </bundle>
