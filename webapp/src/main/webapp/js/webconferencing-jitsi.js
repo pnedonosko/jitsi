@@ -153,7 +153,7 @@
         var callProcess = $.Deferred();
         var callId = getCallId(context, target);
         // Open call window
-        var callWindow;
+        var callWindow = webConferencing.showCallPopup("", target.title);
         getStatus().then(function(response) {
           if (response.status === "active") {
             webConferencing.getCall(callId).done(function(call) {
@@ -165,16 +165,12 @@
                   log.info("Updated call state to started");
                 });
               }
-              // Open new call window
-              callWindow = webConferencing.showCallPopup("", target.title);
               callProcess.resolve(call);
             }).fail(function(err) {
               if (err) {
                 if (err.code == "NOT_FOUND_ERROR") {
                   createCall(callId, context.currentUser, target).done(function(call) {
                     log.info("Call created: " + callId);
-                    // Open new call window
-                    callWindow = webConferencing.showCallPopup("", target.title);
                     callProcess.resolve(call);
                   });
                 } else {
@@ -199,7 +195,11 @@
           callWindow.location = getCallUrl(callId);
           callWindow.document.title = target.title;
         }).fail(function(msg){
-          alert("Cannot open call page. " + msg);
+          callWindow.close();
+          setTimeout(function(){
+            alert("Cannot open call page. " + msg);
+          }, 50);
+          
         });
       };
 

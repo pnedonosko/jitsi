@@ -205,7 +205,7 @@ public class JitsiGateway extends AbstractHttpServlet {
     } catch (IOException e) {
       LOG.warn("Error occured while requesting remote resource [{}]", requestUrl, e.getMessage());
       try {
-        resp.sendError(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Cannot connect to " + requestUrl);
+        resp.sendError(HttpStatus.SC_FORBIDDEN, "Cannot connect to " + requestUrl);
       } catch (IOException e1) {
         LOG.error("Cannot write response", e.getMessage());
       }
