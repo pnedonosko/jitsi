@@ -647,6 +647,15 @@
             if (callButtonContext && jitsiProviderCallButton) {
               //destroy old jitsi button
               jitsiProviderCallButton.$destroy();
+
+              // create div for mounting
+              let containerForMounting = document.createElement("div");
+              containerForMounting.setAttribute("id", "call-button-container");
+
+              // replace Jitsi button to container for mounting
+              jitsiProviderCallButton.$el.parentNode.replaceChild(containerForMounting, jitsiProviderCallButton.$el);
+              jitsiProviderCallButton = null;
+
               log.trace("Selected the other contact in chat");
 
               let roomId = target.detail.user;
