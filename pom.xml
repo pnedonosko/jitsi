@@ -51,9 +51,9 @@
     <!-- **************************************** -->
     <!-- Dependencies versions                    -->
     <!-- **************************************** -->
-    <web-conferencing.version>2.1.x-jitsi-SNAPSHOT</web-conferencing.version>
+    <web-conferencing.version>2.1.0-M05</web-conferencing.version>
     <org.exoplatform.depmgt.version>17.0</org.exoplatform.depmgt.version>
-    <org.exoplatform.version>6.1.x-SNAPSHOT</org.exoplatform.version>
+    <org.exoplatform.version>6.1.0-M05</org.exoplatform.version>
     <!-- for tests -->
     <junit.version>4.12</junit.version>
     <io.jsonwebtoken.version>0.10.5</io.jsonwebtoken.version>
