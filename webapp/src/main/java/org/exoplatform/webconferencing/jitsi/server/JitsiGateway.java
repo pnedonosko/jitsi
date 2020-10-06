@@ -190,12 +190,12 @@ public class JitsiGateway extends AbstractHttpServlet {
       try {
         if (req.getRequestURI().startsWith("/jitsi/meet/")) {
           // TODO: create the error page and change url here
-          resp.sendRedirect("/portal/jitsi/error");
+          resp.sendRedirect("/jitsi/resources/pages/error.html");
         } else {
           resp.sendError(HttpStatus.SC_FORBIDDEN, "Cannot connect to " + requestUrl);
         }
-      } catch (IOException e1) {
-        LOG.error("Cannot write response", e.getMessage());
+      } catch (IOException ex) {
+        LOG.error("Cannot write response", ex.getMessage());
       }
     }
   }
