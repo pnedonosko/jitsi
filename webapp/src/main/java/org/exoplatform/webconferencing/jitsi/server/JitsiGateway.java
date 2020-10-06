@@ -106,24 +106,7 @@ public class JitsiGateway extends AbstractHttpServlet {
           forward(requestUrl, Action.INTERNAL_AUTH, jitsiProvider.getInternalAuthSecret(), req, resp);
         } else if (req.getRequestURI().startsWith("/jitsi/resources")) {
           // TODO: separate the Gateway from local resources, make two .wars
-          try {
-            uri = uri.substring(uri.indexOf("/resources") + 10);
-            InputStream is = httpRequest.getServletContext().getResourceAsStream(uri);
-            if (is != null) {
-              httpResponse.setContentLength(is.available());
-              stream(is, httpResponse.getOutputStream());
-            } else {
-              httpResponse.sendError(HttpStatus.SC_NOT_FOUND, "Resource " + uri + " is not found");
-            }
-          } catch (Exception e) {
-            LOG.warn("Cannot load local resource {}, {}", uri, e.getMessage());
-            try {
-              httpResponse.sendError(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Error while loading " + uri + " resource");
-            } catch (IOException ex) {
-              LOG.warn("Cannot send error response: {}", e.getMessage());
-            }
-          }
-
+          handleResourceRequest(uri, httpRequest, httpResponse);
         } else {
           String requestUrl = new StringBuilder(jitsiProvider.getSettings().getUrl()).append(uri).toString();
           forward(requestUrl, Action.EXTERNAL_AUTH, jitsiProvider.getExternalAuthSecret(), req, resp);
@@ -205,9 +188,41 @@ public class JitsiGateway extends AbstractHttpServlet {
     } catch (IOException e) {
       LOG.warn("Error occured while requesting remote resource [{}]", requestUrl, e.getMessage());
       try {
-        resp.sendError(HttpStatus.SC_FORBIDDEN, "Cannot connect to " + requestUrl);
+        if (req.getRequestURI().startsWith("/jitsi/meet/")) {
+          // TODO: create the error page and change url here
+          resp.sendRedirect("/portal/jitsi/error");
+        } else {
+          resp.sendError(HttpStatus.SC_FORBIDDEN, "Cannot connect to " + requestUrl);
+        }
       } catch (IOException e1) {
         LOG.error("Cannot write response", e.getMessage());
+      }
+    }
+  }
+
+  /**
+   * Handle resource request.
+   *
+   * @param uri the uri
+   * @param httpRequest the http request
+   * @param httpResponse the http response
+   */
+  private void handleResourceRequest(String uri, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    try {
+      uri = uri.substring(uri.indexOf("/resources") + 10);
+      InputStream is = httpRequest.getServletContext().getResourceAsStream(uri);
+      if (is != null) {
+        httpResponse.setContentLength(is.available());
+        stream(is, httpResponse.getOutputStream());
+      } else {
+        httpResponse.sendError(HttpStatus.SC_NOT_FOUND, "Resource " + uri + " is not found");
+      }
+    } catch (Exception e) {
+      LOG.warn("Cannot load local resource {}, {}", uri, e.getMessage());
+      try {
+        httpResponse.sendError(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Error while loading " + uri + " resource");
+      } catch (IOException ex) {
+        LOG.warn("Cannot send error response: {}", e.getMessage());
       }
     }
   }
