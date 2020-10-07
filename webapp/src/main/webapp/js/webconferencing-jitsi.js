@@ -675,6 +675,7 @@
               callButtonContext.isSpace = isSpace;
               callButtonContext.isRoom = isRoom;
               callButtonContext.isUser = isUser;
+              callButtonContext.participants = target.detail.participants;
 
               callButtonContext.details = function () {
                 let data = $.Deferred();
@@ -688,10 +689,10 @@
                       data.reject(err);
                     });
                   } else if (isRoom) {
-                    eXo.chat.getUsers(roomId).done(function (users) {
+                    if (this.participants) {
                       var unames = [];
-                      for (var i = 0; i < users.length; i++) {
-                        var u = users[i];
+                      for (var i = 0; i < this.participants.length; i++) {
+                        var u = this.participants[i];
                         if (u && u.name && u.name != "null") {
                           unames.push(u.name);
                         }
@@ -702,10 +703,10 @@
                         log.trace("Error getting Chat room info " + roomName + "/" + roomId + " for chat context", err);
                         data.reject(err);
                       });
-                    }).fail(function (err) {
-                      log.trace("Error getting Chat room users " + roomId + " for chat context", err);
+                    } else {
+                      log.trace("Error getting Chat room users for " + roomId);
                       data.reject("Error reading Chat room users for " + roomId);
-                    });
+                    }
                   } else {
                     data.reject("Unexpected context chat type for " + roomTitle);
                   }
