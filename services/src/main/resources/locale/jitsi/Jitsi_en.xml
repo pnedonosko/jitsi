@@ -13,7 +13,7 @@
   </UIEditUserProfileForm>
   <UICallButton>
     <label>
-      <jitsi>Start Call</jitsi>
+      <jitsi>Jitsi Call</jitsi>
     </label>
   </UICallButton>
   <!-- Messages for Platform add-on -->

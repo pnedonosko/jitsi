@@ -10,7 +10,7 @@
     <i class="uiIconSocPhone uiIconSocBlue"></i>
     {{ i18n.te("UICallButton.label.jitsi")
       ? $t("UICallButton.label.jitsi")
-    : "Start Call" }}
+    : "Jitsi Call" }}
   </v-btn>
 </template>
 
