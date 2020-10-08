@@ -51,9 +51,12 @@
     <!-- **************************************** -->
     <!-- Dependencies versions                    -->
     <!-- **************************************** -->
-    <web-conferencing.version>2.1.0-M05</web-conferencing.version>
-    <org.exoplatform.depmgt.version>17.0</org.exoplatform.depmgt.version>
-    <org.exoplatform.version>6.1.0-M05</org.exoplatform.version>
+    <addon.exo.web-conferencing.version>2.1.x-SNAPSHOT</addon.exo.web-conferencing.version>
+    <org.exoplatform.depmgt.version>18.x-SNAPSHOT</org.exoplatform.depmgt.version>
+    <addon.exo.ecms.version>6.1.x-SNAPSHOT</addon.exo.ecms.version>
+    <org.exoplatform.social.version>6.1.x-SNAPSHOT</org.exoplatform.social.version>
+    <addon.exo.jcr.version>6.1.x-SNAPSHOT</addon.exo.jcr.version>
+    <org.exoplatform.platform-ui.version>6.1.x-SNAPSHOT</org.exoplatform.platform-ui.version>
     <!-- for tests -->
     <junit.version>4.12</junit.version>
     <io.jsonwebtoken.version>0.10.5</io.jsonwebtoken.version>
@@ -82,35 +85,35 @@
       <dependency>
         <groupId>org.exoplatform.ecms</groupId>
         <artifactId>ecms</artifactId>
-        <version>${org.exoplatform.version}</version>
+        <version>${addon.exo.ecms.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.exoplatform.social</groupId>
         <artifactId>social</artifactId>
-        <version>${org.exoplatform.version}</version>
+        <version>${org.exoplatform.social.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.exoplatform.jcr</groupId>
         <artifactId>exo.jcr.component.core</artifactId>
-        <version>${org.exoplatform.version}</version>
+        <version>${addon.exo.jcr.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.exoplatform.jcr</groupId>
         <artifactId>exo.jcr.component.ext</artifactId>
-        <version>${org.exoplatform.version}</version>
+        <version>${addon.exo.jcr.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.exoplatform.platform-ui</groupId>
         <artifactId>platform-ui</artifactId>
-        <version>${org.exoplatform.version}</version>
+        <version>${org.exoplatform.platform-ui.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -118,7 +121,7 @@
       <dependency>
         <groupId>org.exoplatform.addons.web-conferencing</groupId>
         <artifactId>web-conferencing-services</artifactId>
-        <version>${web-conferencing.version}</version>
+        <version>${addon.exo.web-conferencing.version}</version>
         <type>jar</type>
       </dependency>
       <!-- My Connector -->
