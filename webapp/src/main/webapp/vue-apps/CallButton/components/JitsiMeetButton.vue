@@ -1,4 +1,5 @@
 <template>
+  <!-- <keep-alive> -->
   <v-btn
     ref="jitsi"
     class="myCallAction"
@@ -12,6 +13,7 @@
       ? $t("UICallButton.label.jitsi")
     : "Jitsi Call" }}
   </v-btn>
+  <!-- </keep-alive> -->
 </template>
 
 
@@ -43,8 +45,16 @@ export default {
       callWindow: null
     };
   },
+  created() {
+    this.log = webConferencing.getLog("jitsi!!!");
+    const callButton = this.$refs.jitsi;
+    console.log(this.settings, "sett")
+  },
   mounted() {
-    //const callButton = this.$refs.jitsi;
+    // Assign target ID to the button for later use on started
+    // event in init()
+    // const callButton = this.$refs.jitsi;
+    //callButton.$el.dataset.targetid = this.settings.target.id;
   },
   methods: {
     startCall: function() {
