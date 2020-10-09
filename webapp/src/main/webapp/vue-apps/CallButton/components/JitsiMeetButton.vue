@@ -1,23 +1,20 @@
 <template>
-  <!-- <keep-alive> -->
-  <v-btn
-    ref="jitsi"
-    class="myCallAction"
-    outlined="true"
-    height="36px"
-    min-width="80px"
+  <v-btn 
+    id="myCallAction" 
+    ref="jitsi" 
+    outlined="true" 
     @click.native="startCall">
-    <!-- <i class="uiIconMyCall uiIconVideoPortlet uiIconLightGray"></i> -->
     <i class="uiIconSocPhone uiIconSocBlue"></i>
-    {{ i18n.te("UICallButton.label.jitsi")
-      ? $t("UICallButton.label.jitsi")
-    : "Jitsi Call" }}
+    <span>
+      {{ i18n.te("UICallButton.label.jitsi")
+        ? $t("UICallButton.label.jitsi")
+      : "Jitsi Call" }}
+    </span>
   </v-btn>
-  <!-- </keep-alive> -->
 </template>
 
-
 <script>
+
 export default {
   props: {
     callSettings: {
@@ -48,7 +45,7 @@ export default {
   created() {
     this.log = webConferencing.getLog("jitsi!!!");
     const callButton = this.$refs.jitsi;
-    console.log(this.settings, "sett")
+    console.log(this.settings, "sett");
   },
   mounted() {
     // Assign target ID to the button for later use on started
@@ -63,30 +60,21 @@ export default {
   }
 };
 </script>
-<style>
-.VuetifyApp button:not(.ignore-vuetify-classes),
-.VuetifyApp input:not(.ignore-vuetify-classes),
-.VuetifyApp select:not(.ignore-vuetify-classes),
-.VuetifyApp textarea:not(.ignore-vuetify-classes) {
-  background-color: transparent;
-  border: 1px solid rgb(232, 238, 242);
-  border-radius: 3px;
-}
-.room-actions-container [class^="uiIcon"]:before {
-  color: unset;
-  height: 16px;
-  width: 16px;
-}
-[class^="uiIcon"] {
-  font-size: 12px;
-}
 
-.VuetifyApp .v-btn__content {
-  letter-spacing: 0.1px;
-  justify-content: space-between;
-}
-.VuetifyApp .v-btn:not(.v-btn--round).v-size--default {
-  padding: 0 10px;
-  margin-right: 10px;
+<style scoped lang="less">
+@import "../../../skin/variables.less";
+
+.VuetifyApp {
+  .v-btn:not(.v-btn--round).v-size--default {
+    padding: 0px;
+  }
+  .theme--light.v-btn {
+    &:hover {
+      &::before {
+        color: transparent;
+        opacity: 0;
+      }
+    }
+  }
 }
 </style>
