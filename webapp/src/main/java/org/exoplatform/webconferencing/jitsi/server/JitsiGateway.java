@@ -42,13 +42,18 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
 
+import org.exoplatform.common.http.HTTPMethods;
 import org.exoplatform.container.web.AbstractHttpServlet;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -134,7 +139,19 @@ public class JitsiGateway extends AbstractHttpServlet {
    * @param resp the resp
    */
   private void forward(String requestUrl, Action action, String secret, HttpServletRequest req, HttpServletResponse resp) {
-    HttpGet request = new HttpGet(requestUrl);
+    HttpRequestBase request = null;
+    if (req.getMethod().equals(HTTPMethods.GET)) {
+      request = new HttpGet(requestUrl);
+    } else {
+      HttpPost post = new HttpPost(requestUrl);
+      try {
+        post.setEntity(new InputStreamEntity(req.getInputStream(), ContentType.create(req.getContentType())));
+      } catch (IOException e) {
+        LOG.warn("Cannot set entity for post request  {} : {} ", requestUrl, e.getMessage());
+      }
+      request = post;
+    }
+
     String authHeader;
     // TODO: Use servlet forwarding for accessing internal resources. Solve the issue with filters (not invoked when forwarding)
     if (action == Action.INTERNAL_AUTH) {
@@ -189,7 +206,6 @@ public class JitsiGateway extends AbstractHttpServlet {
       LOG.warn("Error occured while requesting remote resource [{}]", requestUrl, e.getMessage());
       try {
         if (req.getRequestURI().startsWith("/jitsi/meet/")) {
-          // TODO: create the error page and change url here
           resp.sendRedirect("/jitsi/resources/pages/error.html");
         } else {
           resp.sendError(HttpStatus.SC_FORBIDDEN, "Cannot connect to " + requestUrl);
