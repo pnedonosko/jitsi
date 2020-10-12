@@ -3,8 +3,9 @@
     id="myCallAction" 
     ref="jitsi" 
     outlined="true" 
+    width="86px"
     @click.native="startCall">
-    <i class="uiIconSocPhone uiIconSocBlue"></i>
+    <i class="uiIconSocPhone uiIconBlue"></i>
     <span>
       {{ i18n.te("UICallButton.label.jitsi")
         ? $t("UICallButton.label.jitsi")
@@ -14,7 +15,6 @@
 </template>
 
 <script>
-
 export default {
   props: {
     callSettings: {
@@ -45,7 +45,6 @@ export default {
   created() {
     this.log = webConferencing.getLog("jitsi!!!");
     const callButton = this.$refs.jitsi;
-    console.log(this.settings, "sett");
   },
   mounted() {
     // Assign target ID to the button for later use on started
@@ -66,13 +65,30 @@ export default {
 
 .VuetifyApp {
   .v-btn:not(.v-btn--round).v-size--default {
-    padding: 0px;
+    padding: 0px 10px;
+  }
+  [class^="uiIcon"] {
+    // font-size: 12px;
+    &:before {
+      color: unset;
+      height: 16px;
+      width: 16px;
+      margin-right: 4px;
+    }
   }
   .theme--light.v-btn {
+    margin-right: 10px;
+    border: 1px solid rgb(232, 238, 242);
     &:hover {
       &::before {
-        color: transparent;
-        opacity: 0;
+        color: @primaryColor;
+        opacity: 1;
+      }
+      i {
+        color: white;
+      }
+      span {
+        color: white;
       }
     }
   }
