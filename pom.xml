@@ -41,6 +41,12 @@
     <module>webapp</module>
     <module>packaging</module>
   </modules>
+  <scm>
+    <connection>scm:git:git://github.com/exo-addons/jitsi.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/exo-addons/jitsi.git</developerConnection>
+    <url>https://github.com/exo-addons/jitsi</url>
+    <tag>HEAD</tag>
+  </scm>
 
   <properties>
     <!-- Defaut compiler settings -->
