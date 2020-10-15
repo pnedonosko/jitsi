@@ -43,7 +43,7 @@ export default {
     };
   },
   created() {
-    this.log = webConferencing.getLog("jitsi!!!");
+    this.log = webConferencing.getLog("jitsi");
     const callButton = this.$refs.jitsi;
   },
   mounted() {

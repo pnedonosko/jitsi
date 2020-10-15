@@ -32,7 +32,7 @@
 
       var self = this;
       var settings;
-      var jitsiProviderCallButton = null;
+      //var jitsiProviderCallButton = null; // TODO cleanup
 
       /**
        * MUST return a call type name. If several types supported, this one is
@@ -73,7 +73,7 @@
           url: "/jitsi",
         });
       };
-      
+
       /**
        * Returns call members
        */
@@ -188,18 +188,18 @@
         }).catch(function(err) {
           callProcess.reject("The Call App is temporary unavailable.");
         });
-        
+
         // We wait for call readiness and invoke start it in the
         // popup window
         callProcess.done(function(call) {
           callWindow.location = getCallUrl(callId);
           callWindow.document.title = target.title;
-        }).fail(function(msg){
+        }).fail(function(msg) {
           callWindow.close();
-          setTimeout(function(){
+          setTimeout(function() {
             alert("Cannot open call page. " + msg);
           }, 50);
-          
+
         });
       };
 
@@ -245,9 +245,9 @@
                   startCall(context, target);
                 };
                 // callSettings.callWindow = callWindow;
-                callButton.init(callSettings).then(jitsiCallButton => {
-                  jitsiProviderCallButton = jitsiCallButton;
-                  button.resolve(jitsiCallButton);
+                callButton.init(callSettings).then(comp => {
+                  //jitsiProviderCallButton = jitsiCallButton;
+                  button.resolve(comp);
                 });
                 // Resolve with our button - return Vue object here, so it
                 // will be appended to Call Button UI in the Platform
@@ -262,21 +262,21 @@
                 button.resolve($button);
               }
             }).fail(function(err) {
-            // On error, we don't show the button for this context
-            if (err && err.code == "NOT_FOUND_ERROR") {
-              // If target not found, for any reason, we don't need tell it's an
-              // error - just no button for the target
-              button.reject(err.message);
-            } else {
-              // For other failures we seems met an error (server or network)
-              // and send it as a second parameter,
-              // thus the core add-on will be able recognize it and do
-              // accordingly (at least log to server log)
-              var msg = "Error getting context details";
-              log.error(msg, err);
-              button.reject(msg, err);
-            }
-          });
+              // On error, we don't show the button for this context
+              if (err && err.code == "NOT_FOUND_ERROR") {
+                // If target not found, for any reason, we don't need tell it's an
+                // error - just no button for the target
+                button.reject(err.message);
+              } else {
+                // For other failures we seems met an error (server or network)
+                // and send it as a second parameter,
+                // thus the core add-on will be able recognize it and do
+                // accordingly (at least log to server log)
+                var msg = "Error getting context details";
+                log.error(msg, err);
+                button.reject(msg, err);
+              }
+            });
         } else {
           // If not initialized, we don't show the button for this context
           var msg = "Not configured or empty context";
@@ -385,41 +385,6 @@
               }
             }
           };
-          // When call is already running we want lock a call button and then
-          // unlock on stop.
-          // As we may find several call buttons on eXo pages, need update only
-          // related to the call.
-          // On space pages (space call button) we can rely on call ownerId (it
-          // will be a space pretty_name),
-          // for Chat page we need use its internal room name to distinguish
-          // rooms and ownerId for users.
-          var lockCallButton = function(targetId, callId) {
-            var $buttons = $(".myCallAction");
-            $buttons.each(function() {
-              var $button = $(this);
-              if ($button.data("targetid") == targetId) {
-                if (!$button.hasClass("callDisabled")) {
-                  // log.trace(">> lockCallButton " + targetId);
-                  // TODO: add class (removed for testing)
-                  // $button.addClass("callDisabled");
-                  $button.data("callid", callId);
-                }
-              }
-            });
-          };
-          var unlockCallButton = function(callId) {
-            var $buttons = $(".myCallAction");
-            $buttons.each(function() {
-              var $button = $(this);
-              if ($button.data("callid") == callId) {
-                // log.trace(">> unlockCallButton " + callId + " " +
-                // $button.data("targetid"));
-                $button.removeClass("callDisabled");
-                $button.removeData("callid"); // we don't touch targetid, it
-                // managed by callButton()
-              }
-            });
-          };
           // Subscribe to user updates (incoming calls will be notified here)
           webConferencing.onUserUpdate(currentUserId, function(update) {
             // This connector cares only about own provider events
@@ -476,15 +441,15 @@
 
                             var callUrl = window.location.protocol + "//" + window.location.host + "/jitsi/meet/" + encodeURIComponent(callId);
 
-                            var callWindow = webConferencing.showCallPopup(callUrl, longTitle);
+                            var callWindow = webConferencing.showCallWindow(callUrl, longTitle);
                             callWindow.document.title = call.title;
                             // Optionally, we may invoke a call window to
                             // initialize the call.
                             // First wait the call window loaded
-                            $(callWindow).on("load", function() {
-                              log.debug("Call page loaded: " + callId);
-                              lockCallButton(update.owner.id, callId);
-                            });
+                            //$(callWindow).on("load", function() {
+                            //  log.debug("Call page loaded: " + callId);
+                            //  lockCallButton(update.owner.id, callId); // TODO cleanup
+                            //});
                           });
                           popover.fail(function(err) {
                             // User rejected the call, call was stopped or
@@ -510,29 +475,29 @@
                             }
                           });
                         }).fail(
-                        function(err) {
-                          log.error("Failed to get user status: " + currentUserId, err);
-                          if (err) {
-                            webConferencing.showError("Incoming call error", webConferencing.errorText(err));
-                          } else {
-                            webConferencing.showError("Incoming call error",
-                              "Error read user status information from the server");
-                          }
-                        });
+                          function(err) {
+                            log.error("Failed to get user status: " + currentUserId, err);
+                            if (err) {
+                              webConferencing.showError("Incoming call error", webConferencing.errorText(err));
+                            } else {
+                              webConferencing.showError("Incoming call error",
+                                "Error read user status information from the server");
+                            }
+                          });
                     }).fail(function(err) {
-                    log.error("Failed to get call info: " + callId, err);
-                    if (err) {
-                      webConferencing.showError("Incoming call error", webConferencing.errorText(err));
-                    } else {
-                      webConferencing.showError("Incoming call error", "Error read call information from the server");
-                    }
-                  });
+                      log.error("Failed to get call info: " + callId, err);
+                      if (err) {
+                        webConferencing.showError("Incoming call error", webConferencing.errorText(err));
+                      } else {
+                        webConferencing.showError("Incoming call error", "Error read call information from the server");
+                      }
+                    });
                 } else if (update.callState == "stopped") {
                   log.info("Call stopped remotelly: " + callId);
                   // Hide call popover for this call, if any
                   closeCallPopup(callId, update.callState);
                   // Unclock the call button
-                  unlockCallButton(callId);
+                  //unlockCallButton(callId); // TODO cleanup
                 }
               } else if (update.eventType == "call_joined") {
                 log.debug("User call joined: " + update.callId);
@@ -546,9 +511,9 @@
                 // When user leaves a call, we unlock his button, thus it will
                 // be possible to join the call again -
                 // actual for group conversations.
-                if (currentUserId == update.part.id) {
-                  unlockCallButton(callId);
-                }
+                //if (currentUserId == update.part.id) {
+                //  unlockCallButton(callId); // TODO cleanup
+                //}
               } else {
                 log.debug("Unexpected user update: " + JSON.stringify(update));
               }
@@ -557,10 +522,11 @@
             log.error("Failed to listen on user updates", err);
           });
 
+          // TODO It's not a place in provider to do this at all!
           // Handle an event when select other contacts in chat
-          document.addEventListener(EVENT_ROOM_SELECTION_CHANGED, function (target) {
-            self.replaceVueButton(target);
-          });
+          //document.addEventListener(EVENT_ROOM_SELECTION_CHANGED, function(target) {
+          //  addButton(target);
+          //});
         }
         process.resolve();
         return process.promise();
@@ -637,23 +603,29 @@
       this.initSettings = function(mySettings) {
         // initialize IM type settings UI
       };
-
+      
+      // TODO don't use this method
       // delete old and add new vue button
-      this.replaceVueButton = async function (target) {
-        if (target && target.detail) {
-          if (webConferencing && provider) {
-            let callButtonContext = await webConferencing.getCallContext();
-
-            if (callButtonContext && jitsiProviderCallButton) {
+      var addButton = async function(target) {
+        if (webConferencing && provider) {
+          if (target && target.detail) {
+            // create div for mounting - TODO it's wrong logic with removal of container here, this should happen in WebConf for all the buttons
+            let container = document.getElementById("call-button-container");
+            if (container) {
+              container.parentNode.removeChild(container);
+            }
+            container = document.createElement("div");
+            container.setAttribute("id", "call-button-container");
+            let context = await webConferencing.getCallContext();
+            if (jitsiProviderCallButton) {
+              //const prevElem = jitsiProviderCallButton.$el;
               //destroy old jitsi button
               jitsiProviderCallButton.$destroy();
 
-              // create div for mounting
-              let containerForMounting = document.createElement("div");
-              containerForMounting.setAttribute("id", "call-button-container");
-
               // replace Jitsi button to container for mounting
-              jitsiProviderCallButton.$el.parentNode.replaceChild(containerForMounting, jitsiProviderCallButton.$el);
+              //if (prevElem && prevElem.parentNode) {
+              //  prevElem.parentNode.replaceChild(container, prevElem);
+              //}
               jitsiProviderCallButton = null;
 
               log.trace("Selected the other contact in chat");
@@ -668,23 +640,23 @@
               // It is a logic used in Chat, so reuse it here:
               let roomName = roomTitle.toLowerCase().split(" ").join("_");
 
-              callButtonContext.roomId = roomId;
-              callButtonContext.roomName = roomName; // has no sense for team rooms, but for spaces it's pretty_name
-              callButtonContext.roomTitle = roomTitle;
-              callButtonContext.isGroup = isGroup;
-              callButtonContext.isSpace = isSpace;
-              callButtonContext.isRoom = isRoom;
-              callButtonContext.isUser = isUser;
-              callButtonContext.participants = target.detail.participants;
+              context.roomId = roomId;
+              context.roomName = roomName; // has no sense for team rooms, but for spaces it's pretty_name
+              context.roomTitle = roomTitle;
+              context.isGroup = isGroup;
+              context.isSpace = isSpace;
+              context.isRoom = isRoom;
+              context.isUser = isUser;
+              context.participants = target.detail.participants;
 
-              callButtonContext.details = function () {
+              context.details = function() {
                 let data = $.Deferred();
                 if (isGroup) {
                   if (isSpace) {
                     let spaceId = roomName; // XXX no other way within Chat
-                    webConferencing.getSpaceInfo(spaceId).done(function (space) {
+                    webConferencing.getSpaceInfo(spaceId).done(function(space) {
                       data.resolve(space);
-                    }).fail(function (err) {
+                    }).fail(function(err) {
                       log.trace("Error getting space info " + spaceId + " for chat context", err);
                       data.reject(err);
                     });
@@ -697,9 +669,9 @@
                           unames.push(u.name);
                         }
                       }
-                      webConferencing.getRoomInfo(roomId, roomTitle, unames).done(function (info) {
+                      webConferencing.getRoomInfo(roomId, roomTitle, unames).done(function(info) {
                         data.resolve(info);
-                      }).fail(function (err) {
+                      }).fail(function(err) {
                         log.trace("Error getting Chat room info " + roomName + "/" + roomId + " for chat context", err);
                         data.reject(err);
                       });
@@ -712,28 +684,28 @@
                   }
                 } else {
                   // roomId is an user name for P2P chats
-                  webConferencing.getUserInfo(roomId).done(function (user) {
+                  webConferencing.getUserInfo(roomId).done(function(user) {
                     data.resolve(user);
-                  }).fail(function (err) {
+                  }).fail(function(err) {
                     log.trace("Error getting user info " + roomId + " for chat context", err);
                     data.reject(err);
                   });
                 }
                 return data.promise();
               }
-
-              // Create the new vue button
-              jitsiProviderCallButton = await self.callButton(callButtonContext, "vue");
-
-              // Add the new vue button
-              jitsiProviderCallButton.$mount("#call-button-container");
             }
+            // Create the new vue button
+            jitsiProviderCallButton = await self.callButton(context, "vue");
+            // Add the new vue button
+            jitsiProviderCallButton.$mount(container);
+          } else {
+            log.warn("No details provided for Chat room");
           }
         } else {
-          log.warn("No details provided for Chat room");
+          log.warn("WebConferencing or provided not defined");
         }
       };
-    }
+    };
 
     var provider = new JitsiProvider();
 
@@ -750,6 +722,6 @@
   } else {
     window.console &&
       window.console
-      .log("WARN: webConferencing not given and eXo.webConferencing not defined. Jitsi provider registration skipped.");
+        .log("WARN: webConferencing not given and eXo.webConferencing not defined. Jitsi provider registration skipped.");
   }
 })($, webConferencing, callButton);

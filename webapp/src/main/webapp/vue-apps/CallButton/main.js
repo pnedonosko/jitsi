@@ -1,7 +1,7 @@
 import JitsiMeetButton from "./components/JitsiMeetButton.vue";
 
 Vue.use(Vuetify);
-Vue.component("JitsiCallButton", JitsiMeetButton);
+Vue.component("jitsi-meet-button", JitsiMeetButton);
 const vuetify = new Vuetify({
   dark: true,
   iconfont: ""
