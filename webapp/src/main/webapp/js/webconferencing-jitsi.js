@@ -236,7 +236,7 @@
         if (settings && context && context.currentUser) {
           context.details().done(
             function(target) {
-              if (buttonType === "vue") {
+              if (!buttonType || buttonType === "vue") {
                 const callSettings = {};
                 callSettings.target = target;
                 callSettings.context = context;
@@ -251,7 +251,7 @@
                 });
                 // Resolve with our button - return Vue object here, so it
                 // will be appended to Call Button UI in the Platform
-              } else {
+              } else if (buttonType === "element") {
                 var $button = $("<a title='" + target.title + "' href='javascript:void(0)' class='myCallAction'>" +
                   "<i class='uiIconMyCall uiIconVideoPortlet uiIconLightGray'></i>" + "<span class='callTitle'>" +
                   self.getCallTitle() + "</span></a>");
