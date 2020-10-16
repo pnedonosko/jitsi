@@ -65,7 +65,7 @@ export default {
 
 .VuetifyApp {
   .v-btn:not(.v-btn--round).v-size--default {
-    padding: 0px 10px;
+    padding: 0px;
   }
   [class^="uiIcon"] {
     // font-size: 12px;
@@ -78,7 +78,7 @@ export default {
   }
   .theme--light.v-btn {
     margin-right: 10px;
-    border: 1px solid rgb(232, 238, 242);
+    // border: 1px solid rgb(232, 238, 242);
     &:hover {
       &::before {
         color: @primaryColor;
