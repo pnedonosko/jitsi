@@ -78,7 +78,14 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
     HttpServletResponse resp = (HttpServletResponse) response;
     if (checkAuthToken(req)) {
       String webconfToken = getCookie(req, WebConferencingService.SESSION_TOKEN_COOKIE);
-      Claims claims = getClaims(webconfToken, getWebconferencing().getSecretKey());
+      Claims claims = null;
+      if (webconfToken != null) {
+        try {
+          claims = parseJWT(webconfToken, getWebconferencing().getSecretKey());
+        } catch (Exception e) {
+          LOG.warn("Cannot parse JWT session token from cookie", e.getMessage());
+        }
+      }
       if (claims != null && claims.containsKey(USERNAME)) {
         try {
           String username = String.valueOf(claims.get(USERNAME));
@@ -153,37 +160,12 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
    */
   private String getCookie(HttpServletRequest request, String name) {
     Cookie[] cookies = request.getCookies();
-    if (cookies != null) { 
+    if (cookies != null) {
       for (Cookie cookie : request.getCookies()) {
         if (cookie.getName().equals(name)) {
           return cookie.getValue();
         }
       }
-    }
-    return null;
-  }
-
-  /**
-   * Gets the claims.
-   *
-   * @param token the token
-   * @param secret the secret
-   * @return the claims
-   */
-  @SuppressWarnings("unchecked")
-  private Claims getClaims(String token, String secret) {
-    if (token == null || token.trim().isEmpty()) {
-      return null;
-    }
-    try {
-      Jws<Claims> jws = Jwts.parser().setSigningKey(Keys.hmacShaKeyFor(secret.getBytes())).parseClaimsJws(token);
-      return jws.getBody();
-    } catch (SignatureException | ExpiredJwtException e) {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("The token is not valid: {} : {}", token, e.getMessage());
-      }
-    } catch (Exception e) {
-      LOG.warn("Couldn't validate the token: {} : {}", token, e.getMessage());
     }
     return null;
   }
@@ -257,11 +239,19 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
     JitsiProvider provider = (JitsiProvider) getWebconferencing().getProvider(JitsiProvider.TYPE);
     if (request.getHeader(AUTH_TOKEN_ATTRIBUTE) != null) {
       String token = request.getHeader(AUTH_TOKEN_ATTRIBUTE);
-
-      Map<String, Object> claims = getClaims(token, provider.getInternalAuthSecret());
-      // Try to get claims using externalAuthSecret
-      if (claims == null) {
-        claims = getClaims(token, provider.getExternalAuthSecret());
+      Claims claims = null;
+      try {
+        claims = parseJWT(token, provider.getInternalAuthSecret());
+      } catch (Exception e) {
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("Cannot parse auth token JWT with internal auth secret", e.getMessage());
+        }
+        // Try with external secret
+        try {
+          claims = parseJWT(token, provider.getExternalAuthSecret());
+        } catch (Exception ex) {
+          LOG.warn("Cannot parse auth token JWT", e.getMessage());
+        }
       }
       if (claims != null && claims.containsKey("action")) {
         String action = String.valueOf(claims.get("action"));
@@ -276,6 +266,17 @@ public class WebconferencingSessionFilter extends AbstractFilter implements Filt
     LOG.warn("The request doesn't contain auth token header");
     return false;
 
+  }
+
+  /**
+   * Parses the JWT.
+   *
+   * @param token the token
+   * @param secret the secret
+   * @return the claims
+   */
+  private Claims parseJWT(String token, String secret) {
+    return Jwts.parser().setSigningKey(Keys.hmacShaKeyFor(secret.getBytes())).parseClaimsJws(token).getBody();
   }
 
   /**

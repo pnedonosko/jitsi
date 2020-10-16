@@ -18,23 +18,19 @@
  */
 package org.exoplatform.webconferencing.jitsi;
 
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.exoplatform.container.configuration.ConfigurationException;
 import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.services.jcr.RepositoryService;
+import org.exoplatform.services.jcr.ext.app.SessionProviderService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.profile.settings.IMType;
 import org.exoplatform.social.core.profile.settings.UserProfileSettingsService;
+import org.exoplatform.upload.UploadService;
 import org.exoplatform.webconferencing.CallProvider;
 import org.exoplatform.webconferencing.UserInfo.IMInfo;
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 
 /**
  * Jitsi provider implementation.
@@ -105,13 +101,13 @@ public class JitsiProvider extends CallProvider {
   }
 
   /** The internal auth secret. */
-  protected final String internalAuthSecret;
+  protected final String               internalAuthSecret;
 
   /** The external auth secret. */
-  protected final String externalAuthSecret;
+  protected final String               externalAuthSecret;
 
   /** The connector web-services URL (will be used to generate Call page URLs). */
-  protected final String url;
+  protected final String               url;
 
   /**
    * Instantiates a new JitsiProvider provider.
@@ -122,7 +118,6 @@ public class JitsiProvider extends CallProvider {
    */
   public JitsiProvider(UserProfileSettingsService profileSettings, InitParams params) throws ConfigurationException {
     super(params);
-
     String internalAuthSecret = this.config.get(CONFIG_INTERNAL_AUTH_SECRET);
     if (internalAuthSecret == null || (internalAuthSecret = internalAuthSecret.trim()).length() == 0) {
       throw new ConfigurationException(CONFIG_INTERNAL_AUTH_SECRET + " required and should be non empty.");
@@ -154,7 +149,11 @@ public class JitsiProvider extends CallProvider {
    * @param params the params (from configuration.xml)
    * @throws ConfigurationException the configuration exception
    */
-  public JitsiProvider(InitParams params) throws ConfigurationException {
+  public JitsiProvider(UploadService uploadService,
+                       RepositoryService repositoryService,
+                       SessionProviderService sessionProviders,
+                       InitParams params)
+      throws ConfigurationException {
     this(null, params);
   }
 

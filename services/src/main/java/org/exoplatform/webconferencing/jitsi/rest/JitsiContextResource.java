@@ -2,18 +2,25 @@ package org.exoplatform.webconferencing.jitsi.rest;
 
 import static org.exoplatform.webconferencing.Utils.getCurrentContext;
 
+import javax.jcr.RepositoryException;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.http.HttpStatus;
 import org.gatein.portal.controller.resource.ResourceRequestHandler;
 
+import org.exoplatform.services.jcr.RepositoryService;
+import org.exoplatform.services.jcr.ext.app.SessionProviderService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
@@ -21,9 +28,14 @@ import org.exoplatform.services.security.ConversationState;
 import org.exoplatform.services.security.IdentityConstants;
 import org.exoplatform.webconferencing.ContextInfo;
 import org.exoplatform.webconferencing.IdentityStateException;
+import org.exoplatform.webconferencing.UploadFileException;
 import org.exoplatform.webconferencing.UserInfo;
 import org.exoplatform.webconferencing.WebConferencingService;
 import org.exoplatform.webconferencing.jitsi.JitsiProvider;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 
 /**
  * The Class JitsiContextResource.
@@ -37,13 +49,20 @@ public class JitsiContextResource implements ResourceContainer {
   /** The Constant webconferencing. */
   private final WebConferencingService webconferencing;
 
+  private final JitsiProvider          provider;
+
   /**
    * Instantiates a new jitsi context resource.
    *
    * @param webconferencing the webconferencing
+   * @param repositoryService the repository service
+   * @param sessionProviders the session providers
    */
-  public JitsiContextResource(WebConferencingService webconferencing) {
+  public JitsiContextResource(WebConferencingService webconferencing,
+                              RepositoryService repositoryService,
+                              SessionProviderService sessionProviders) {
     this.webconferencing = webconferencing;
+    this.provider = (JitsiProvider) webconferencing.getProvider(JitsiProvider.TYPE);
   }
 
   /**
@@ -68,19 +87,56 @@ public class JitsiContextResource implements ResourceContainer {
   @GET
   @Path("/settings")
   public Response settings() {
-    try {
-      JitsiProvider provider = (JitsiProvider) webconferencing.getProvider(JitsiProvider.TYPE);
-      if (provider != null) {
-        return Response.status(Status.OK).entity(provider.getSettings()).type(MediaType.APPLICATION_JSON).build();
-      }
-    } catch (ClassCastException e) {
-      LOG.error("Provider " + JitsiProvider.TYPE + " isn't an instance of " + JitsiProvider.class.getName(), e);
+    if (provider != null) {
+      return Response.status(Status.OK).entity(provider.getSettings()).type(MediaType.APPLICATION_JSON).build();
     }
     return Response.status(Status.INTERNAL_SERVER_ERROR)
-                   .entity("{\"error\":\"Cannot find valid Jitsi provider \"}")
+                   .entity("{\"error\":\"Jitsi Provider is not registered in webconferencing \"}")
                    .type(MediaType.APPLICATION_JSON)
                    .build();
+  }
 
+  /**
+   * Upload recordings.
+   *
+   * @param request the request
+   * @param owner the owner
+   * @param isSpace the is space
+   * @return the response
+   * @throws Exception the exception
+   */
+  @POST
+  @Path("/upload")
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  public Response upload(@Context HttpServletRequest request, @QueryParam("token") String token) {
+    String owner = null;
+    Boolean isGroup = null;
+    String moderator = null;
+    try {
+      Claims body = Jwts.parser()
+                        .setSigningKey(Keys.hmacShaKeyFor(provider.getExternalAuthSecret().getBytes()))
+                        .parseClaimsJws(token)
+                        .getBody();
+      owner = body.get("owner", String.class);
+      isGroup = body.get("isGroup", Boolean.class);
+      moderator = body.get("moderator", String.class);
+    } catch (Exception e) {
+      LOG.error("Cannot parse JWT token for uploading recording", e.getMessage());
+      return Response.status(HttpStatus.SC_BAD_REQUEST).entity("{\"error\":\"JWT token is invalid\"}").build();
+    }
+    if (owner == null || isGroup == null || moderator == null) {
+      return Response.status(HttpStatus.SC_BAD_REQUEST)
+                     .entity("{\"error\":\"JWT token should contain owner, idGroup, moderator\"}")
+                     .build();
+    }
+
+    try {
+      webconferencing.uploadFile(owner, isGroup, moderator, request);
+      return Response.ok().build();
+    } catch (RepositoryException | UploadFileException e) {
+      LOG.error("Cannot upload recording for " + owner, e);
+      return Response.serverError().entity("{\"error\":\"Cannot upload recording for " + owner + "\"}").build();
+    }
   }
 
   /**
