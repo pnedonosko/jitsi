@@ -521,12 +521,6 @@
           }, function(err) {
             log.error("Failed to listen on user updates", err);
           });
-
-          // TODO It's not a place in provider to do this at all!
-          // Handle an event when select other contacts in chat
-          //document.addEventListener(EVENT_ROOM_SELECTION_CHANGED, function(target) {
-          //  addButton(target);
-          //});
         }
         process.resolve();
         return process.promise();
@@ -602,108 +596,6 @@
        */
       this.initSettings = function(mySettings) {
         // initialize IM type settings UI
-      };
-      
-      // TODO don't use this method
-      // delete old and add new vue button
-      var addButton = async function(target) {
-        if (webConferencing && provider) {
-          if (target && target.detail) {
-            // create div for mounting - TODO it's wrong logic with removal of container here, this should happen in WebConf for all the buttons
-            let container = document.getElementById("call-button-container");
-            if (container) {
-              container.parentNode.removeChild(container);
-            }
-            container = document.createElement("div");
-            container.setAttribute("id", "call-button-container");
-            let context = await webConferencing.getCallContext();
-            if (jitsiProviderCallButton) {
-              //const prevElem = jitsiProviderCallButton.$el;
-              //destroy old jitsi button
-              jitsiProviderCallButton.$destroy();
-
-              // replace Jitsi button to container for mounting
-              //if (prevElem && prevElem.parentNode) {
-              //  prevElem.parentNode.replaceChild(container, prevElem);
-              //}
-              jitsiProviderCallButton = null;
-
-              log.trace("Selected the other contact in chat");
-
-              let roomId = target.detail.user;
-              let roomTitle = target.detail.fullName;
-              let isSpace = target.detail.type === "s"; // roomId && roomId.startsWith("space-");
-              let isRoom = target.detail.type === "t"; // roomId && roomId.startsWith("team-");
-              let isGroup = isSpace || isRoom;
-              let isUser = !isGroup && target.detail.type === "u";
-
-              // It is a logic used in Chat, so reuse it here:
-              let roomName = roomTitle.toLowerCase().split(" ").join("_");
-
-              context.roomId = roomId;
-              context.roomName = roomName; // has no sense for team rooms, but for spaces it's pretty_name
-              context.roomTitle = roomTitle;
-              context.isGroup = isGroup;
-              context.isSpace = isSpace;
-              context.isRoom = isRoom;
-              context.isUser = isUser;
-              context.participants = target.detail.participants;
-
-              context.details = function() {
-                let data = $.Deferred();
-                if (isGroup) {
-                  if (isSpace) {
-                    let spaceId = roomName; // XXX no other way within Chat
-                    webConferencing.getSpaceInfo(spaceId).done(function(space) {
-                      data.resolve(space);
-                    }).fail(function(err) {
-                      log.trace("Error getting space info " + spaceId + " for chat context", err);
-                      data.reject(err);
-                    });
-                  } else if (isRoom) {
-                    if (this.participants) {
-                      var unames = [];
-                      for (var i = 0; i < this.participants.length; i++) {
-                        var u = this.participants[i];
-                        if (u && u.name && u.name != "null") {
-                          unames.push(u.name);
-                        }
-                      }
-                      webConferencing.getRoomInfo(roomId, roomTitle, unames).done(function(info) {
-                        data.resolve(info);
-                      }).fail(function(err) {
-                        log.trace("Error getting Chat room info " + roomName + "/" + roomId + " for chat context", err);
-                        data.reject(err);
-                      });
-                    } else {
-                      log.trace("Error getting Chat room users for " + roomId);
-                      data.reject("Error reading Chat room users for " + roomId);
-                    }
-                  } else {
-                    data.reject("Unexpected context chat type for " + roomTitle);
-                  }
-                } else {
-                  // roomId is an user name for P2P chats
-                  webConferencing.getUserInfo(roomId).done(function(user) {
-                    data.resolve(user);
-                  }).fail(function(err) {
-                    log.trace("Error getting user info " + roomId + " for chat context", err);
-                    data.reject(err);
-                  });
-                }
-                return data.promise();
-              }
-            }
-            // Create the new vue button
-            jitsiProviderCallButton = await self.callButton(context, "vue");
-            // Add the new vue button
-            jitsiProviderCallButton.$mount(container);
-          } else {
-            log.warn("No details provided for Chat room");
-          }
-        } else {
-          log.warn("WebConferencing or provided not defined");
-        }
       };
     };
 
