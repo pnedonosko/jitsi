@@ -32,7 +32,6 @@
 
       var self = this;
       var settings;
-      //var jitsiProviderCallButton = null; // TODO cleanup
 
       /**
        * MUST return a call type name. If several types supported, this one is
@@ -246,7 +245,6 @@
                 };
                 // callSettings.callWindow = callWindow;
                 callButton.init(callSettings).then(comp => {
-                  //jitsiProviderCallButton = jitsiCallButton;
                   button.resolve(comp);
                 });
                 // Resolve with our button - return Vue object here, so it
