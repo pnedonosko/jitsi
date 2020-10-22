@@ -147,6 +147,7 @@ public class JitsiContextResource implements ResourceContainer {
    */
   @GET
   @Path("/userinfo")
+  @Produces(MediaType.APPLICATION_JSON)
   public Response userInfo(@Context HttpServletRequest request) {
     ConversationState state = ConversationState.getCurrent();
     if (state != null && !state.getIdentity().getUserId().equals(IdentityConstants.ANONIM)) {
@@ -154,9 +155,8 @@ public class JitsiContextResource implements ResourceContainer {
       try {
         UserInfo userInfo = webconferencing.getUserInfo(userId);
         String authToken = String.valueOf(request.getServletContext().getAttribute("token"));
-        return Response.status(Status.OK)
+        return Response.ok()
                        .entity(new UserInfoResponse(userInfo, authToken))
-                       .type(MediaType.APPLICATION_JSON)
                        .build();
       } catch (IdentityStateException e) {
         LOG.warn("Cannot find identity with id: {}", userId);

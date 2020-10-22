@@ -73,7 +73,9 @@ public class JitsiGateway extends AbstractHttpServlet {
    */
   private enum Action {
 
-    EXTERNAL_AUTH, INTERNAL_AUTH
+    /** The external auth. */
+    EXTERNAL_AUTH, /** The internal auth. */
+ INTERNAL_AUTH
   }
 
   /** The Constant serialVersionUID. */
@@ -90,6 +92,9 @@ public class JitsiGateway extends AbstractHttpServlet {
 
   /** The Constant TRANSFER_ENCODING_HEADER. */
   private final static String TRANSFER_ENCODING_HEADER   = "Transfer-Encoding";
+
+  /** The Constant UTF_8. */
+  private static final String UTF_8                      = "utf-8";
 
   /**
    * {@inheritDoc}
@@ -198,9 +203,10 @@ public class JitsiGateway extends AbstractHttpServlet {
         }
       }
       resp.setStatus(response.getStatusLine().getStatusCode());
+      resp.setCharacterEncoding(UTF_8);
       HttpEntity entity = response.getEntity();
       if (entity != null) {
-        resp.getWriter().write(EntityUtils.toString(entity));
+        resp.getWriter().write(EntityUtils.toString(entity, UTF_8));
       }
     } catch (IOException e) {
       LOG.warn("Error occured while requesting remote resource [{}]", requestUrl, e.getMessage());
