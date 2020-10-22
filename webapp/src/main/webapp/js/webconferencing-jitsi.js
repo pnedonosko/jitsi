@@ -152,7 +152,8 @@
         var callProcess = $.Deferred();
         var callId = getCallId(context, target);
         // Open call window
-        var callWindow = webConferencing.showCallPopup("", target.title);
+        var longTitle = self.getTitle() + " " + self.getCallTitle();
+        var callWindow = webConferencing.showCallWindow("", longTitle);
         getStatus().then(function(response) {
           if (response.status === "active") {
             webConferencing.getCall(callId).done(function(call) {
@@ -192,7 +193,7 @@
         // popup window
         callProcess.done(function(call) {
           callWindow.location = getCallUrl(callId);
-          callWindow.document.title = target.title;
+          callWindow.document.title = call.title; // TODO was target.title
         }).fail(function(msg) {
           callWindow.close();
           setTimeout(function() {
@@ -289,8 +290,8 @@
       /**
        * Helper method to build an incoming call popup.
        */
-      var acceptCallPopover = function(callerLink, callerAvatar, callerMessage, playRingtone) {
-        log.trace(">> acceptCallPopover '" + callerMessage + "' caler:" + callerLink + " avatar:" + callerAvatar);
+      var acceptCallPopover = function(callerId, callerLink, callerAvatar, callerMessage, playRingtone) {
+        log.trace(">> acceptCallPopover '" + callerMessage + "' caler:" + callerId + " (" + callerLink + ", avatar:" + callerAvatar + ")");
         var process = $.Deferred();
         var $call = $("div.uiIncomingCall");
         // Remove previous dialogs (if you need handle several incoming at the
@@ -332,17 +333,25 @@
         });
         process.notify($call);
         if (playRingtone) {
-          // Start ringing incoming sound only if requested (depends on user
-          // status)
-          var $ring = $("<audio loop autoplay style='display: none;'>" // controls
-            +
-            "<source src='/jitsi/resources/audio/incoming.mp3' type='audio/mpeg'>" +
-            "Your browser does not support the audio element.</audio>");
-          $(document.body).append($ring);
+          const ringId = "jitsi-call-ring-" + callerId;
+          let $ring;
+          let callRinging = localStorage.getItem(ringId);
+          if (!callRinging || Date.now() - callRinging.time > 5000) {
+            log.trace(">>> Ringing the caller: " + callerId);
+            // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
+            localStorage.setItem(ringId, {
+              time: Date.now()
+            }); // set it quick as possible to avoid rice conditions
+            callRinging = true;
+            // Start ringing incoming sound only if requested (depends on user status)
+            $ring = $("<audio loop autoplay style='display: none;'>" +
+              "<source src='/jitsi/resources/audio/incoming.mp3' type='audio/mpeg'>" +
+              "Your browser does not support the audio element.</audio>");
+            $(document.body).append($ring);
+          }
           process.fail(function() {
             if ($call.callState != "joined") {
-              var $cancel = $("<audio autoplay style='display: none;'>" // controls
-                +
+              var $cancel = $("<audio autoplay style='display: none;'>" +
                 "<source src='/jitsi/resources/audio/incoming_cancel.mp3' type='audio/mpeg'>" +
                 "Your browser does not support the audio element.</audio>");
               $(document.body).append($cancel);
@@ -353,7 +362,13 @@
           });
           process.always(function() {
             // Stop incoming ringing on dialog completion
-            $ring.remove();
+            if (callRinging) {
+              localStorage.removeItem(ringId);
+            }
+            if ($ring) {
+              $ring.remove();
+              log.trace("<<< Ringing stopped: " + callerId);
+            }
           });
         }
         return process.promise();
@@ -418,7 +433,7 @@
                       webConferencing.getUserStatus(currentUserId).done(
                         function(user) {
                           // Build a call popover
-                          var popover = acceptCallPopover(callerLink, callerAvatar, callerMessage, !user ||
+                          var popover = acceptCallPopover(callerId, callerLink, callerAvatar, callerMessage, !user ||
                             user.status == "available" || user.status == "away");
                           // We use the popover promise to finish
                           // initialization on its progress state, on
@@ -436,9 +451,8 @@
                             // User accepted the call...
                             log.info("User " + msg + " call: " + callId);
                             var longTitle = self.getTitle() + " " + self.getCallTitle();
-
-                            var callUrl = window.location.protocol + "//" + window.location.host + "/jitsi/meet/" + encodeURIComponent(callId);
-
+                            //var callUrl = window.location.protocol + "//" + window.location.host + "/jitsi/meet/" + encodeURIComponent(callId);
+                            var callUrl = getCallUrl(callId);
                             var callWindow = webConferencing.showCallWindow(callUrl, longTitle);
                             callWindow.document.title = call.title;
                             // Optionally, we may invoke a call window to
