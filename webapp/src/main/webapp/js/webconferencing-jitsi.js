@@ -5,8 +5,6 @@
  */
 (function($, webConferencing, callButton) {
   "use strict";
-  const EVENT_ROOM_SELECTION_CHANGED = "exo-chat-selected-contact-changed";
-
   var globalWebConferencing = typeof eXo != "undefined" && eXo && eXo.webConferencing ? eXo.webConferencing : null;
 
   // Use webConferencing from global eXo namespace (for non AMD uses).
