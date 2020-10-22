@@ -50,6 +50,7 @@ public class JitsiContextResource implements ResourceContainer {
   /** The Constant webconferencing. */
   private final WebConferencingService webconferencing;
 
+  /** The provider. */
   private final JitsiProvider          provider;
 
   /**
@@ -101,10 +102,8 @@ public class JitsiContextResource implements ResourceContainer {
    * Upload recordings.
    *
    * @param request the request
-   * @param owner the owner
-   * @param isSpace the is space
+   * @param token the token
    * @return the response
-   * @throws Exception the exception
    */
   @POST
   @Path("/upload")

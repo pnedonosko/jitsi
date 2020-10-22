@@ -101,13 +101,13 @@ public class JitsiProvider extends CallProvider {
   }
 
   /** The internal auth secret. */
-  protected final String               internalAuthSecret;
+  protected final String internalAuthSecret;
 
   /** The external auth secret. */
-  protected final String               externalAuthSecret;
+  protected final String externalAuthSecret;
 
   /** The connector web-services URL (will be used to generate Call page URLs). */
-  protected final String               url;
+  protected final String url;
 
   /**
    * Instantiates a new JitsiProvider provider.
@@ -149,11 +149,7 @@ public class JitsiProvider extends CallProvider {
    * @param params the params (from configuration.xml)
    * @throws ConfigurationException the configuration exception
    */
-  public JitsiProvider(UploadService uploadService,
-                       RepositoryService repositoryService,
-                       SessionProviderService sessionProviders,
-                       InitParams params)
-      throws ConfigurationException {
+  public JitsiProvider(InitParams params) throws ConfigurationException {
     this(null, params);
   }
 
