@@ -29,6 +29,7 @@ import org.exoplatform.services.security.IdentityConstants;
 import org.exoplatform.webconferencing.ContextInfo;
 import org.exoplatform.webconferencing.IdentityStateException;
 import org.exoplatform.webconferencing.UploadFileException;
+import org.exoplatform.webconferencing.UploadFileInfo;
 import org.exoplatform.webconferencing.UserInfo;
 import org.exoplatform.webconferencing.WebConferencingService;
 import org.exoplatform.webconferencing.jitsi.JitsiProvider;
@@ -109,6 +110,7 @@ public class JitsiContextResource implements ResourceContainer {
   @Path("/upload")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   public Response upload(@Context HttpServletRequest request, @QueryParam("token") String token) {
+    String callId = null;
     String owner = null;
     Boolean isGroup = null;
     String moderator = null;
@@ -120,18 +122,20 @@ public class JitsiContextResource implements ResourceContainer {
       owner = body.get("owner", String.class);
       isGroup = body.get("isGroup", Boolean.class);
       moderator = body.get("moderator", String.class);
+      callId = body.get("callId", String.class);
     } catch (Exception e) {
       LOG.error("Cannot parse JWT token for uploading recording", e.getMessage());
-      return Response.status(HttpStatus.SC_BAD_REQUEST).entity("{\"error\":\"JWT token is invalid\"}").build();
+      return Response.status(Status.BAD_REQUEST).entity("{\"error\":\"JWT token is invalid\"}").build();
     }
-    if (owner == null || isGroup == null || moderator == null) {
-      return Response.status(HttpStatus.SC_BAD_REQUEST)
-                     .entity("{\"error\":\"JWT token should contain owner, idGroup, moderator\"}")
+    if (callId == null || owner == null || isGroup == null || moderator == null) {
+      return Response.status(Status.BAD_REQUEST)
+                     .entity("{\"error\":\"JWT token should contain owner, isGroup, moderator\"}")
                      .build();
     }
 
     try {
-      webconferencing.uploadFile(owner, isGroup, moderator, request);
+      UploadFileInfo uploadFileInfo = new UploadFileInfo(callId, owner, isGroup, moderator);
+      webconferencing.uploadFile(uploadFileInfo, request);
       return Response.ok().build();
     } catch (RepositoryException | UploadFileException e) {
       LOG.error("Cannot upload recording for " + owner, e);
@@ -155,9 +159,7 @@ public class JitsiContextResource implements ResourceContainer {
       try {
         UserInfo userInfo = webconferencing.getUserInfo(userId);
         String authToken = String.valueOf(request.getServletContext().getAttribute("token"));
-        return Response.ok()
-                       .entity(new UserInfoResponse(userInfo, authToken))
-                       .build();
+        return Response.ok().entity(new UserInfoResponse(userInfo, authToken)).build();
       } catch (IdentityStateException e) {
         LOG.warn("Cannot find identity with id: {}", userId);
         return Response.status(Status.INTERNAL_SERVER_ERROR)
