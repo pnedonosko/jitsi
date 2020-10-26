@@ -6,7 +6,6 @@
 (function($, webConferencing, callButton) {
   "use strict";
   var globalWebConferencing = typeof eXo != "undefined" && eXo && eXo.webConferencing ? eXo.webConferencing : null;
-
   // Use webConferencing from global eXo namespace (for non AMD uses).
   // This can be actual when running the script outside the portal page - e.g.
   // on a custom call page.
@@ -109,7 +108,8 @@
           callMembersAsc.sort();
           callId = "p_" + callMembersAsc.join("-");
         }
-        return callId;
+        // Transliterate callId
+        return window.slugify(callId);
       };
 
       /**
