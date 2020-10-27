@@ -2,8 +2,8 @@
   <v-btn 
     id="myCallAction" 
     ref="jitsi" 
-    outlined="true" 
-    width="86px"
+    outlined 
+    width="86px" 
     @click.native="startCall">
     <i class="uiIconSocPhone uiIconBlue"></i>
     <span>
@@ -79,10 +79,13 @@ export default {
   .theme--light.v-btn {
     margin-right: 10px;
     // border: 1px solid rgb(232, 238, 242);
+    &:focus::before {
+      opacity: 0;
+    }
     &:hover {
       &::before {
         color: @primaryColor;
-        opacity: 1;
+        opacity: 0;
       }
       i {
         color: white;
