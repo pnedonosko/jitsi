@@ -9,7 +9,7 @@
     <span>
       {{ i18n.te("UICallButton.label.jitsi")
         ? $t("UICallButton.label.jitsi")
-      : "Jitsi Call" }}
+      : "Jitsi" }}
     </span>
   </v-btn>
 </template>
