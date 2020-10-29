@@ -342,8 +342,9 @@
             }); // set it quick as possible to avoid rice conditions
             callRinging = true;
             // Start ringing incoming sound only if requested (depends on user status)
+            // TODO ringtone was incoming.mp3 type='audio/mpeg' -- Oct 29, 2020
             $ring = $("<audio loop autoplay style='display: none;'>" +
-              "<source src='/jitsi/resources/audio/incoming.mp3' type='audio/mpeg'>" +
+              "<source src='/jitsi/resources/audio/ringtone_exo-1.m4a'>" +
               "Your browser does not support the audio element.</audio>");
             $(document.body).append($ring);
           }
