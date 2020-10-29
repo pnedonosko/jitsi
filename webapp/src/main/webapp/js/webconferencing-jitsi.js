@@ -150,8 +150,7 @@
         var callProcess = $.Deferred();
         var callId = getCallId(context, target);
         // Open call window
-        var longTitle = self.getTitle() + " " + self.getCallTitle();
-        var callWindow = webConferencing.showCallWindow("", longTitle);
+        var callWindow = webConferencing.showCallWindow("", self.getTitle() + " " + callId);
         getStatus().then(function(response) {
           if (response.status === "active") {
             webConferencing.getCall(callId).done(function(call) {
@@ -449,10 +448,9 @@
                           popover.done(function(msg) {
                             // User accepted the call...
                             log.info("User " + msg + " call: " + callId);
-                            var longTitle = self.getTitle() + " " + self.getCallTitle();
                             //var callUrl = window.location.protocol + "//" + window.location.host + "/jitsi/meet/" + encodeURIComponent(callId);
                             var callUrl = getCallUrl(callId);
-                            var callWindow = webConferencing.showCallWindow(callUrl, longTitle);
+                            var callWindow = webConferencing.showCallWindow(callUrl, self.getTitle() + " " + callId);
                             callWindow.document.title = call.title;
                             // Optionally, we may invoke a call window to
                             // initialize the call.
