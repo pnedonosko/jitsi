@@ -157,10 +157,9 @@
               // Call already running - join it
               log.info("Call already exists. Joining call: " + callId);
               // For grop calls
-              if (call.state === "stopped" && (target.type === "space" || target.type === "chat_room")) {
-                webConferencing.updateCall(callId, "started").done(function() {
-                  log.info("Updated call state to started");
-                });
+              // Note: webconf starts call when first user joins it
+              if (call.state === "stopped" && target.type === "chat_room") {
+                webConferencing.updateParticipants(callId, Object.values(target.members));
               }
               callProcess.resolve(call);
             }).fail(function(err) {
