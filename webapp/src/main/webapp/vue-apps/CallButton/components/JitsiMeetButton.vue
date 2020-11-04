@@ -4,10 +4,10 @@
     ref="jitsi" 
     outlined 
     @click.native="startCall">
-    <i class="uiIconVideoPortlet uiIconBlue"></i>
+    <i class="uiIconSocPhone uiIconBlue"></i>
     {{ i18n.te("UICallButton.label.jitsi")
       ? $t("UICallButton.label.jitsi")
-    : "Jitsi" }}
+    : "Jitsi Call" }}
   </v-btn>
 </template>
 
@@ -66,7 +66,7 @@ export default {
     min-width: unset;
   }
   [class^="uiIcon"] {
-    // font-size: 12px;
+    font-size: 12px;
     &:before {
       color: unset;
       height: 16px;
