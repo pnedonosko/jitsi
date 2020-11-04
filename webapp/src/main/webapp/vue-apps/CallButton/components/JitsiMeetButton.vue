@@ -3,14 +3,11 @@
     id="myCallAction" 
     ref="jitsi" 
     outlined 
-    width="86px" 
     @click.native="startCall">
-    <i class="uiIconSocPhone uiIconBlue"></i>
-    <span>
-      {{ i18n.te("UICallButton.label.jitsi")
-        ? $t("UICallButton.label.jitsi")
-      : "Jitsi" }}
-    </span>
+    <i class="uiIconVideoPortlet uiIconBlue"></i>
+    {{ i18n.te("UICallButton.label.jitsi")
+      ? $t("UICallButton.label.jitsi")
+    : "Jitsi" }}
   </v-btn>
 </template>
 
@@ -66,6 +63,7 @@ export default {
 .VuetifyApp {
   .v-btn:not(.v-btn--round).v-size--default {
     padding: 0px;
+    min-width: unset;
   }
   [class^="uiIcon"] {
     // font-size: 12px;

@@ -25,12 +25,7 @@ const webconferencingJitsiExts = [{
       ],
     },
     // enabled just show that this extension is enabled, if enabled: false CloudDriveComponent will not appear on page
-    enabled: true,
-    // onExecute will be executed after click on action button, which is placed inside parent component
-    onExecute(jitsiComponent) {
-      // click on action button will open WHAT? with list of cloud drives available to connection
-      //jitsiComponent.showJitsi = true;
-    }
+    enabled: true
   }];
 require(["SHARED/extensionRegistry", "SHARED/webConferencing"], function(extensionRegistry, webConferencing) {
   // webConferencing.init(); // TODO why we care about WebConf init from one of its providers??
