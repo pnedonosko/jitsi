@@ -213,7 +213,7 @@ public class JitsiGateway extends AbstractHttpServlet {
 
       HttpEntity entity = response.getEntity();
       if (entity != null) {
-        if (resp.getContentType().startsWith(APPLICATION_JSON)) {
+        if (resp.getContentType() != null && resp.getContentType().startsWith(APPLICATION_JSON)) {
           resp.setCharacterEncoding(UTF_8);
           resp.getWriter().write(EntityUtils.toString(entity, UTF_8));
         } else {
