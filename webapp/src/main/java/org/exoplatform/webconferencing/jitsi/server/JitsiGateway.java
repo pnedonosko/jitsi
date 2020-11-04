@@ -74,8 +74,9 @@ public class JitsiGateway extends AbstractHttpServlet {
   private enum Action {
 
     /** The external auth. */
-    EXTERNAL_AUTH, /** The internal auth. */
- INTERNAL_AUTH
+    EXTERNAL_AUTH,
+    /** The internal auth. */
+    INTERNAL_AUTH
   }
 
   /** The Constant serialVersionUID. */
@@ -92,6 +93,9 @@ public class JitsiGateway extends AbstractHttpServlet {
 
   /** The Constant TRANSFER_ENCODING_HEADER. */
   private final static String TRANSFER_ENCODING_HEADER   = "Transfer-Encoding";
+
+  /** The Constant APPLICATION_JSON. */
+  private static final String APPLICATION_JSON           = "application/json";
 
   /** The Constant UTF_8. */
   private static final String UTF_8                      = "utf-8";
@@ -200,13 +204,21 @@ public class JitsiGateway extends AbstractHttpServlet {
       for (Header header : response.getAllHeaders()) {
         if (!header.getName().equals(TRANSFER_ENCODING_HEADER)) {
           resp.setHeader(header.getName(), header.getValue());
+          if (header.getName().equals("Content-Type")) {
+            resp.setContentType(header.getValue());
+          }
         }
       }
       resp.setStatus(response.getStatusLine().getStatusCode());
-      resp.setCharacterEncoding(UTF_8);
+
       HttpEntity entity = response.getEntity();
       if (entity != null) {
-        resp.getWriter().write(EntityUtils.toString(entity, UTF_8));
+        if (resp.getContentType().startsWith(APPLICATION_JSON)) {
+          resp.setCharacterEncoding(UTF_8);
+          resp.getWriter().write(EntityUtils.toString(entity, UTF_8));
+        } else {
+          resp.getWriter().write(EntityUtils.toString(entity));
+        }
       }
     } catch (IOException e) {
       LOG.warn("Error occured while requesting remote resource [{}]", requestUrl, e.getMessage());
