@@ -1,4 +1,5 @@
 import JitsiMeetButton from "./components/JitsiMeetButton.vue";
+import NotificationPopUp from "./components/NotificationPopUp.vue";
 
 Vue.use(Vuetify);
 Vue.component("jitsi-meet-button", JitsiMeetButton);
@@ -33,4 +34,50 @@ export function init(callSettings) {
     });
 }
 
-  
+export function initNotificationPopup(target) {
+  const comp = new Vue({
+    el: target,
+    components: {
+      NotificationPopUp,
+    },
+    data() {
+      return {
+        callInfo: {
+          dialog: false,
+          callerId: "",
+          avatar: "",
+          callbackFunc: null
+        }
+      };
+    },
+    vuetify,
+    render: function(h) {
+      return h(NotificationPopUp, {
+        props: {
+          dialog: this.callInfo.dialog,
+          caller: this.callInfo.callerId,
+          avatar: this.callInfo.avatar,
+          callbackFunc: this.callInfo.callbackFunc
+          // language: lang,
+          
+        }
+      });
+    }
+  })
+  return {
+    comp: comp,
+    show: function(callerId, callerLink, callerAvatar, callerMessage, playRingtone, callbackFunc) {
+      // console.log(callerId, callerLink, callerAvatar, callerMessage, playRingtone, callbackFunc, "ARGSS")
+      comp.callInfo.dialog = true;
+      comp.callInfo.callerId = callerId;
+      comp.callInfo.avatar = callerAvatar;
+      comp.callInfo.callbackFunc = callbackFunc
+    },
+    close: function() {
+      comp.callInfo.dialog = false;
+      comp.callInfo.callerId = "";
+      comp.callInfo.avatar = "";
+      comp.callInfo.callbackFunc = null;
+    }
+  }
+}
