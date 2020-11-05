@@ -282,11 +282,54 @@
         // core to add a button to a required places
         return button.promise();
       };
+      
+      const popUpContainer = document.createElement("div");
+      popUpContainer.setAttribute("id", "notification-popup-vue");
+      document.body.append(popUpContainer);
+      var acceptCallPopoverVueComp = callButton.initNotificationPopup("#notification-popup-vue")
+      var _acceptCallPopoverVue = function(callerId, callerLink, callerAvatar, callerMessage, playRingtone) {
+        let d = $.Deferred()
+        // return new Promise(function(resolve, reject) {
+        //   acceptCallPopoverVueComp.show(callerId, callerLink, callerAvatar, callerMessage, playRingtone, function(res) {
+        //     if (res) {
+        //       resolve("accepted")
+        //     } else {
+        //       reject("declined")
+        //     }
+        //   })
+        // })
+        d.notify({});
+        acceptCallPopoverVueComp.show(callerId, callerLink, callerAvatar, callerMessage, playRingtone, function(res) {
+          if(res) {
+            d.resolve(res)
+          } else {
+            d.reject(res)
+          }
+        })
+        return d.promise()
+      }
+
+      var acceptCallPopover = function(callerId, callerLink, callerAvatar, callerMessage, playRingtone) {
+        // console.log(callerId, callerLink, callerAvatar, callerMessage, playRingtone)
+
+        // let d = $.Deferred()
+        
+        // let p = Promise.race([
+        // return _acceptCallPopover(callerId, callerLink, callerAvatar, callerMessage, playRingtone)
+        return _acceptCallPopoverVue(callerId, callerLink, callerAvatar, callerMessage, playRingtone) 
+        // ]).then(function(res) {
+        //   d.resolve(res)
+        // }).fail(function(res) {
+        //   d.reject(res)
+        // })
+
+        // return d.promise()
+      }
 
       /**
        * Helper method to build an incoming call popup.
        */
-      var acceptCallPopover = function(callerId, callerLink, callerAvatar, callerMessage, playRingtone) {
+      var _acceptCallPopover = function(callerId, callerLink, callerAvatar, callerMessage, playRingtone) {
         log.trace(">> acceptCallPopover '" + callerMessage + "' caler:" + callerId + " (" + callerLink + ", avatar:" + callerAvatar + ")");
         var process = $.Deferred();
         var $call = $("div.uiIncomingCall");
@@ -387,13 +430,14 @@
           var $callPopup;
           var closeCallPopup = function(callId, state) {
             if ($callPopup && $callPopup.callId && $callPopup.callId == callId) {
-              if ($callPopup.is(":visible")) {
+              // if (acceptCallPopoverVueComp.comp.callInfo.dialog) {
                 // Set state before closing the dialog, it will be used by
                 // promise failure handler
                 $callPopup.callState = state;
-                $callPopup.dialog("close");
+                acceptCallPopoverVueComp.close()
+                // $callPopup.dialog("close");
               }
-            }
+            // }
           };
           // Subscribe to user updates (incoming calls will be notified here)
           webConferencing.onUserUpdate(currentUserId, function(update) {
