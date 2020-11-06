@@ -1,3 +1,4 @@
+/* eslint-disable no-empty-function */
 import JitsiMeetButton from "./components/JitsiMeetButton.vue";
 import NotificationPopUp from "./components/NotificationPopUp.vue";
 
@@ -43,10 +44,10 @@ export function initNotificationPopup(target) {
     data() {
       return {
         callInfo: {
-          dialog: false,
+          dialog: true,
           callerId: "",
           avatar: "",
-          callbackFunc: null
+          callbackFunc: () => {}
         }
       };
     },
@@ -77,7 +78,7 @@ export function initNotificationPopup(target) {
       comp.callInfo.dialog = false;
       comp.callInfo.callerId = "";
       comp.callInfo.avatar = "";
-      comp.callInfo.callbackFunc = null;
+      comp.callInfo.callbackFunc = () => {};
     }
   }
 }
