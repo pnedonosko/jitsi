@@ -254,7 +254,7 @@
                   startCall(context, target);
                 });
                 $button.data("targetid", target.id);
-                button.resolve($button);
+                button.resolve($button[0]);
               }
             }).fail(function(err) {
               // On error, we don't show the button for this context
