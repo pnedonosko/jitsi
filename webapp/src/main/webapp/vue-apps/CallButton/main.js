@@ -44,7 +44,7 @@ export function initNotificationPopup(target) {
     data() {
       return {
         callInfo: {
-          dialog: true,
+          dialog: false,
           callerId: "",
           avatar: "",
           callbackFunc: () => {}
