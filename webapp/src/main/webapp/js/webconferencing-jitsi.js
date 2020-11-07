@@ -286,90 +286,90 @@
       /**
        * Helper method to build an incoming call popup.
        */
-      var acceptCallPopover = function(callerId, callerLink, callerAvatar, callerMessage, playRingtone) {
-        log.trace(">> acceptCallPopover '" + callerMessage + "' caler:" + callerId + " (" + callerLink + ", avatar:" + callerAvatar + ")");
-        var process = $.Deferred();
-        var $call = $("div.uiIncomingCall");
-        // Remove previous dialogs (if you need handle several incoming at the
-        // same time - implement special logic for this)
-        if ($call.length > 0) {
-          try {
-            // By destroying a dialog, it should reject its incoming call
-            $call.dialog("destroy");
-          } catch (e) {
-            log.error("acceptCallPopover: error destroing previous dialog ", e);
-          }
-          $call.remove();
-        }
-        $call = $("<div class='uiIncomingCall' title='Incoming call'></div>");
-        $call.append($("<div class='messageAuthor'><a target='_blank' href='" + callerLink + "' class='avatarMedium'>" +
-          "<img src='" + callerAvatar + "'></a></div>" + "<div class='messageBody'><div class='messageText'>" + callerMessage +
-          "</div></div>"));
-        $(document.body).append($call);
-        $call.dialog({
-          resizable: false,
-          height: "auto",
-          width: 400,
-          modal: false,
-          buttons: {
-            "Answer": function() {
-              process.resolve("accepted");
-              $call.dialog("close");
-            },
-            "Decline": function() {
-              process.reject("declined");
-              $call.dialog("close");
-            }
-          }
-        });
-        $call.on("dialogclose", function(event, ui) {
-          if (process.state() == "pending") {
-            process.reject("closed");
-          }
-        });
-        process.notify($call);
-        if (playRingtone) {
-          const ringId = "jitsi-call-ring-" + callerId;
-          let $ring;
-          let callRinging = localStorage.getItem(ringId);
-          if (!callRinging || Date.now() - callRinging.time > 5000) {
-            log.trace(">>> Ringing the caller: " + callerId);
-            // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
-            localStorage.setItem(ringId, {
-              time: Date.now()
-            }); // set it quick as possible to avoid rice conditions
-            callRinging = true;
-            // Start ringing incoming sound only if requested (depends on user status)
-            // TODO ringtone was incoming.mp3 type='audio/mpeg' -- Oct 29, 2020
-            $ring = $("<audio loop autoplay style='display: none;'>" +
-              "<source src='/jitsi/resources/audio/ringtone_exo-1.m4a'>" +
-              "Your browser does not support the audio element.</audio>");
-            $(document.body).append($ring);
-          }
-          process.fail(function() {
-            if ($call.callState != "joined") {
-              var $cancel = $("<audio autoplay style='display: none;'>" +
-                "<source src='/jitsi/resources/audio/incoming_cancel.mp3' type='audio/mpeg'>" +
-                "Your browser does not support the audio element.</audio>");
-              $(document.body).append($cancel);
-              setTimeout(function() {
-                $cancel.remove();
-              }, 2500);
-            }
-          });
-          process.always(function() {
-            // Stop incoming ringing on dialog completion
-            if (callRinging) {
-              localStorage.removeItem(ringId);
-            }
-            if ($ring) {
-              $ring.remove();
-              log.trace("<<< Ringing stopped: " + callerId);
-            }
-          });
-        }
-        return process.promise();
-      };
+      // var _acceptCallPopover = function(callerId, callerLink, callerAvatar, callerMessage, playRingtone) {
+      //   log.trace(">> acceptCallPopover '" + callerMessage + "' caler:" + callerId + " (" + callerLink + ", avatar:" + callerAvatar + ")");
+      //   var process = $.Deferred();
+      //   var $call = $("div.uiIncomingCall");
+      //   // Remove previous dialogs (if you need handle several incoming at the
+      //   // same time - implement special logic for this)
+      //   if ($call.length > 0) {
+      //     try {
+      //       // By destroying a dialog, it should reject its incoming call
+      //       $call.dialog("destroy");
+      //     } catch (e) {
+      //       log.error("acceptCallPopover: error destroing previous dialog ", e);
+      //     }
+      //     $call.remove();
+      //   }
+      //   $call = $("<div class='uiIncomingCall' title='Incoming call'></div>");
+      //   $call.append($("<div class='messageAuthor'><a target='_blank' href='" + callerLink + "' class='avatarMedium'>" +
+      //     "<img src='" + callerAvatar + "'></a></div>" + "<div class='messageBody'><div class='messageText'>" + callerMessage +
+      //     "</div></div>"));
+      //   $(document.body).append($call);
+      //   $call.dialog({
+      //     resizable: false,
+      //     height: "auto",
+      //     width: 400,
+      //     modal: false,
+      //     buttons: {
+      //       "Answer": function() {
+      //         process.resolve("accepted");
+      //         $call.dialog("close");
+      //       },
+      //       "Decline": function() {
+      //         process.reject("declined");
+      //         $call.dialog("close");
+      //       }
+      //     }
+      //   });
+      //   $call.on("dialogclose", function(event, ui) {
+      //     if (process.state() == "pending") {
+      //       process.reject("closed");
+      //     }
+      //   });
+      //   process.notify($call);
+      //   if (playRingtone) {
+      //     const ringId = "jitsi-call-ring-" + callerId;
+      //     let $ring;
+      //     let callRinging = localStorage.getItem(ringId);
+      //     if (!callRinging || Date.now() - callRinging.time > 5000) {
+      //       log.trace(">>> Ringing the caller: " + callerId);
+      //       // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
+      //       localStorage.setItem(ringId, {
+      //         time: Date.now()
+      //       }); // set it quick as possible to avoid rice conditions
+      //       callRinging = true;
+      //       // Start ringing incoming sound only if requested (depends on user status)
+      //       // TODO ringtone was incoming.mp3 type='audio/mpeg' -- Oct 29, 2020
+      //       $ring = $("<audio loop autoplay style='display: none;'>" +
+      //         "<source src='/jitsi/resources/audio/ringtone_exo-1.m4a'>" +
+      //         "Your browser does not support the audio element.</audio>");
+      //       $(document.body).append($ring);
+      //     }
+      //     process.fail(function() {
+      //       if ($call.callState != "joined") {
+      //         var $cancel = $("<audio autoplay style='display: none;'>" +
+      //           "<source src='/jitsi/resources/audio/incoming_cancel.mp3' type='audio/mpeg'>" +
+      //           "Your browser does not support the audio element.</audio>");
+      //         $(document.body).append($cancel);
+      //         setTimeout(function() {
+      //           $cancel.remove();
+      //         }, 2500);
+      //       }
+      //     });
+      //     process.always(function() {
+      //       // Stop incoming ringing on dialog completion
+      //       if (callRinging) {
+      //         localStorage.removeItem(ringId);
+      //       }
+      //       if ($ring) {
+      //         $ring.remove();
+      //         log.trace("<<< Ringing stopped: " + callerId);
+      //       }
+      //     });
+      //   }
+      //   return process.promise();
+      // };
 
       /**
        * OPTIONAL method. If implemented, it will be called by Web Conferencing
@@ -384,15 +384,23 @@
           var currentUserId = webConferencing.getUser().id;
           // Incoming call popup (embedded into the current page), it is based
           // on jQueryUI dialog widget
-          var $callPopup;
+          // var $callPopup;
+
+
+          let callPopup;
+
           var closeCallPopup = function(callId, state) {
-            if ($callPopup && $callPopup.callId && $callPopup.callId == callId) {
-              if ($callPopup.is(":visible")) {
+            if (callPopup && callPopup.callId && callPopup.callId == callId) {
+              // if ($callPopup.is(":visible")) {
                 // Set state before closing the dialog, it will be used by
                 // promise failure handler
-                $callPopup.callState = state;
-                $callPopup.dialog("close");
-              }
+                console.log("CLOSECALLPOPUP");
+                callPopup.callState = state;
+                // acceptCallPopoverVueComp.close();
+                // console.log(callPopup);
+                callPopup.close();
+                // $callPopup.dialog("close");
+              // }
             }
           };
           // Subscribe to user updates (incoming calls will be notified here)
@@ -430,58 +438,98 @@
                       webConferencing.getUserStatus(currentUserId).done(
                         function(user) {
                           // Build a call popover
-                          var popover = acceptCallPopover(callerId, callerLink, callerAvatar, callerMessage, !user ||
-                            user.status == "available" || user.status == "away");
+                          // var popover = acceptCallPopover(callerId, callerLink, callerAvatar, callerMessage, !user ||
+                            // user.status == "available" || user.status == "away");
                           // We use the popover promise to finish
                           // initialization on its progress state, on
                           // resolved (done)
                           // to act on accepted call and on rejected (fail)
                           // on declined call.
-                          popover.progress(function($callDialog) {
-                            // Finish initialization...
-                            $callPopup = $callDialog;
-                            // And some extra info to distinguish the popup
-                            $callPopup.callId = callId;
-                            $callPopup.callState = update.callState;
-                          });
-                          popover.done(function(msg) {
-                            // User accepted the call...
-                            log.info("User " + msg + " call: " + callId);
-                            //var callUrl = window.location.protocol + "//" + window.location.host + "/jitsi/meet/" + encodeURIComponent(callId);
-                            var callUrl = getCallUrl(callId);
-                            var callWindow = webConferencing.showCallWindow(callUrl, self.getTitle() + " " + callId);
-                            callWindow.document.title = call.title;
-                            // Optionally, we may invoke a call window to
-                            // initialize the call.
-                            // First wait the call window loaded
-                            //$(callWindow).on("load", function() {
-                            //  log.debug("Call page loaded: " + callId);
-                            //  lockCallButton(update.owner.id, callId); // TODO cleanup
-                            //});
-                          });
-                          popover.fail(function(err) {
-                            // User rejected the call, call was stopped or
-                            // joined on another client/page.
-                            if (!isGroup && $callPopup.callState != "stopped" && $callPopup.callState != "joined") {
-                              // Delete the call if it is not group one, not
-                              // already stopped and wasn't joined -
-                              // a group call will be deleted automatically
-                              // when last party leave it.
-                              log.trace("<<< User " + err + ($callPopup.callState ? " just " + $callPopup.callState : "") +
-                                " call " + callId + ", deleting it.");
-                              webConferencing.deleteCall(callId).done(function() {
-                                log.info("Call deleted: " + callId);
-                              }).fail(function(err) {
-                                if (err && (err.code == "NOT_FOUND_ERROR")) {
-                                  // already deleted
-                                  log.trace("<< Call not found " + callId);
-                                } else {
-                                  log.error("Failed to stop call: " + callId, err);
-                                  webConferencing.showError("Error stopping call", webConferencing.errorText(err));
+                          callButton.initCallPopup(callId, update.callState, callerId, callerLink,  callerAvatar, callerMessage, !user ||
+                            user.status == "available" || user.status == "away").then((callPopup) => {
+                              callPopup.onAccepted(() => {
+                                log.info("User accepted call: " + callId);
+                                //var callUrl = window.location.protocol + "//" + window.location.host + "/jitsi/meet/" + encodeURIComponent(callId);
+                                var callUrl = getCallUrl(callId);
+                                var callWindow = webConferencing.showCallWindow(callUrl, self.getTitle() + " " + callId);
+                                callWindow.document.title = call.title;
+
+                                // callPopup.close();
+                              });
+                              callPopup.onRejected(() => {
+                                if (!isGroup && callPopup.callState != "stopped" && callPopup.callState != "joined") {
+                                  // Delete the call if it is not group one, not
+                                  // already stopped and wasn't joined -
+                                  // a group call will be deleted automatically
+                                  // when last party leave it.
+
+                                  // closeCallPopup(callId, "started");
+
+                                  log.trace("<<< User declined " + (callPopup.callState ? " just " + callPopup.callState : "") +
+                                    " call " + callId + ", deleting it.");
+                                  webConferencing.deleteCall(callId).done(function() {
+                                    log.info("Call deleted: " + callId);
+                                  }).fail(function(err) {
+                                    if (err && (err.code == "NOT_FOUND_ERROR")) {
+                                      // already deleted
+                                      log.trace("<< Call not found " + callId);
+                                    } else {
+                                      log.error("Failed to stop call: " + callId, err);
+                                      webConferencing.showError("Error stopping call", webConferencing.errorText(err));
+                                    }
+                                  });
                                 }
                               });
-                            }
-                          });
+                            })
+                          
+                          .catch(error => {
+                            log.error(error)
+                          })
+                          // popover.progress(function($callDialog) {
+                          //   // Finish initialization...
+                          //   $callPopup = $callDialog;
+                          //   // And some extra info to distinguish the popup
+                          //   $callPopup.callId = callId;
+                          //   $callPopup.callState = update.callState;
+                          // });
+                          // popover.done(function(msg) {
+                          //   // User accepted the call...
+                          //   log.info("User " + msg + " call: " + callId);
+                          //   //var callUrl = window.location.protocol + "//" + window.location.host + "/jitsi/meet/" + encodeURIComponent(callId);
+                          //   var callUrl = getCallUrl(callId);
+                          //   var callWindow = webConferencing.showCallWindow(callUrl, self.getTitle() + " " + callId);
+                          //   callWindow.document.title = call.title;
+                          //   // Optionally, we may invoke a call window to
+                          //   // initialize the call.
+                          //   // First wait the call window loaded
+                          //   //$(callWindow).on("load", function() {
+                          //   //  log.debug("Call page loaded: " + callId);
+                          //   //  lockCallButton(update.owner.id, callId); // TODO cleanup
+                          //   //});
+                          // });
+                          // popover.fail(function(err) {
+                          //   // User rejected the call, call was stopped or
+                          //   // joined on another client/page.
+                          //   if (!isGroup && $callPopup.callState != "stopped" && $callPopup.callState != "joined") {
+                          //     // Delete the call if it is not group one, not
+                          //     // already stopped and wasn't joined -
+                          //     // a group call will be deleted automatically
+                          //     // when last party leave it.
+                          //     log.trace("<<< User " + err + ($callPopup.callState ? " just " + $callPopup.callState : "") +
+                          //       " call " + callId + ", deleting it.");
+                          //     webConferencing.deleteCall(callId).done(function() {
+                          //       log.info("Call deleted: " + callId);
+                          //     }).fail(function(err) {
+                          //       if (err && (err.code == "NOT_FOUND_ERROR")) {
+                          //         // already deleted
+                          //         log.trace("<< Call not found " + callId);
+                          //       } else {
+                          //         log.error("Failed to stop call: " + callId, err);
+                          //         webConferencing.showError("Error stopping call", webConferencing.errorText(err));
+                          //       }
+                          //     });
+                          //   }
+                          // });
                         }).fail(
                           function(err) {
                             log.error("Failed to get user status: " + currentUserId, err);
