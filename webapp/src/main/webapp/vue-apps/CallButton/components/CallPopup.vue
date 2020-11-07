@@ -1,31 +1,43 @@
 <template>
-  <v-row justify="center">
-    <!-- <v-btn color="primary" dark @click.stop="dialog = true">Open Dialog</v-btn> -->
-    <v-dialog v-model="dialog" width="430">
-      <v-card>
-        <!-- <v-card-title class="headline">UserName</v-card-title> -->
-        <v-avatar color="#578dc9" width="70" height="70">
-          <img :src="avatar" :alt="caller" />
-        </v-avatar>
-        <v-card-text>{{ caller }} started a Meeting with you</v-card-text>
-        <v-card-actions>
-          <!-- <v-spacer /> -->
-
-          <v-btn class="ma-2" color="success" elevation="0" fab dark @click="callbackFunc(true); closePopup()">
-            <i class="uiIconSocPhone"></i>
-          </v-btn>Join
-          <v-spacer />
-          <v-btn class="ma-2" outlined fab color="#999" @click="callbackFunc(false); closePopup()">
-            <i class="uiIconClose"></i>
-          </v-btn>Ignore
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-row>
+  <div id="call-popup">
+    <v-row justify="center">
+      <v-dialog v-model="dialog" width="430">
+        <v-card>
+          <v-avatar 
+            color="#578dc9" 
+            width="70" 
+            height="70">
+            <img :src="avatar" :alt="caller" >
+          </v-avatar>
+          <v-card-text>{{ caller }} started a Meeting with you</v-card-text>
+          <v-card-actions>
+            <v-btn
+              class="ma-2"
+              color="success"
+              elevation="0"
+              fab
+              dark
+              @click="passAssepted(); closePopup()">
+              <i class="uiIconSocPhone"></i>
+            </v-btn>Join
+            <v-spacer />
+            <v-btn
+              class="ma-2"
+              outlined
+              fab
+              color="#999"
+              @click="passRejected(); closePopup()">
+              <i class="uiIconClose"></i>
+            </v-btn>Ignore
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
+  </div>
 </template>
 <script>
 export default {
-  name: "NotificationPopUp",
+  name: "CallPopup",
   props: {
     dialog: {
       type: Boolean,
@@ -39,15 +51,17 @@ export default {
     avatar: {
       type: String,
       required: true
-    },
-    callbackFunc: {
-      type: Function,
-      required: true
     }
   },
   methods: {
     closePopup() {
       this.dialog = false;
+    },
+    passAssepted() {
+      this.$emit("accepted");
+    },
+    passRejected() {
+      this.$emit("rejected");
     }
   }
 };
@@ -57,7 +71,6 @@ export default {
   content: "e937";
 }
 .VuetifyApp {
-  //   .v-application  {
   .spacer {
     flex-grow: unset !important;
     width: 12%;
@@ -87,7 +100,6 @@ export default {
       .v-card__text {
         grid-column: 2 / span 2;
         grid-row: 1 / span 1;
-        // align-self: center;
         padding: 20px 10px 20px;
       }
       .v-card__actions {
@@ -100,14 +112,12 @@ export default {
           border: 1px solid;
           .v-btn__content {
             .uiIconClose::before {
-                font-size: 20px !important;
-              }
+              font-size: 20px !important;
+            }
           }
         }
       }
     }
-
-    //   }
     //   @media (max-width: 959px) {
     //     .v-dialog {
     //       border-radius: 2px;

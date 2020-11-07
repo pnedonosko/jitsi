@@ -72,6 +72,10 @@ export default {
     padding: 0px;
     min-width: unset;
   }
+  .v-btn {
+    padding: 0px;
+  }
+
   [class^="uiIcon"] {
     font-size: 12px !important;
     &:before {
@@ -79,6 +83,7 @@ export default {
       height: 16px;
       width: 16px;
       margin-right: 4px;
+      margin-left: 3px;
     }
   }
   .theme--light.v-btn {
