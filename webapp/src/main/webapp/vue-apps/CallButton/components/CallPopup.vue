@@ -69,13 +69,20 @@ export default {
     flex-grow: unset !important;
     width: 12%;
   }
+  .v-application {
+    .v-dialog {
+      position: absolute;
+    bottom: 7%;
+    right: 7%;
+    }
+  }
   .v-dialog {
     border-radius: 2px;
     // border: 1px solid red !important;
     height: 160px;
-    position: absolute;
-    bottom: 7%;
-    right: 7%;
+    // position: absolute;
+    // bottom: 7%;
+    // right: 7%;
     .v-sheet.v-card {
       border-radius: 2px;
       height: 160px;
