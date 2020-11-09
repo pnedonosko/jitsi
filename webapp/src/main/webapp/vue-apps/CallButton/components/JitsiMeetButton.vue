@@ -77,7 +77,7 @@ export default {
   }
 
   [class^="uiIcon"] {
-    font-size: 14px !important;
+    // font-size: 16px !important;
     &:before {
       color: unset;
       height: 16px;

@@ -328,24 +328,24 @@
       //     }
       //   });
       //   process.notify($call);
-      //   if (playRingtone) {
-      //     const ringId = "jitsi-call-ring-" + callerId;
-      //     let $ring;
-      //     let callRinging = localStorage.getItem(ringId);
-      //     if (!callRinging || Date.now() - callRinging.time > 5000) {
-      //       log.trace(">>> Ringing the caller: " + callerId);
-      //       // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
-      //       localStorage.setItem(ringId, {
-      //         time: Date.now()
-      //       }); // set it quick as possible to avoid rice conditions
-      //       callRinging = true;
-      //       // Start ringing incoming sound only if requested (depends on user status)
-      //       // TODO ringtone was incoming.mp3 type='audio/mpeg' -- Oct 29, 2020
-      //       $ring = $("<audio loop autoplay style='display: none;'>" +
-      //         "<source src='/jitsi/resources/audio/ringtone_exo-1.m4a'>" +
-      //         "Your browser does not support the audio element.</audio>");
-      //       $(document.body).append($ring);
-      //     }
+        // if (playRingtone) {
+        //   const ringId = "jitsi-call-ring-" + callerId;
+        //   let $ring;
+        //   let callRinging = localStorage.getItem(ringId);
+        //   if (!callRinging || Date.now() - callRinging.time > 5000) {
+        //     log.trace(">>> Ringing the caller: " + callerId);
+        //     // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
+        //     localStorage.setItem(ringId, {
+        //       time: Date.now()
+        //     }); // set it quick as possible to avoid rice conditions
+        //     callRinging = true;
+        //     // Start ringing incoming sound only if requested (depends on user status)
+        //     // TODO ringtone was incoming.mp3 type='audio/mpeg' -- Oct 29, 2020
+        //     $ring = $("<audio loop autoplay style='display: none;'>" +
+        //       "<source src='/jitsi/resources/audio/ringtone_exo-1.m4a'>" +
+        //       "Your browser does not support the audio element.</audio>");
+        //     $(document.body).append($ring);
+        //   }
       //     process.fail(function() {
       //       if ($call.callState != "joined") {
       //         var $cancel = $("<audio autoplay style='display: none;'>" +
@@ -403,6 +403,12 @@
               // }
             }
           };
+          // var playSound = function(sound) {
+          //   if(sound) {
+          //     var audio = new Audio(sound);
+          //     audio.play();
+          //   }
+          // }
           // Subscribe to user updates (incoming calls will be notified here)
           webConferencing.onUserUpdate(currentUserId, function(update) {
             // This connector cares only about own provider events
@@ -446,9 +452,30 @@
                           // resolved (done)
                           // to act on accepted call and on rejected (fail)
                           // on declined call.
-                          callButton.initCallPopup(callId, update.callState, callerId, callerLink,  callerAvatar, callerMessage, !user ||
-                            user.status == "available" || user.status == "away").then((callPopup) => {
-                              callPopup.onAccepted(() => {
+                          const playRingtone = !user || user.status == "available" || user.status == "away";
+                          callButton.initCallPopup(callId, update.callState, callerId, callerLink,  callerAvatar, callerMessage, playRingtone).then((callPopup) => {
+                            if (playRingtone) {
+                              const ringId = "jitsi-call-ring-" + callerId;
+                              let $ring;
+                              let callRinging = localStorage.getItem(ringId);
+                              if (!callRinging || Date.now() - callRinging.time > 5000) {
+                                log.trace(">>> Ringing the caller: " + callerId);
+                                // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
+                                localStorage.setItem(ringId, {
+                                  time: Date.now()
+                                }); // set it quick as possible to avoid rice conditions
+                                callRinging = true;
+                                // Start ringing incoming sound only if requested (depends on user status)
+                                // TODO ringtone was incoming.mp3 type='audio/mpeg' -- Oct 29, 2020
+                                // playSound('/jitsi/audio/ringtone_exo-1.m4a');
+                                console.log("PLAYING")
+                                $ring = $("<audio loop autoplay style='display: none;'>" +
+                                  "<source src='http://soundbible.com/mp3/Air Plane Ding-SoundBible.com-496729130.mp3' type='audio/mpeg'>" +
+                                  "Your browser does not support the audio element.</audio>");
+                                $(document.body).append($ring);
+                              }
+                            }  
+                            callPopup.onAccepted(() => {
                                 log.info("User accepted call: " + callId);
                                 //var callUrl = window.location.protocol + "//" + window.location.host + "/jitsi/meet/" + encodeURIComponent(callId);
                                 var callUrl = getCallUrl(callId);
