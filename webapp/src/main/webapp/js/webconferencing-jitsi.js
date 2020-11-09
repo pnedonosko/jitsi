@@ -425,7 +425,8 @@
                       var callerId = call.owner.id;
                       var callerLink = call.owner.profileLink;
                       var callerAvatar = call.owner.avatarLink;
-                      var callerMessage = call.owner.title + " is calling you...";
+                      const styledOwnerTitle = call.owner.title.bold();
+                      var callerMessage = !isGroup ? styledOwnerTitle + " started a Meeting with you." : "A meeting has started in the room " + styledOwnerTitle;
                       var callerRoom = callerId;
                       call.title = call.owner.title; // for callee the call
                       // title is a caller
@@ -454,7 +455,6 @@
                                 var callWindow = webConferencing.showCallWindow(callUrl, self.getTitle() + " " + callId);
                                 callWindow.document.title = call.title;
 
-                                // callPopup.close();
                               });
                               callPopup.onRejected(() => {
                                 if (!isGroup && callPopup.callState != "stopped" && callPopup.callState != "joined") {

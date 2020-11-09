@@ -45,6 +45,15 @@ export function initCallPopup(
   playRingtone
 ) {
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
+    console.log("callId: ", callId,
+      "callState: ", callState,
+      "callerId: ", callerId,
+      "callerLink: ", callerLink,
+      "callerAvatar: ", callerAvatar,
+      "callerMessage: ", callerMessage,
+      "playRingtone: ", playRingtone)
+    const container = document.createElement("div");
+    container.setAttribute("id", "call-popup");
     let onAccepted;
     let onRejected;
     const comp = new Vue({
@@ -54,29 +63,36 @@ export function initCallPopup(
       },
       data() {
         return {
-          dialog: true,
+          isDialogVisible: true,
           callerId: callerId,
           avatar: callerAvatar,
+          callerMessage: callerMessage
         };
       },
       i18n,
       vuetify,
       render: function(h) {
+        const thevue = this;
         return h(CallPopup, {
           props: {
-            dialog: this.dialog,
+            isDialogVisible: this.isDialogVisible,
             caller: this.callerId,
             avatar: this.avatar,
+            callerMessage: this.callerMessage
           },
           on: {
             accepted: function() {
               if (onAccepted) {
                 onAccepted();
+                thevue.isDialogVisible = false;
+                thevue.$destroy();
               }
             },
             rejected: function(isClosed) {
               if (onRejected) {
                 onRejected(isClosed);
+                thevue.isDialogVisible = false;
+                thevue.$destroy();
               }
             },
           },
@@ -88,10 +104,8 @@ export function initCallPopup(
       callState,
       callerId,
       close: function() {
-        // console.log("close")
-        comp.dialog = false;
-        comp.destroy();
-        // console.log(comp);
+        comp.isDialogVisible = false;
+        comp.$destroy();
       },
       onAccepted: function(callback) {
         onAccepted = callback;

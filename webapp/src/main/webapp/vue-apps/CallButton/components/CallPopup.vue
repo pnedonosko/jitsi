@@ -1,45 +1,38 @@
 <template>
-  <div id="call-popup">
-    <v-row justify="center">
-      <v-dialog v-model="dialog" width="430">
-        <v-card>
-          <v-avatar 
-            color="#578dc9" 
-            width="70" 
-            height="70">
-            <img :src="avatar" :alt="caller" >
-          </v-avatar>
-          <v-card-text>{{ caller }} started a Meeting with you</v-card-text>
-          <v-card-actions>
-            <v-btn
-              class="ma-2"
-              color="success"
-              elevation="0"
-              fab
-              dark
-              @click="passAssepted(); closePopup()">
-              <i class="uiIconSocPhone"></i>
-            </v-btn>Join
-            <v-spacer />
-            <v-btn
-              class="ma-2"
-              outlined
-              fab
-              color="#999"
-              @click="passRejected(); closePopup()">
-              <i class="uiIconClose"></i>
-            </v-btn>Ignore
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-row>
-  </div>
+  <v-row justify="center">
+    <v-dialog v-model="isDialogVisible" width="430">
+      <v-card>
+        <v-avatar color="#578dc9" width="70" height="70">
+          <img :src="avatar" :alt="caller" />
+        </v-avatar>
+        <i class="uiIconSocPhone start-call"></i>
+        <v-card-text v-html="callerMessage"></v-card-text>
+        <v-card-actions>
+          <v-btn
+            class="ma-2 accept-button"
+            color="#2eb58c"
+            elevation="0"
+            fab
+            dark
+            @click="passAssepted">
+            <i class="uiIconSocPhone"></i>
+          </v-btn>
+          <span class="button-title">JoIn</span>
+          <v-spacer />
+          <v-btn class="ma-2 decline-button" outlined fab color="#aeb3b7" @click="passRejected">
+            <i class="uiIconClose"></i>
+          </v-btn>
+          <span class="button-title">Ignore</span>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-row>
 </template>
 <script>
 export default {
   name: "CallPopup",
   props: {
-    dialog: {
+    isDialogVisible: {
       type: Boolean,
       required: true,
       default: false
@@ -51,12 +44,16 @@ export default {
     avatar: {
       type: String,
       required: true
+    },
+    callerMessage: {
+      type: String,
+      required: true
     }
   },
   methods: {
-    closePopup() {
-      this.dialog = false;
-    },
+    // closePopup() {
+    //   this.dialog = false;
+    // },
     passAssepted() {
       this.$emit("accepted");
     },
@@ -67,21 +64,18 @@ export default {
 };
 </script>
 <style scoped lang="less">
-[class^="uiIcon"] {
-  content: "e937";
-}
 .VuetifyApp {
   .spacer {
     flex-grow: unset !important;
     width: 12%;
   }
-  .v-card__actions {
-    padding: 8px 2px !important;
-  }
   .v-dialog {
     border-radius: 2px;
     // border: 1px solid red !important;
     height: 160px;
+    position: absolute;
+    bottom: 7%;
+    right: 7%;
     .v-sheet.v-card {
       border-radius: 2px;
       height: 160px;
@@ -90,6 +84,16 @@ export default {
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(2, 80px);
       grid-auto-rows: 10px;
+      [class^="uiIcon"].start-call {
+        position: absolute;
+        top: 15%;
+        left: 24%;
+        &::before {
+          content: "\e61c";
+          color: #fb8e18;
+          font-size: 20px;
+        }
+      }
       .v-avatar {
         border-radius: 50% !important;
         align-self: center;
@@ -100,21 +104,54 @@ export default {
       .v-card__text {
         grid-column: 2 / span 2;
         grid-row: 1 / span 1;
-        padding: 20px 10px 20px;
+        padding: 20px 15px 20px 0px;
+        font-size: 16px;
       }
       .v-card__actions {
         grid-column: 2 / span 2;
         grid-row: 2 / span 1;
+        padding: 8px 0px !important;
         .v-btn {
           padding: 0;
           height: 50px;
-          widows: 50px;
+          width: 50px;
           border: 1px solid;
+          margin-left: 0px !important;
           .v-btn__content {
-            .uiIconClose::before {
-              font-size: 20px !important;
+            [class^="uiIcon"]::before {
+              font-size: 25px;
             }
           }
+          &.accept-button {
+            .v-btn__content {
+              [class^="uiIcon"] {
+                color: white;
+                &::before {
+                  content: "\e92b";
+                }
+              }
+            }
+          }
+          &.decline-button {
+            .v-btn__content {
+              [class^="uiIcon"] {
+                position: relative;
+                &::before {
+                  color: #aeb3b7;
+                  font-size: 35px;
+                  content: "\00d7";
+                  position: absolute;
+                  top: -25px;
+                  left: -25px;
+                  transform: translate(14px, 5px);
+                }
+              }
+            }
+          }
+        }
+        .button-title {
+          font-weight: 700;
+          font-size: 14px;
         }
       }
     }

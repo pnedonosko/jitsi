@@ -77,13 +77,14 @@ export default {
   }
 
   [class^="uiIcon"] {
-    font-size: 12px !important;
+    font-size: 14px !important;
     &:before {
       color: unset;
       height: 16px;
       width: 16px;
       margin-right: 4px;
       margin-left: 3px;
+      content: "\e92b";
     }
   }
   .theme--light.v-btn {
