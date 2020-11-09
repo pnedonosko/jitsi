@@ -254,7 +254,7 @@
                   startCall(context, target);
                 });
                 $button.data("targetid", target.id);
-                button.resolve($button[0]);
+                button.resolve($button);
               }
             }).fail(function(err) {
               // On error, we don't show the button for this context
@@ -403,12 +403,12 @@
               // }
             }
           };
-          // var playSound = function(sound) {
-          //   if(sound) {
-          //     var audio = new Audio(sound);
-          //     audio.play();
-          //   }
-          // }
+          var playSound = function(sound) {
+            if(sound) {
+              var audio = new Audio(sound);
+              audio.play();
+            }
+          }
           // Subscribe to user updates (incoming calls will be notified here)
           webConferencing.onUserUpdate(currentUserId, function(update) {
             // This connector cares only about own provider events
@@ -455,25 +455,27 @@
                           const playRingtone = !user || user.status == "available" || user.status == "away";
                           callButton.initCallPopup(callId, update.callState, callerId, callerLink,  callerAvatar, callerMessage, playRingtone).then((callPopup) => {
                             if (playRingtone) {
-                              const ringId = "jitsi-call-ring-" + callerId;
+                              //const ringId = "jitsi-call-ring-" + callerId;
                               let $ring;
-                              let callRinging = localStorage.getItem(ringId);
-                              if (!callRinging || Date.now() - callRinging.time > 5000) {
+                              //let callRinging = localStorage.getItem(ringId);
+                              //log.trace(callRinging);
+                              //if (!callRinging || Date.now() - callRinging.time > 5000) {
                                 log.trace(">>> Ringing the caller: " + callerId);
                                 // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
-                                localStorage.setItem(ringId, {
-                                  time: Date.now()
-                                }); // set it quick as possible to avoid rice conditions
-                                callRinging = true;
+                                //localStorage.setItem(ringId, {
+                                //  time: Date.now()
+                                //}); // set it quick as possible to avoid rice conditions
+                                // callRinging = true;
                                 // Start ringing incoming sound only if requested (depends on user status)
                                 // TODO ringtone was incoming.mp3 type='audio/mpeg' -- Oct 29, 2020
-                                // playSound('/jitsi/audio/ringtone_exo-1.m4a');
-                                console.log("PLAYING")
-                                $ring = $("<audio loop autoplay style='display: none;'>" +
-                                  "<source src='http://soundbible.com/mp3/Air Plane Ding-SoundBible.com-496729130.mp3' type='audio/mpeg'>" +
-                                  "Your browser does not support the audio element.</audio>");
-                                $(document.body).append($ring);
-                              }
+                                // playSound('/jitsi/resources/audio/ringtone_exo-1.m4a');
+                                // $ring = $("<audio loop autoplay style='display: none;'>" +
+                                //   "<source src='http://soundbible.com/mp3/Air Plane Ding-SoundBible.com-496729130.mp3' type='audio/mpeg'>" +
+                                //   "Your browser does not support the audio element.</audio>");
+                                //   console.log($ring);
+                                // $(document.body).append($fcloring);
+                                playSound("http://soundbible.com/mp3/Air Plane Ding-SoundBible.com-496729130.mp3");
+                              //}
                             }  
                             callPopup.onAccepted(() => {
                                 log.info("User accepted call: " + callId);

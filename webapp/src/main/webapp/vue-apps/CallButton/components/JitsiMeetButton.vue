@@ -75,9 +75,7 @@ export default {
   .v-btn {
     padding: 0px;
   }
-
   [class^="uiIcon"] {
-    // font-size: 16px !important;
     &:before {
       color: unset;
       height: 16px;
