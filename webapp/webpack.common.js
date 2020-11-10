@@ -7,17 +7,17 @@ let config = {
   // can use multiple entry
   entry: {
     jitsi: "./src/main/webapp/vue-apps/Jitsi/main.js",
-    callButton: "./src/main/webapp/vue-apps/CallButton/main.js"
+    callButton: "./src/main/webapp/vue-apps/CallButton/main.js",
   },
   output: {
     filename: "js/[name].bundle.js",
-    libraryTarget: "amd"
+    libraryTarget: "amd",
   },
   module: {
     rules: [
       {
         test: /\.css$/,
-        use: ["vue-style-loader", "css-loader"]
+        use: ["vue-style-loader", "css-loader"],
       },
       {
         test: /\.less$/,
@@ -27,34 +27,32 @@ let config = {
             {
               loader: "css-loader",
               options: {
-                sourceMap: true
-              }
+                sourceMap: true,
+              },
             },
             {
               loader: "less-loader",
               options: {
-                sourceMap: true
-              }
-            }
-          ]
-        })
+                sourceMap: true,
+              },
+            },
+          ],
+        }),
       },
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        use: [
-          "babel-loader",
-          "eslint-loader"
-        ]
+        use: ["babel-loader", "eslint-loader"],
       },
       {
         test: /\.vue$/,
-        use: [
-          "vue-loader",
-          "eslint-loader"
-        ]
-      }
-    ]
+        use: ["vue-loader", "eslint-loader"],
+      },
+      {
+        test: /\.mp3$/,
+        loader: "url-loader",
+      },
+    ],
   },
   externals: {
     vue: "Vue",
@@ -62,8 +60,8 @@ let config = {
   },
   plugins: [
     // we use ExtractTextWebpackPlugin to extract the css code on a css file
-    new ExtractTextWebpackPlugin("css/main.css")
-  ]
+    new ExtractTextWebpackPlugin("css/main.css"),
+  ],
 };
 
 module.exports = config;

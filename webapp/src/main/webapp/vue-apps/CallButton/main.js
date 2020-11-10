@@ -1,5 +1,6 @@
 import JitsiMeetButton from "./components/JitsiMeetButton.vue";
 import CallPopup from "./components/CallPopup.vue";
+import { Howl } from "howler";
 
 Vue.use(Vuetify);
 Vue.component("jitsi-meet-button", JitsiMeetButton);
@@ -14,6 +15,29 @@ const lang =
 const localePortlet = "locale.jitsi";
 const resourceBundleName = "Jitsi";
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/${localePortlet}.${resourceBundleName}-${lang}.json`;
+
+let audio;
+function playSound(sound) {
+  if (sound) {
+    // this.audio = new Audio(sound);
+    // this.audio.muted = false;
+    // this.audio.autoplay = true;
+    // this.audio.allow = "autoplay";
+    
+    audio = new Howl({
+      autoUnlock: true,
+      // autoplay: true,
+      src: [sound],
+      loop: true,
+      preload: true
+    });
+
+    // sound.play();
+    // console.log(audio);
+    // audio.play();
+  }
+}
+playSound("/webrtc/audio/line.mp3");
 
 export function init(callSettings) {
   // getting locale ressources
@@ -44,14 +68,15 @@ export function initCallPopup(
   callerMessage,
   playRingtone
 ) {
+
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
-    console.log("callId: ", callId,
-      "callState: ", callState,
-      "callerId: ", callerId,
-      "callerLink: ", callerLink,
-      "callerAvatar: ", callerAvatar,
-      "callerMessage: ", callerMessage,
-      "playRingtone: ", playRingtone)
+    // log.trace("callId: ", callId,
+    //   "callState: ", callState,
+    //   "callerId: ", callerId,
+    //   "callerLink: ", callerLink,
+    //   "callerAvatar: ", callerAvatar,
+    //   "callerMessage: ", callerMessage,
+    //   "playRingtone: ", playRingtone)
     const container = document.createElement("div");
     container.setAttribute("id", "call-popup");
     let onAccepted;
@@ -66,8 +91,19 @@ export function initCallPopup(
           isDialogVisible: true,
           callerId: callerId,
           avatar: callerAvatar,
-          callerMessage: callerMessage
+          callerMessage: callerMessage,
+          playRingtone: playRingtone
         };
+      },
+      // created() {
+      //   if (playRingtone) {
+      //     audio.play();
+      //   }
+      // },
+      mounted() {
+        if (playRingtone) {
+          audio.play();
+        }
       },
       i18n,
       vuetify,
@@ -78,13 +114,16 @@ export function initCallPopup(
             isDialogVisible: this.isDialogVisible,
             caller: this.callerId,
             avatar: this.avatar,
-            callerMessage: this.callerMessage
+            callerMessage: this.callerMessage,
+            playRingtone: this.playRingtone,
+            audio: audio
           },
           on: {
             accepted: function() {
               if (onAccepted) {
                 onAccepted();
                 thevue.isDialogVisible = false;
+                audio.stop();
                 thevue.$destroy();
               }
             },
@@ -92,6 +131,7 @@ export function initCallPopup(
               if (onRejected) {
                 onRejected(isClosed);
                 thevue.isDialogVisible = false;
+                audio.stop();
                 thevue.$destroy();
               }
             },
