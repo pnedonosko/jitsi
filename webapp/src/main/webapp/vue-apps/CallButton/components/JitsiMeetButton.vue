@@ -4,7 +4,7 @@
     <i class="uiIconSocPhone uiIconBlue"></i>
     <!-- <svg viewBox="0 0 100 100" class="icon shape-codepen">
       <use xlink:href="#shape-codepen"></use>
-    </svg> -->
+    </svg>-->
     <!-- <svg-icon icon="Jitsi"/> -->
     {{ i18n.te("UICallButton.label.jitsi")
       ? $t("UICallButton.label.jitsi")
@@ -43,14 +43,14 @@ export default {
     return {
       settings: this.callSettings,
       log: null,
-      callWindow: null,
+      callWindow: null
     };
   },
-  create() {
+  created() {
     this.log = webConferencing.getLog("jitsi");
     const callButton = this.$refs.jitsi;
   },
- 
+
   mounted() {
     // Assign target ID to the button for later use on started
     // event in init()
