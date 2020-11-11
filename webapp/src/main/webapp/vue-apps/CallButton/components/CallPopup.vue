@@ -2,8 +2,11 @@
   <v-row justify="center">
     <v-dialog v-model="isDialogVisible" width="430">
       <v-card>
-        <v-avatar color="#578dc9" width="70" height="70">
-          <img :src="avatar" :alt="caller" />
+        <v-avatar 
+          color="#578dc9" 
+          width="70" 
+          height="70">
+          <img :src="avatar" :alt="caller" >
         </v-avatar>
         <i class="uiIconSocPhone start-call"></i>
         <v-card-text v-html="callerMessage" />
@@ -19,7 +22,12 @@
           </v-btn>
           <span class="button-title">JoIn</span>
           <v-spacer />
-          <v-btn class="ma-2 decline-button" outlined fab color="#aeb3b7" @click="passRejected">
+          <v-btn 
+            class="ma-2 decline-button" 
+            outlined 
+            fab 
+            color="#aeb3b7" 
+            @click="passRejected">
             <i class="uiIconClose"></i>
           </v-btn>
           <span class="button-title">Ignore</span>
@@ -30,8 +38,7 @@
 </template>
 
 <script>
-// let audio;
-// import { Howl, Howler } from "howler";
+
 export default {
   name: "CallPopup",
   props: {
@@ -51,52 +58,19 @@ export default {
     callerMessage: {
       type: String,
       required: true
-    },
-    playRingtone: {
-      type: Boolean,
-      required: true,
-      default: false
-    },
-    audio: {
-      type: Object,
-      required: true
     }
   },
   data() {
     return {
-      // sound: "",
-      // audio: null
     };
   },
   // watch: {
   //   playRingtone(oldValue, newValue) {
-  //     console.log(this.playRingtone);
   //     if (oldValue === true || newValue === true) {
-  //       this.playSound("/webrtc/audio/line.mp3");
+  //       this.addSound("/webrtc/audio/line.mp3");
   //       this.audio.play();
   //     }
   //   }
-    // isDialogVisible(newV, oldV) {
-    //   if (newV === true) {
-    //     this.audio.stop()
-    //     }
-    // }
-  // },
-  // beforeCreate() {
-  //   this.playSound("/webrtc/audio/line.mp3");
-  // },
-  // created() {
-  //   // this.playSound("/webrtc/audio/line.mp3");
-  //   // audio.play();
-  //   // console.log(this.audio)
-  //   // return this.playRingtone;
-  // },
-  beforeDestroy() {
-    // audio.stop();
-  },
-  // updated() {
-  //   // this.playSound("/webrtc/audio/line.mp3");
-  //   return this.playRingtone;
   // },
   methods: {
     // closePopup() {
@@ -108,26 +82,6 @@ export default {
     passRejected() {
       this.$emit("rejected");
     },
-    // playSound(sound) {
-    //   if (sound) {
-    //     // this.audio = new Audio(sound);
-    //     // this.audio.muted = false;
-    //     // this.audio.autoplay = true;
-    //     // this.audio.allow = "autoplay";
-        
-    //     audio = new Howl({
-    //       autoUnlock: true,
-    //       autoplay: true,
-    //       src: [sound],
-    //       loop: true,
-    //       preload: true
-    //     });
-
-    //     // sound.play();
-    //     console.log(audio);
-    //     // audio.play();
-    //   }
-    // }
   }
 };
 </script>
@@ -146,7 +100,6 @@ export default {
   }
   .v-dialog {
     border-radius: 2px;
-    // border: 1px solid red !important;
     height: 160px;
     // position: absolute;
     // bottom: 7%;

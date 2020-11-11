@@ -1,5 +1,9 @@
 <template>
-  <v-btn id="myCallAction" ref="jitsi" outlined @click.native="startCall">
+  <v-btn 
+    id="myCallAction" 
+    ref="jitsi" 
+    outlined 
+    @click.native="startCall">
     <!-- <svg-sprite /> -->
     <i class="uiIconSocPhone uiIconBlue"></i>
     <!-- <svg viewBox="0 0 100 100" class="icon shape-codepen">

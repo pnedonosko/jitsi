@@ -17,13 +17,9 @@ const resourceBundleName = "Jitsi";
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/${localePortlet}.${resourceBundleName}-${lang}.json`;
 
 let audio;
-function playSound(sound) {
+let decline;
+function addCallSound(sound) {
   if (sound) {
-    // this.audio = new Audio(sound);
-    // this.audio.muted = false;
-    // this.audio.autoplay = true;
-    // this.audio.allow = "autoplay";
-    
     audio = new Howl({
       autoUnlock: true,
       // autoplay: true,
@@ -31,13 +27,21 @@ function playSound(sound) {
       loop: true,
       preload: true
     });
-
-    // sound.play();
-    // console.log(audio);
-    // audio.play();
   }
 }
-playSound("/webrtc/audio/line.mp3");
+function addRejectSound(sound) {
+  if (sound) {
+    decline = new Howl({
+      autoUnlock: true,
+      // autoplay: true,
+      src: [sound],
+      preload: true
+    });
+  }
+}
+addCallSound("/webrtc/audio/line.mp3");
+addRejectSound("/webrtc/audio/manner_cancel.mp3");
+
 
 export function init(callSettings) {
   // getting locale ressources
@@ -70,13 +74,6 @@ export function initCallPopup(
 ) {
 
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
-    // log.trace("callId: ", callId,
-    //   "callState: ", callState,
-    //   "callerId: ", callerId,
-    //   "callerLink: ", callerLink,
-    //   "callerAvatar: ", callerAvatar,
-    //   "callerMessage: ", callerMessage,
-    //   "playRingtone: ", playRingtone)
     const container = document.createElement("div");
     container.setAttribute("id", "call-popup");
     let onAccepted;
@@ -95,12 +92,8 @@ export function initCallPopup(
           playRingtone: playRingtone
         };
       },
-      // created() {
-      //   if (playRingtone) {
-      //     audio.play();
-      //   }
-      // },
       mounted() {
+        console.log("mounted!")
         if (playRingtone) {
           audio.play();
         }
@@ -115,8 +108,8 @@ export function initCallPopup(
             caller: this.callerId,
             avatar: this.avatar,
             callerMessage: this.callerMessage,
-            playRingtone: this.playRingtone,
-            audio: audio
+            // playRingtone: this.playRingtone,
+            // audio: audio
           },
           on: {
             accepted: function() {
@@ -129,9 +122,10 @@ export function initCallPopup(
             },
             rejected: function(isClosed) {
               if (onRejected) {
+                audio.stop();
+                decline.play();
                 onRejected(isClosed);
                 thevue.isDialogVisible = false;
-                audio.stop();
                 thevue.$destroy();
               }
             },
