@@ -1,6 +1,6 @@
 import JitsiMeetButton from "./components/JitsiMeetButton.vue";
 import CallPopup from "./components/CallPopup.vue";
-import { Howl } from "howler";
+// import { Howl } from "howler";
 
 Vue.use(Vuetify);
 Vue.component("jitsi-meet-button", JitsiMeetButton);
@@ -16,33 +16,35 @@ const localePortlet = "locale.jitsi";
 const resourceBundleName = "Jitsi";
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/${localePortlet}.${resourceBundleName}-${lang}.json`;
 
-let audio;
-let decline;
-function addCallSound(sound) {
-  if (sound) {
-    audio = new Howl({
-      autoUnlock: true,
-      // autoplay: true,
-      src: [sound],
-      loop: true,
-      preload: true
-    });
-  }
-}
-function addRejectSound(sound) {
-  if (sound) {
-    decline = new Howl({
-      autoUnlock: true,
-      // autoplay: true,
-      src: [sound],
-      preload: true
-    });
-  }
-}
-addCallSound("/jitsi/resources/audio/ringtone_exo-1.m4a");
-addRejectSound("/webrtc/audio/incoming_cancel.mp3");
+// console.log(webConferencing)
 
+// let audio;
+// let decline;
+// function addCallSound(sound) {
+//   if (sound) {
+//     audio = new Howl({
+//       autoUnlock: true,
+//       // autoplay: true,
+//       src: [sound],
+//       loop: true,
+//       preload: true
+//     });
+//   }
+// }
+// function addRejectSound(sound) {
+//   if (sound) {
+//     decline = new Howl({
+//       autoUnlock: true,
+//       // autoplay: true,
+//       src: [sound],
+//       preload: true
+//     });
+//   }
+// }
+// addCallSound("/jitsi/resources/audio/ringtone_exo-1.m4a");
+// addRejectSound("/webrtc/audio/manner_cancel.mp3");
 
+// console.log(audio.loop)
 export function init(callSettings) {
   // getting locale ressources
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
@@ -93,10 +95,11 @@ export function initCallPopup(
         };
       },
       mounted() {
-        console.log("mounted!")
-        if (playRingtone) {
-          audio.play();
-        }
+        // console.log("mounted!")
+        // if (playRingtone) {
+        //   audio.play();
+        // }
+        webConferencing.jitsi.playIncomingRing("/webrtc/audio/line.mp3");
       },
       i18n,
       vuetify,
@@ -116,14 +119,14 @@ export function initCallPopup(
               if (onAccepted) {
                 onAccepted();
                 thevue.isDialogVisible = false;
-                audio.stop();
+                // audio.stop();
                 thevue.$destroy();
               }
             },
             rejected: function(isClosed) {
               if (onRejected) {
-                audio.stop();
-                decline.play();
+                // audio.stop();
+                // decline.play();
                 onRejected(isClosed);
                 thevue.isDialogVisible = false;
                 thevue.$destroy();

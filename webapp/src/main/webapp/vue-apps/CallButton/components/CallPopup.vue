@@ -3,7 +3,7 @@
     <v-dialog 
       v-model="isDialogVisible" 
       width="430"
-      @click-outside="passRejected">
+      @click:outside="passRejected">
       <v-card>
         <v-avatar 
           color="#578dc9" 
@@ -20,7 +20,7 @@
             elevation="0"
             fab
             dark
-            @click="passAssepted">
+            @click="passAccepted">
             <i class="uiIconSocPhone"></i>
           </v-btn>
           <span class="button-title">JoIn</span>
@@ -82,7 +82,7 @@ export default {
     // closePopup() {
     //   this.dialog = false;
     // },
-    passAssepted() {
+    passAccepted() {
       this.$emit("accepted");
     },
     passRejected() {
