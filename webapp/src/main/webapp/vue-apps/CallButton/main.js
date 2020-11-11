@@ -99,7 +99,7 @@ export function initCallPopup(
         // if (playRingtone) {
         //   audio.play();
         // }
-        webConferencing.jitsi.playIncomingRing("/webrtc/audio/line.mp3");
+        webConferencing.jitsi.playIncomingRing();
       },
       i18n,
       vuetify,
