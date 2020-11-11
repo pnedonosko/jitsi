@@ -91,7 +91,7 @@ export default {
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(2, 80px);
       grid-auto-rows: 10px;
-      width: fit-content;
+      width: initial;
       [class^="uiIcon"].start-call {
         position: absolute;
         top: 15%;
