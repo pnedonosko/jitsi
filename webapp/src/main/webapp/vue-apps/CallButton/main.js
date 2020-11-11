@@ -39,8 +39,8 @@ function addRejectSound(sound) {
     });
   }
 }
-addCallSound("/webrtc/audio/line.mp3");
-addRejectSound("/webrtc/audio/manner_cancel.mp3");
+addCallSound("/jitsi/resources/audio/ringtone_exo-1.m4a");
+addRejectSound("/webrtc/audio/incoming_cancel.mp3");
 
 
 export function init(callSettings) {

@@ -1,6 +1,9 @@
 <template>
   <v-row justify="center">
-    <v-dialog v-model="isDialogVisible" width="430">
+    <v-dialog 
+      v-model="isDialogVisible" 
+      width="430"
+      @click-outside="passRejected">
       <v-card>
         <v-avatar 
           color="#578dc9" 
@@ -63,6 +66,9 @@ export default {
   data() {
     return {
     };
+  },
+  created() {
+    console.log(this.activator)
   },
   // watch: {
   //   playRingtone(oldValue, newValue) {
