@@ -89,7 +89,7 @@
           // Start ringing incoming sound only if requested (depends on user status)
           // TODO ringtone was incoming.mp3 type='audio/mpeg' -- Oct 29, 2020
           $ring = $("<audio loop autoplay style='display: none;'>" +
-           "<source src='/jitsi/resources/audio/done.mp3' type='audio/mpeg'>" +
+           "<source src='/jitsi/resources/audio/ringtone_exo-1.m4a' type='audio/mpeg'>" +
            "Your browser does not support the audio element.</audio>");
          $(document.body).append($ring);
         }
@@ -548,11 +548,14 @@
                             // }  
                             callPopup.onAccepted(() => {
                               // playRingtone = false;
-                                log.info("User accepted call: " + callId);
-                                //var callUrl = window.location.protocol + "//" + window.location.host + "/jitsi/meet/" + encodeURIComponent(callId);
+                              log.info("User accepted call: " + callId);
+                              //var callUrl = window.location.protocol + "//" + window.location.host + "/jitsi/meet/" + encodeURIComponent(callId);
+                              try {
                                 var callUrl = getCallUrl(callId);
                                 var callWindow = webConferencing.showCallWindow(callUrl, self.getTitle() + " " + callId);
                                 callWindow.document.title = call.title;
+                              } finally {
+                                // stop calling anyway
                                 if (callRinging) {
                                   localStorage.removeItem(ringId);
                                 }
@@ -560,43 +563,50 @@
                                   $ring.remove();
                                   log.trace("<<< Ringing stopped: " + callerId);
                                 }
+                              }
+                            });
+                            callPopup.onRejected(() => {
+                              if (!isGroup && callPopup.callState != "stopped" && callPopup.callState != "joined") {
+                                // Delete the call if it is not group one, not
+                                // already stopped and wasn't joined -
+                                // a group call will be deleted automatically
+                                // when last party leave it.
 
-                              });
-                              callPopup.onRejected(() => {
-                                if (!isGroup && callPopup.callState != "stopped" && callPopup.callState != "joined") {
-                                  // Delete the call if it is not group one, not
-                                  // already stopped and wasn't joined -
-                                  // a group call will be deleted automatically
-                                  // when last party leave it.
+                                // closeCallPopup(callId, "started");
 
-                                  // closeCallPopup(callId, "started");
+                                log.trace("<<< User declined " + (callPopup.callState ? " just " + callPopup.callState : "") +
+                                  " call " + callId + ", deleting it.");
+                                webConferencing.deleteCall(callId).done(function() {
+                                  if (callRinging) {
+                                    localStorage.removeItem(ringId);
+                                  }
+                                  if ($ring) {
+                                    $ring.remove();
+                                    log.trace("<<< Ringing stopped: " + callerId);
+                                  }
+                                  log.info("Call deleted: " + callId);
+                                }).fail(function(err) {
+                                  if (err && (err.code == "NOT_FOUND_ERROR")) {
+                                    // already deleted
+                                    log.trace("<< Call not found " + callId);
+                                  } else {
+                                    log.error("Failed to stop call: " + callId, err);
+                                    webConferencing.showError("Error stopping call", webConferencing.errorText(err));
+                                  }
 
-                                  log.trace("<<< User declined " + (callPopup.callState ? " just " + callPopup.callState : "") +
-                                    " call " + callId + ", deleting it.");
-                                  webConferencing.deleteCall(callId).done(function() {
-                                    if (callRinging) {
-                                      localStorage.removeItem(ringId);
-                                    }
-                                    if ($ring) {
-                                      $ring.remove();
-                                      log.trace("<<< Ringing stopped: " + callerId);
-                                    }
-                                    log.info("Call deleted: " + callId);
-                                  }).fail(function(err) {
-                                    if (err && (err.code == "NOT_FOUND_ERROR")) {
-                                      // already deleted
-                                      log.trace("<< Call not found " + callId);
-                                    } else {
-                                      log.error("Failed to stop call: " + callId, err);
-                                      webConferencing.showError("Error stopping call", webConferencing.errorText(err));
-                                    }
-                                  });
-                                }
-                              });
-                            })
-                          
-                          .catch(error => {
-                            log.error(error)
+                                  // stop calling
+                                  if (callRinging) {
+                                    localStorage.removeItem(ringId);
+                                  }
+                                  if ($ring) {
+                                    $ring.remove();
+                                    log.trace("<<< Ringing stopped: " + callerId);
+                                  }
+                                });
+                              }
+                            });
+                          }).catch(error => {
+                            log.error(error);
                           })
                           // popover.progress(function($callDialog) {
                           //   // Finish initialization...
