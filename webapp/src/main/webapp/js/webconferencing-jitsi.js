@@ -25,6 +25,11 @@
      * An object that implements Web Conferencing SPI contract for a call
      * provider.
      */
+
+     var callRinging;
+     var ringId;
+     var $ring;
+
     function JitsiProvider() {
 
       var self = this;
@@ -64,11 +69,32 @@
 
 
 
-      this.playIncomingRing = function(sound) {
-        if(sound) {
-              var audio = new Audio(sound);
-              audio.play();
-            }
+      this.playIncomingRing = function(callerId, playRingtone) {
+        // if("/webrtc/audio/line.mp3") {
+              // var audio = new Audio("/jitsi/resources/audio/incoming.mp3");
+              // audio.play();
+            // }
+        if (playRingtone) {
+        ringId = "jitsi-call-ring-" + callerId;
+        // let $ring;
+        callRinging = localStorage.getItem(ringId);
+        log.trace(callRinging);
+        if (!callRinging || Date.now() - callRinging.time > 5000) {
+          log.trace(">>> Ringing the caller: ");
+          //if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
+          localStorage.setItem(ringId, {
+           time: Date.now()
+          }); // set it quick as possible to avoid rice conditions
+          callRinging = true;
+          // Start ringing incoming sound only if requested (depends on user status)
+          // TODO ringtone was incoming.mp3 type='audio/mpeg' -- Oct 29, 2020
+          $ring = $("<audio loop autoplay style='display: none;'>" +
+            "<source src='/webrtc/audio/line.mp3' type='audio/mpeg'>" +
+            "Your browser does not support the audio element.</audio>");
+            console.log($ring);
+          $(document.body).append($ring);
+        }
+      }
       };
 
       /**
@@ -370,13 +396,13 @@
       //     });
       //     process.always(function() {
       //       // Stop incoming ringing on dialog completion
-      //       if (callRinging) {
-      //         localStorage.removeItem(ringId);
-      //       }
-      //       if ($ring) {
-      //         $ring.remove();
-      //         log.trace("<<< Ringing stopped: " + callerId);
-      //       }
+            // if (callRinging) {
+            //   localStorage.removeItem(ringId);
+            // }
+            // if ($ring) {
+            //   $ring.remove();
+            //   log.trace("<<< Ringing stopped: " + callerId);
+            // }
       //     });
       //   }
       //   return process.promise();
@@ -542,6 +568,13 @@
                                   log.trace("<<< User declined " + (callPopup.callState ? " just " + callPopup.callState : "") +
                                     " call " + callId + ", deleting it.");
                                   webConferencing.deleteCall(callId).done(function() {
+                                    if (callRinging) {
+                                      localStorage.removeItem(ringId);
+                                    }
+                                    if ($ring) {
+                                      $ring.remove();
+                                      log.trace("<<< Ringing stopped: " + callerId);
+                                    }
                                     log.info("Call deleted: " + callId);
                                   }).fail(function(err) {
                                     if (err && (err.code == "NOT_FOUND_ERROR")) {
