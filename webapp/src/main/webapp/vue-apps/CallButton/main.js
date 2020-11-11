@@ -111,7 +111,7 @@ export function initCallPopup(
             caller: this.callerId,
             avatar: this.avatar,
             callerMessage: this.callerMessage,
-            // playRingtone: this.playRingtone,
+            playRingtone: this.playRingtone,
             // audio: audio
           },
           on: {
