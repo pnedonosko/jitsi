@@ -89,10 +89,9 @@
           // Start ringing incoming sound only if requested (depends on user status)
           // TODO ringtone was incoming.mp3 type='audio/mpeg' -- Oct 29, 2020
           $ring = $("<audio loop autoplay style='display: none;'>" +
-            "<source src='/webrtc/audio/line.mp3' type='audio/mpeg'>" +
-            "Your browser does not support the audio element.</audio>");
-            console.log($ring);
-          $(document.body).append($ring);
+           "<source src='/jitsi/resources/audio/done.mp3' type='audio/mpeg'>" +
+           "Your browser does not support the audio element.</audio>");
+         $(document.body).append($ring);
         }
       }
       };
@@ -554,6 +553,13 @@
                                 var callUrl = getCallUrl(callId);
                                 var callWindow = webConferencing.showCallWindow(callUrl, self.getTitle() + " " + callId);
                                 callWindow.document.title = call.title;
+                                if (callRinging) {
+                                  localStorage.removeItem(ringId);
+                                }
+                                if ($ring) {
+                                  $ring.remove();
+                                  log.trace("<<< Ringing stopped: " + callerId);
+                                }
 
                               });
                               callPopup.onRejected(() => {

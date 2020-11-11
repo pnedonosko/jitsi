@@ -37,6 +37,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <!-- <audio v-if="playRingtone" loop autoplay><source src="/webrtc/audio/line.mp3" type="audio/mpeg"></audio> -->
   </v-row>
 </template>
 
@@ -60,6 +61,10 @@ export default {
     },
     callerMessage: {
       type: String,
+      required: true
+    },
+    playRingtone: {
+      type: Boolean,
       required: true
     }
   },
