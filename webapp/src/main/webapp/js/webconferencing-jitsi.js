@@ -60,6 +60,17 @@
         }
       };
 
+
+
+
+
+      this.playIncomingRing = function(sound) {
+        if(sound) {
+              var audio = new Audio(sound);
+              audio.play();
+            }
+      };
+
       /**
        * Request a status of Jitsi Call App
        */
@@ -403,6 +414,15 @@
               // }
             }
           };
+
+          // var readCallWindow = function(callId) {
+          //   if (typeof Storage != "undefined") {
+          //     return localStorage.getItem(LOCAL_CALL_PREFIX + callId);
+          //   } else {
+          //     return null;
+          //   }
+          // };
+
           // var playSound = function(sound) {
           //   if(sound) {
           //     var audio = new Audio(sound);
@@ -428,6 +448,27 @@
                   // Get call details by ID
                   webConferencing.getCall(callId).done(
                     function(call) {
+
+
+                      // var callWindow;
+											// 		var callWindowId = readCallWindow(callId);
+											// 		if (callWindowId) {
+											// 			callWindow = webConferencing.showCallPopup("", callWindowId);
+											// 		}
+											// 		// here this window will be blocked by popup blocker and will be undefined
+											// 		// need use messaging between windows to know if a call is actually running
+											// 		if (callWindow && callWindow.location.href !== "about:blank") {
+											// 			// call already running in this browser - don't need ask the user for it
+											// 			log.trace(">>> Call alreadey joined and running: " + callWindowId);
+											// 		} else {
+											// 			if (callWindow) {
+											// 				callWindow.close();
+                      //       }
+                      //     }
+
+
+
+
                       var callerId = call.owner.id;
                       var callerLink = call.owner.profileLink;
                       var callerAvatar = call.owner.avatarLink;
