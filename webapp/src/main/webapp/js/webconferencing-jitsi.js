@@ -433,7 +433,7 @@
                 log.trace(">>> User call state updated: " + JSON.stringify(update));
 
                 var callPopupRing = {
-                  incomingSound: '/jitsi/resources/audio/incoming.mp3',
+                  incomingSound: '/jitsi/resources/audio/ringtone_exo-1.m4a',
                   declineSound: '/jitsi/resources/audio/incoming_cancel.mp3',
                   doneSound: '/jitsi/resources/audio/done.mp3',
                   decline: false,
@@ -472,7 +472,7 @@
                   console.log(el);
                   document.body.appendChild(el);
                 }
-                createAudio(audio, "call-popup-ring", "/jitsi/resources/audio/incoming.mp3", "true", "true");
+                createAudio(audio, "call-popup-ring", "/jitsi/resources/audio/ringtone_exo-1.m4a", "true", "true");
                 // createAudio(declineAudio, "call-popup-decline", "/webrtc/audio/echo.mp3", "false", "false");
                 if (update.callState == "started") {
                   // When call started it means we have an incoming call for
