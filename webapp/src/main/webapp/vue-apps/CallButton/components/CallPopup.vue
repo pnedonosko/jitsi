@@ -34,10 +34,11 @@
             <i class="uiIconClose"></i>
           </v-btn>
           <span class="button-title">Ignore</span>
+          <i v-html="callPopupRing.incomingAudio"></i>
+          <i v-html="callPopupRing.declineAudio"></i>
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <!-- <audio v-if="playRingtone" loop autoplay><source src="/webrtc/audio/line.mp3" type="audio/mpeg"></audio> -->
   </v-row>
 </template>
 
@@ -66,15 +67,22 @@ export default {
     playRingtone: {
       type: Boolean,
       required: true
+    },
+    callPopupRing: {
+      type: Object,
+      required: true
     }
   },
   data() {
     return {
+      ringtone: ""
     };
   },
-  created() {
-    console.log(this.activator)
-  },
+  //  watch: {
+  //   ringtone() {
+  //     return this.callPopupRing.incomingSound;
+  //   },
+  // },
   // watch: {
   //   playRingtone(oldValue, newValue) {
   //     if (oldValue === true || newValue === true) {

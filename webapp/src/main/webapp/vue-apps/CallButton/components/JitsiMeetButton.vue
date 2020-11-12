@@ -79,7 +79,7 @@ export default {
   .v-btn {
     padding: 0px;
   }
-  [class^="uiIcon"] {
+  .uiIconSocPhone {
     &:before {
       color: unset;
       height: 16px;
@@ -90,9 +90,7 @@ export default {
     }
   }
   .theme--light.v-btn {
-    margin-right: 10px;
     background: inherit;
-    // border: 1px solid rgb(232, 238, 242);
     &:focus::before {
       opacity: 0;
     }

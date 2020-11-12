@@ -72,7 +72,8 @@ export function initCallPopup(
   callerLink,
   callerAvatar,
   callerMessage,
-  playRingtone
+  playRingtone,
+  callPopupRing
 ) {
 
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
@@ -91,15 +92,16 @@ export function initCallPopup(
           callerId: callerId,
           avatar: callerAvatar,
           callerMessage: callerMessage,
-          playRingtone: playRingtone
+          playRingtone: playRingtone,
+          callPopupRing: callPopupRing
         };
       },
       mounted() {
-        // console.log("mounted!")
+        console.log(callPopupRing);
         // if (playRingtone) {
         //   audio.play();
         // }
-        webConferencing.jitsi.playIncomingRing(callerId, playRingtone);
+        // webConferencing.jitsi.playIncomingRing(callerId, playRingtone);
       },
       i18n,
       vuetify,
@@ -112,6 +114,7 @@ export function initCallPopup(
             avatar: this.avatar,
             callerMessage: this.callerMessage,
             playRingtone: this.playRingtone,
+            callPopupRing: this.callPopupRing
             // audio: audio
           },
           on: {
