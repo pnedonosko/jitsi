@@ -97,11 +97,14 @@ export function initCallPopup(
         };
       },
       mounted() {
-        console.log(callPopupRing);
+        console.log(callState);
         // if (playRingtone) {
         //   audio.play();
         // }
         // webConferencing.jitsi.playIncomingRing(callerId, playRingtone);
+      },
+      updated() {
+        console.log(callState);
       },
       i18n,
       vuetify,
@@ -131,6 +134,7 @@ export function initCallPopup(
                 // audio.stop();
                 // decline.play();
                 onRejected(isClosed);
+                
                 thevue.isDialogVisible = false;
                 thevue.$destroy();
               }
