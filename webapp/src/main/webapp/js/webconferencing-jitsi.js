@@ -695,12 +695,6 @@
                 } else if (update.callState == "stopped") {
                   log.info("Call stopped remotelly: " + callId);
                   // Hide call popover for this call, if any
-                  createAudio(declineAudio, "call-popup-done", "/jitsi/resources/audio/done.mp3")
-                  declineAudio = document.getElementById("call-popup-done");
-                  audio = document.getElementById("call-popup-ring");
-                  callPopupRing.pauseRing(audio);
-                  setTimeout(() => { callPopupRing.playRing(declineAudio);}, 200)
-                  // callPopupRing.playRing(declineAudio);
                   closeCallPopup(callId, update.callState);
                   // Unclock the call button
                   //unlockCallButton(callId); // TODO cleanup
