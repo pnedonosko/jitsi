@@ -535,20 +535,24 @@
                             audio = document.getElementById("call-popup-ring");
                             declineAudio = document.getElementById("call-popup-decline");
                             if (playRingtone) {
-                              callPopupRing.playRing(audio);
+                              var audio = document.getElementById("call-popup-ring");
+                              var declineAudio = document.getElementById("call-popup-decline");
                               // const ringId = "jitsi-call-ring-" + callerId;
+                              const ringId = "jitsi-call-ring-" + callerId;
                               // let $ring;
-                              // let callRinging = localStorage.getItem(ringId);
+                              let callRinging = JSON.parse(localStorage.getItem(ringId));
                               //log.trace(callRinging);
-                              // if (!callRinging || Date.now() - callRinging.time > 5000) {
+                              if (!callRinging || Date.now() - callRinging.time > 5000) {
+                                callPopupRing.playRing(audio);
                                 // for(let i = 0; playRingtone === true; i++) {
                                 //   playSound('/webrtc/audio/line.mp3');
                                 // }
                                 // log.trace(">>> Ringing the caller: " + callerId);
                                 // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
-                                // localStorage.setItem(ringId, {
-                                //  time: Date.now()
-                                // }); // set it quick as possible to avoid rice conditions
+                                localStorage.setItem(ringId, JSON.stringify({
+                                 time: Date.now()
+                                })); // set it quick as possible to avoid rice conditions
+                                
                                 // callRinging = true;
                                 // Start ringing incoming sound only if requested (depends on user status)
                                 // TODO ringtone was incoming.mp3 type='audio/mpeg' -- Oct 29, 2020
@@ -558,7 +562,9 @@
                                 //   "Your browser does not support the audio element.</audio>");
                                 // $(document.body).append($ring);
                                 // playSound('/webrtc/audio/line.mp3');
-                              // }
+                                
+                              }
+
                             } 
                             callPopup.onAccepted(() => {
                               // playRingtone = false;
