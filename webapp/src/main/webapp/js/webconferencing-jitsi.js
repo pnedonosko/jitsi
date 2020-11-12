@@ -159,7 +159,10 @@
               // For grop calls
               // Note: webconf starts call when first user joins it
               if (call.state === "stopped" && target.type === "chat_room") {
-                webConferencing.updateParticipants(callId, Object.values(target.members));
+                var participants = Object.values(target.members).map(function(member) {
+                  return member.id;
+                });
+                webConferencing.updateParticipants(callId, participants);
               }
               callProcess.resolve(call);
             }).fail(function(err) {
