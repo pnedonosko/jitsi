@@ -34,8 +34,8 @@
             <i class="uiIconClose"></i>
           </v-btn>
           <span class="button-title">Ignore</span>
-          <i v-html="callPopupRing.incomingAudio"></i>
-          <i v-html="callPopupRing.declineAudio"></i>
+          <!-- <i v-html="callPopupRing.incomingAudio"></i>
+          <i v-html="callPopupRing.declineAudio"></i> -->
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -115,6 +115,7 @@ export default {
       position: absolute;
       bottom: 7%;
       right: 7%;
+      
     }
   }
   .v-dialog {
@@ -123,6 +124,7 @@ export default {
     // position: absolute;
     // bottom: 7%;
     // right: 7%;
+    // overflow-y: unset;
     .v-sheet.v-card {
       border-radius: 2px;
       height: 160px;
