@@ -387,20 +387,22 @@
           // var $callPopup;
 
 
-          let callPopup;
+          let callPopUp;
 
+          
           var closeCallPopup = function(callId, state) {
-            if (callPopup && callPopup.callId && callPopup.callId == callId) {
-              // if ($callPopup.is(":visible")) {
+            // if (callPopUp && callPopUp.callId && callPopUp.callId == callId) {
+              // if ($callPopUp.is(":visible")) {
                 // Set state before closing the dialog, it will be used by
                 // promise failure handler
                 console.log("CLOSECALLPOPUP");
-                callPopup.callState = state;
+                console.log(callPopUp);
+                callPopUp.callState = state;
                 // acceptCallPopoverVueComp.close();
-                callPopup.close();
+                callPopUp.close();
                 // $callPopup.dialog("close");
               // }
-            }
+            // }
           };
 
           // var readCallWindow = function(callId) {
@@ -429,6 +431,49 @@
                 // starts with 'g/'
                 var isGroup = callId.startsWith("g_");
                 log.trace(">>> User call state updated: " + JSON.stringify(update));
+
+                var callPopupRing = {
+                  incomingSound: '/jitsi/resources/audio/incoming.mp3',
+                  declineSound: '/jitsi/resources/audio/incoming_cancel.mp3',
+                  doneSound: '/jitsi/resources/audio/done.mp3',
+                  decline: false,
+                //   incomingAudio: `<audio id="call-popup-ring" preload="auto" autoplay loop style="display: none;">
+                //   <source src="/jitsi/resources/audio/incoming.mp3">
+                //   <p>Your browser does not support the <code>audio</code> element.</p>
+                // </audio>`,
+                //   declineAudio: `<audio id="call-popup-decline" preload="auto" style="display: none;">
+                //     <source src="/jitsi/resources/audio/incoming_cancel.mp3">
+                //     <p>Your browser does not support the <code>audio</code> element.</p>
+                //   </audio>`,
+                //   doneAudio: `<audio id="call-popup-done" preload="auto" style="display: none;">
+                //     <source src="/jitsi/resources/audio/done.mp3">
+                //     <p>Your browser does not support the <code>audio</code> element.</p>
+                //   </audio>`,
+                  // loop: true,
+                  playRing: function(audio) {
+                    audio.play();
+                  },
+                  pauseRing: function(audio) {
+                    audio.pause();
+                    audio.currentTime = 0;
+                  }
+                }
+                var audio;
+                var declineAudio;
+  
+                var createAudio = function(el, id, sound, autoplay, loop) {
+                  el = document.createElement("AUDIO");
+                  el.setAttribute("id", id);
+                  el.setAttribute("src", sound);
+                  el.setAttribute("preload", "auto");
+                  autoplay ? el.setAttribute("autolpay", autoplay) : el.removeAttribute("autolpay", autoplay);
+                  loop ? el.setAttribute("loop", loop) :   el.removeAttribute("loop", loop);
+                  el.style.display = "none";
+                  console.log(el);
+                  document.body.appendChild(el);
+                }
+                createAudio(audio, "call-popup-ring", "/jitsi/resources/audio/incoming.mp3", "true", "true");
+                // createAudio(declineAudio, "call-popup-decline", "/webrtc/audio/echo.mp3", "false", "false");
                 if (update.callState == "started") {
                   // When call started it means we have an incoming call for
                   // this particular user
@@ -454,28 +499,7 @@
                       //       }
                       //     }
 
-                      var callPopupRing = {
-                        incomingSound: '/jitsi/resources/audio/incoming.mp3',
-                        declineSound: '/jitsi/resources/audio/incoming_cancel.mp3',
-                        decline: false,
-                        incomingAudio: `<audio id="call-popup-ring" preload="auto" autoplay loop style="display: none;">
-                        <source src="/webrtc/audio/echo.mp3">
-                        <p>Your browser does not support the <code>audio</code> element.</p>
-                      </audio>`,
-                        declineAudio: `<audio id="call-popup-decline" preload="auto" style="display: none;">
-                          <source src="/webrtc/audio/line.mp3">
-                          <p>Your browser does not support the <code>audio</code> element.</p>
-                        </audio>`,
-                        // loop: true,
-                        playRing: function(audio) {
-                          audio.play();
-                        },
-                        pauseRing: function(audio) {
-                          audio.pause();
-                          audio.currentTime = 0;
-                        }
-                
-                      }
+                      
 
 
                       var callerId = call.owner.id;
@@ -505,11 +529,13 @@
                           let playRingtone = !user || user.status == "available" || user.status == "away";
 
                           callButton.initCallPopup(callId, update.callState, callerId, callerLink,  callerAvatar, callerMessage, playRingtone, callPopupRing).then((callPopup) => {
-                            
+                            callPopUp = callPopup;
+                            // createAudio(audio, "call-popup-ring", "/webrtc/audio/line.mp3", "true", "true");
+                            createAudio(declineAudio, "call-popup-decline", "/jitsi/resources/audio/incoming_cancel.mp3");
+                            audio = document.getElementById("call-popup-ring");
+                            declineAudio = document.getElementById("call-popup-decline");
                             if (playRingtone) {
-                              var audio = document.getElementById("call-popup-ring");
                               callPopupRing.playRing(audio);
-                              var declineAudio = document.getElementById("call-popup-decline");
                               // const ringId = "jitsi-call-ring-" + callerId;
                               // let $ring;
                               // let callRinging = localStorage.getItem(ringId);
@@ -554,18 +580,19 @@
                               });
                               callPopup.onRejected(() => {
                                 if (!isGroup && callPopup.callState != "stopped" && callPopup.callState != "joined") {
-                                  callPopupRing.decline = true;
+                                  // callPopupRing.decline = true;
                                   // Delete the call if it is not group one, not
                                   // already stopped and wasn't joined -
                                   // a group call will be deleted automatically
                                   // when last party lea ve it.
                                   if (audio) {
                                     callPopupRing.pauseRing(audio);
+                                    console.log(declineAudio, "declineAudio")
                                     // if (declineAudio) {
                                         setTimeout(function() {
                                           callPopupRing.playRing(declineAudio);
                                         }, 300)
-                                    
+                                        callPopupRing.pauseRing(declineAudio);
                                     // }
                                     // $ring.remove();
                                     // log.trace("<<< Ringing stopped: " + callerId);
@@ -578,7 +605,7 @@
                                     // if (callRinging) {
                                     //   localStorage.removeItem(ringId);
                                     // }
-                                
+                                    
                                     log.info("Call deleted: " + callId);
                                   }).fail(function(err) {
                                     if (err && (err.code == "NOT_FOUND_ERROR")) {
@@ -662,6 +689,12 @@
                 } else if (update.callState == "stopped") {
                   log.info("Call stopped remotelly: " + callId);
                   // Hide call popover for this call, if any
+                  createAudio(declineAudio, "call-popup-done", "/jitsi/resources/audio/done.mp3")
+                  declineAudio = document.getElementById("call-popup-done");
+                  audio = document.getElementById("call-popup-ring");
+                  callPopupRing.pauseRing(audio);
+                  setTimeout(() => { callPopupRing.playRing(declineAudio);}, 200)
+                  // callPopupRing.playRing(declineAudio);
                   closeCallPopup(callId, update.callState);
                   // Unclock the call button
                   //unlockCallButton(callId); // TODO cleanup
