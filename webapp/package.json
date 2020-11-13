@@ -46,6 +46,7 @@
     "url-parse": "^1.4.3",
     "vue": "^2.6.10",
     "vue-loader": "^14.2.3",
+    "vue-svg-loader": "^0.16.0",
     "vue-template-compiler": "^2.6.10",
     "vuetify": "^2.2.18",
     "webpack": "^4.20.2",

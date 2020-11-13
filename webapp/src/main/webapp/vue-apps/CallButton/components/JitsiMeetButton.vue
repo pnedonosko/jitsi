@@ -2,28 +2,30 @@
   <v-btn 
     id="myCallAction" 
     ref="jitsi" 
+    :ripple="false"
     outlined 
     @click.native="startCall">
-    <!-- <svg-sprite /> -->
-    <i class="uiIconSocPhone uiIconBlue"></i>
-    <!-- <svg viewBox="0 0 100 100" class="icon shape-codepen">
-      <use xlink:href="#shape-codepen"></use>
-    </svg>-->
-    <!-- <svg-icon icon="Jitsi"/> -->
-    {{ i18n.te("UICallButton.label.jitsi")
+    <!-- <i class="uiIconSocPhone uiIconBlue"></i> -->
+    <JitsiLogo
+      class="logo pr-2"
+      width="18px" 
+      height="24px"/>
+    <!-- <svg class="logo pr-3" width="18px" height="24px" viewBox="0 0 774 1042" preserveAspectRatio="xMidYMid meet"><image xlink:href="#svg5488" x="0" y="0" width="100%" height="100%"></image></svg> -->
+    <!-- <img src="/jitsi/resources/assets/icons/Jitsi.svg"> -->
+    <!-- <svg viewBox="0 0 30 10" xmlns="http://www.w3.org/2000/svg"><use xlink:href="#svg5488" x="20" fill="white"></use></svg> -->
+    <!-- <object type="image/svg+xml" data="/jitsi/resources/assets/icons/Jitsi.svg" class="logo pr-3"></object> -->
+    <span>{{ i18n.te("UICallButton.label.jitsi")
       ? $t("UICallButton.label.jitsi")
-    : "Jitsi Call" }}
+    : "Jitsi Call" }}</span>
   </v-btn>
 </template>
 
 <script>
-// import SvgIcon from "./SvgIcon.vue";
-// import SvgSprite from "./SvgSprite.vue";
+import JitsiLogo from "../icons/Jitsi.svg";
 export default {
-  // components: {
-  //   SvgIcon,
-  //   SvgSprite
-  // },
+  components: {
+    JitsiLogo
+  },
   props: {
     callSettings: {
       type: Object,
@@ -78,6 +80,10 @@ export default {
   }
   .v-btn {
     padding: 0px;
+    .logo {
+    //  margin-right: 2px;
+     align-self: center;
+    }
   }
   .uiIconSocPhone {
     &:before {
@@ -93,6 +99,7 @@ export default {
     background: inherit;
     &:focus::before {
       opacity: 0;
+      background: transparent;
     }
     &:hover {
       &::before {

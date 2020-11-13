@@ -34,8 +34,6 @@
             <i class="uiIconClose"></i>
           </v-btn>
           <span class="button-title">Ignore</span>
-          <!-- <i v-html="callPopupRing.incomingAudio"></i>
-          <i v-html="callPopupRing.declineAudio"></i> -->
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -67,10 +65,6 @@ export default {
     playRingtone: {
       type: Boolean,
       required: true
-    },
-    callPopupRing: {
-      type: Object,
-      required: true
     }
   },
   data() {
@@ -78,11 +72,6 @@ export default {
       ringtone: ""
     };
   },
-  //  watch: {
-  //   ringtone() {
-  //     return this.callPopupRing.incomingSound;
-  //   },
-  // },
   // watch: {
   //   playRingtone(oldValue, newValue) {
   //     if (oldValue === true || newValue === true) {
@@ -92,9 +81,6 @@ export default {
   //   }
   // },
   methods: {
-    // closePopup() {
-    //   this.dialog = false;
-    // },
     passAccepted() {
       this.$emit("accepted");
     },
@@ -121,10 +107,6 @@ export default {
   .v-dialog {
     border-radius: 2px;
     height: 160px;
-    // position: absolute;
-    // bottom: 7%;
-    // right: 7%;
-    // overflow-y: unset;
     .v-sheet.v-card {
       border-radius: 2px;
       height: 160px;

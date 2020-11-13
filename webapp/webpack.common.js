@@ -49,8 +49,11 @@ let config = {
         use: ["vue-loader", "eslint-loader"],
       },
       {
-        test: /\.mp3$/,
-        loader: "url-loader",
+        test: /\.svg$/,
+        use: [
+          "babel-loader",
+          "vue-svg-loader",
+        ],
       },
     ],
   },
