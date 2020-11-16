@@ -2,6 +2,9 @@ package org.exoplatform.webconferencing.jitsi.rest;
 
 import static org.exoplatform.webconferencing.Utils.getCurrentContext;
 
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 import javax.jcr.RepositoryException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -16,7 +19,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.http.HttpStatus;
 import org.gatein.portal.controller.resource.ResourceRequestHandler;
 
 import org.exoplatform.services.jcr.RepositoryService;
@@ -44,8 +46,11 @@ import io.jsonwebtoken.security.Keys;
 @Path("/jitsi")
 public class JitsiContextResource implements ResourceContainer {
 
+  /** The Constant INTERNAL_AUTH. */
+  private static final String          INTERNAL_AUTH = "internal_auth";
+
   /** The Constant LOG. */
-  private static final Log             LOG = ExoLogger.getLogger(JitsiContextResource.class);
+  private static final Log             LOG           = ExoLogger.getLogger(JitsiContextResource.class);
 
   /** The Constant webconferencing. */
   private final WebConferencingService webconferencing;
@@ -143,7 +148,7 @@ public class JitsiContextResource implements ResourceContainer {
   }
 
   /**
-   * Content.
+   * Returns userinfo and auth token for user.
    *
    * @param request the request
    * @return the response
@@ -172,6 +177,25 @@ public class JitsiContextResource implements ResourceContainer {
                    .type(MediaType.APPLICATION_JSON)
                    .build();
 
+  }
+
+  /**
+   * Returns Internal Auth token for invited guests.
+   *
+   * @param request the request
+   * @return the response
+   */
+  @GET
+  @Path("/token")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response token(@Context HttpServletRequest request) {
+    String token = Jwts.builder()
+                       .setSubject("exo-webconf")
+                       .claim("action", INTERNAL_AUTH.toString().toLowerCase())
+                       .setExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                       .signWith(Keys.hmacShaKeyFor(provider.getInternalAuthSecret().getBytes()))
+                       .compact();
+    return Response.ok().entity("{\"token\": \" " + token + "\"}").build();
   }
 
   /**
