@@ -375,6 +375,13 @@
       // };
 
       /**
+       * Returns invite link.
+       */
+      this.getInviteLink = function(call) {
+        return getCallUrl(call.id) + "?inviteId=" + call.inviteId;
+      };
+      
+      /**
        * OPTIONAL method. If implemented, it will be called by Web Conferencing
        * core on addProvider() method. It is assumed that the connector will
        * initialize internals depending on the given context.
