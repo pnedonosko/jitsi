@@ -5,15 +5,7 @@
     :ripple="false"
     outlined 
     @click.native="startCall">
-    <!-- <i class="uiIconSocPhone uiIconBlue"></i> -->
-    <JitsiLogo
-      class="logo pr-2"
-      width="18px" 
-      height="24px"/>
-    <!-- <svg class="logo pr-3" width="18px" height="24px" viewBox="0 0 774 1042" preserveAspectRatio="xMidYMid meet"><image xlink:href="#svg5488" x="0" y="0" width="100%" height="100%"></image></svg> -->
-    <!-- <img src="/jitsi/resources/assets/icons/Jitsi.svg"> -->
-    <!-- <svg viewBox="0 0 30 10" xmlns="http://www.w3.org/2000/svg"><use xlink:href="#svg5488" x="20" fill="white"></use></svg> -->
-    <!-- <object type="image/svg+xml" data="/jitsi/resources/assets/icons/Jitsi.svg" class="logo pr-3"></object> -->
+    <i class="uiIconSocPhone uiIconBlue"></i>
     <span>{{ i18n.te("UICallButton.label.jitsi")
       ? $t("UICallButton.label.jitsi")
     : "Jitsi Call" }}</span>
@@ -21,11 +13,7 @@
 </template>
 
 <script>
-import JitsiLogo from "../icons/Jitsi.svg";
 export default {
-  components: {
-    JitsiLogo
-  },
   props: {
     callSettings: {
       type: Object,
@@ -60,7 +48,7 @@ export default {
   mounted() {
     // Assign target ID to the button for later use on started
     // event in init()
-    // this.$refs.jitsi.$el.classList.add("btn--dropdown");
+    // console.log(this.settings)
   },
   methods: {
     startCall: function() {
@@ -80,10 +68,6 @@ export default {
   }
   .v-btn {
     padding: 0px;
-    .logo {
-    //  margin-right: 2px;
-     align-self: center;
-    }
   }
   .uiIconSocPhone {
     &:before {
