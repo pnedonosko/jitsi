@@ -27,6 +27,8 @@
      */
 
     function JitsiProvider() {
+      // The constant stopped - call state
+      const STOPPED = "stopped";
 
       var self = this;
       var settings;
@@ -154,6 +156,7 @@
         getStatus().then(function(response) {
           if (response.status === "active") {
             webConferencing.getCall(callId).done(function(call) {
+              callButton.updateCallState(callId, context.parentClasses, call.state);
               // Call already running - join it
               log.info("Call already exists. Joining call: " + callId);
               // For grop calls
@@ -162,13 +165,19 @@
                 var participants = Object.values(target.members).map(function(member) {
                   return member.id;
                 });
-                webConferencing.updateParticipants(callId, participants);
+                webConferencing.updateParticipants(callId, participants).then((call) => {
+                  callButton.updateCallState(callId, context.parentClasses, call.state);
+                }).fail(() => {
+                  callButton.updateCallState(callId, context.parentClasses, STOPPED);
+                });
               }
               callProcess.resolve(call);
             }).fail(function(err) {
+              callButton.updateCallState(callId, context.parentClasses, STOPPED);
               if (err) {
                 if (err.code == "NOT_FOUND_ERROR") {
                   createCall(callId, context.currentUser, target).done(function(call) {
+                    callButton.updateCallState(callId, context.parentClasses, call.state);
                     log.info("Call created: " + callId);
                     callProcess.resolve(call);
                   });
@@ -236,8 +245,10 @@
           context.details().done(
             function(target) {
               if (!buttonType || buttonType === "vue") {
+                const callId = getCallId(context, target);
                 const callSettings = {};
                 callSettings.target = target;
+                callSettings.callId = callId;
                 callSettings.context = context;
                 callSettings.provider = self;
                 callSettings.onCallOpen = function() {
@@ -246,6 +257,10 @@
                 // callSettings.callWindow = callWindow;
                 callButton.init(callSettings).then(comp => {
                   button.resolve(comp);
+                  getCallState(context, target).then((callState) => {
+                    // initial state
+                    callButton.updateCallState(callId, context.parentClasses, callState);
+                  });
                 });
                 // Resolve with our button - return Vue object here, so it
                 // will be appended to Call Button UI in the Platform
@@ -405,6 +420,7 @@
               // if ($callPopUp.is(":visible")) {
                 // Set state before closing the dialog, it will be used by
                 // promise failure handler
+                callButton.updateCallState(callId, context.parentClasses, state);
                 console.log("CLOSECALLPOPUP");
                 console.log(callPopUp);
                 callPopUp.callState = state;
@@ -483,6 +499,7 @@
                   document.body.appendChild(el);
                 }
                 createAudio(audio, "call-popup-ring", "/jitsi/resources/audio/ringtone_exo-1.m4a", "true", "true");
+                callButton.updateCallState(callId, context.parentClasses, update.callState);
                 // createAudio(declineAudio, "call-popup-decline", "/webrtc/audio/echo.mp3", "false", "false");
                 if (update.callState == "started") {
                   // When call started it means we have an incoming call for
@@ -491,7 +508,7 @@
                   // Get call details by ID
                   webConferencing.getCall(callId).done(
                     function(call) {
-
+                      callButton.updateCallState(callId, context.parentClasses, call.state);
 
                       // var callWindow;
 											// 		var callWindowId = readCallWindow(callId);
@@ -578,6 +595,7 @@
                             } 
                             callPopup.onAccepted(() => {
                               // playRingtone = false;
+                              callButton.updateCallState(callId, context.parentClasses, callPopup.callState);
                                 log.info("User accepted call: " + callId);
                                 //var callUrl = window.location.protocol + "//" + window.location.host + "/jitsi/meet/" + encodeURIComponent(callId);
                                 var callUrl = getCallUrl(callId);
@@ -595,6 +613,7 @@
 
                               });
                               callPopup.onRejected(() => {
+                                callButton.updateCallState(callId, context.parentClasses, callPopup.callState);
                                 if (!isGroup && callPopup.callState != "stopped" && callPopup.callState != "joined") {
                                   // callPopupRing.decline = true;
                                   // Delete the call if it is not group one, not
@@ -621,9 +640,10 @@
                                     // if (callRinging) {
                                     //   localStorage.removeItem(ringId);
                                     // }
-                                    
+                                    callButton.updateCallState(callId, context.parentClasses, STOPPED);
                                     log.info("Call deleted: " + callId);
                                   }).fail(function(err) {
+                                    callButton.updateCallState(callId, context.parentClasses, STOPPED);
                                     if (err && (err.code == "NOT_FOUND_ERROR")) {
                                       // already deleted
                                       log.trace("<< Call not found " + callId);
@@ -806,6 +826,23 @@
        */
       this.initSettings = function(mySettings) {
         // initialize IM type settings UI
+      };
+
+      var getCallState = function(context, target) {
+        var gettingProcess = new Promise(function(resolve) {
+          const callId = getCallId(context, target);
+          webConferencing.getCall(callId).done(function(call) {
+            resolve(call.state);
+          }).fail(function(err) {
+            resolve(STOPPED);
+          });
+        });
+        return gettingProcess;
+      }
+
+      this.getCallState = function(context, target) {
+        const callId = getCallId(context, target);
+        callButton.getCallState(callId, context.parentClasses);
       };
     };
 

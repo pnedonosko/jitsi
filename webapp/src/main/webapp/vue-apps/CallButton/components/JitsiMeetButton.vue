@@ -1,14 +1,12 @@
 <template>
-  <v-btn 
-    id="myCallAction" 
+  <v-btn
+    id="jitsiCallAction"
     ref="jitsi" 
     :ripple="false"
     outlined 
     @click.native="startCall">
     <i class="uiIconSocPhone uiIconBlue"></i>
-    <span>{{ i18n.te("UICallButton.label.jitsi")
-      ? $t("UICallButton.label.jitsi")
-    : "Jitsi Call" }}</span>
+    <span>{{ buttonTitle }}</span>
   </v-btn>
 </template>
 
@@ -37,12 +35,40 @@ export default {
     return {
       settings: this.callSettings,
       log: null,
-      callWindow: null
+      callWindow: null,
+      callState: null
     };
+  },
+  computed: {
+    buttonTitle: function() {
+      let title;
+      console.log(`Call state for the button's title: ${this.callState}`);
+      if (this.callState === "joined") {
+        title = this.i18n.te("UICallButton.label.joined")
+          ? this.$t("UICallButton.label.joined")
+          : "Joined";
+      } else if (this.callState === "started") {
+        title = this.i18n.te("UICallButton.label.join")
+          ? this.$t("UICallButton.label.join")
+          : "Join";
+      } else {
+        title = this.i18n.te("UICallButton.label.jitsi")
+          ? this.$t("UICallButton.label.jitsi")
+          : "Jitsi Call";
+      }
+      return title;
+    },
+  },
+  watch: {
+    callSettings(newSettings, oldSettings) {
+      this.settings = newSettings;
+      this.updateCallState();
+    }
   },
   created() {
     this.log = webConferencing.getLog("jitsi");
     const callButton = this.$refs.jitsi;
+    this.callState = this.callSettings.callState;
   },
 
   mounted() {
@@ -52,7 +78,11 @@ export default {
   },
   methods: {
     startCall: function() {
-      this.settings.onCallOpen();
+      this.callSettings.onCallOpen();
+    },
+    updateCallState: function() {
+      this.callState = this.callSettings.callState;
+      console.log(`updatedCallState: ${this.callState}`);
     }
   }
 };

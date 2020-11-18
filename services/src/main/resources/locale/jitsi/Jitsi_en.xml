@@ -14,6 +14,8 @@
   <UICallButton>
     <label>
       <jitsi>Jitsi Call</jitsi>
+      <join>Join</join>
+      <joined>Joined</joined>
     </label>
   </UICallButton>
   <!-- Messages for Platform add-on -->

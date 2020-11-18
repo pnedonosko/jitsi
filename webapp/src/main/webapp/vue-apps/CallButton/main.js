@@ -14,16 +14,41 @@ const lang =
 const localePortlet = "locale.jitsi";
 const resourceBundleName = "Jitsi";
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/${localePortlet}.${resourceBundleName}-${lang}.json`;
+const callsStates = new Map();
 
-export function init(callSettings) {
+export function init(settings) {
   // getting locale ressources
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
     // init Vue app when locale ressources are ready
     return new Vue({
+      data() {
+        return {
+          callSettings: settings
+        };
+      },
+      created() {
+        if(!callsStates.has(this.callSettings.callId)) {
+          callsStates.set(this.callSettings.callId, new Map());
+        }
+        // different buttons for the same call states
+        const statesForTheSameCall = callsStates.get(this.callSettings.callId);
+        statesForTheSameCall.set(this.callSettings.context.parentClasses, {
+          setCallState: this.setCallState,
+          getCallState: this.getCallState
+        });
+      },
+      methods: {
+        setCallState: function(callState) {
+          this.$set(this.callSettings, "callState", callState);
+        },
+        getCallState: function() {
+          return this.callSettings.callState;
+        }
+      },
       render: (h) =>
         h(JitsiMeetButton, {
           props: {
-            callSettings: callSettings,
+            callSettings: settings,
             i18n: i18n,
             language: lang,
             resourceBundleName: resourceBundleName,
@@ -33,6 +58,14 @@ export function init(callSettings) {
       vuetify,
     });
   });
+}
+
+export function updateCallState(callId, parentClasses, state) {
+  callsStates.get(callId).get(parentClasses).setCallState(state);
+}
+
+export function getCallState(callId, parentClasses) {
+  return callsStates.get(callId).get(parentClasses).getCallState();
 }
 
 export function initCallPopup(
