@@ -60,12 +60,10 @@ export function init(settings) {
   });
 }
 
-export function updateCallState(callId, parentClasses, state) {
-  callsStates.get(callId).get(parentClasses).setCallState(state);
-}
-
-export function getCallState(callId, parentClasses) {
-  return callsStates.get(callId).get(parentClasses).getCallState();
+export function updateCallState(callId, state) {
+  callsStates.get(callId).forEach((stateHandler) => {
+    stateHandler.setCallState(state);
+  });
 }
 
 export function initCallPopup(

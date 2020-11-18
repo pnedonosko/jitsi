@@ -42,12 +42,12 @@ export default {
   computed: {
     buttonTitle: function() {
       let title;
-      console.log(`Call state for the button's title: ${this.callState}`);
-      if (this.callState === "joined") {
+      console.log(`Call state for the button's title: ${this.callSettings.callState}`);
+      if (this.callSettings.callState === "joined") {
         title = this.i18n.te("UICallButton.label.joined")
           ? this.$t("UICallButton.label.joined")
           : "Joined";
-      } else if (this.callState === "started") {
+      } else if (this.callSettings.callState === "started") {
         title = this.i18n.te("UICallButton.label.join")
           ? this.$t("UICallButton.label.join")
           : "Join";
@@ -59,16 +59,9 @@ export default {
       return title;
     },
   },
-  watch: {
-    callSettings(newSettings, oldSettings) {
-      this.settings = newSettings;
-      this.updateCallState();
-    }
-  },
   created() {
     this.log = webConferencing.getLog("jitsi");
     const callButton = this.$refs.jitsi;
-    this.callState = this.callSettings.callState;
   },
 
   mounted() {
@@ -78,11 +71,9 @@ export default {
   },
   methods: {
     startCall: function() {
-      this.callSettings.onCallOpen();
-    },
-    updateCallState: function() {
-      this.callState = this.callSettings.callState;
-      console.log(`updatedCallState: ${this.callState}`);
+      if (this.callSettings.callState !== "joined") {
+        this.callSettings.onCallOpen();
+      }
     }
   }
 };
