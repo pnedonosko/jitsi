@@ -2,14 +2,14 @@
   <v-row justify="center">
     <v-dialog 
       v-model="isDialogVisible" 
-      width="430"
+      width="430" 
       @click:outside="passRejected">
       <v-card>
         <v-avatar 
           color="#578dc9" 
           width="70" 
           height="70">
-          <img :src="avatar" :alt="caller" >
+          <img :src="avatar" :alt="caller" />
         </v-avatar>
         <i class="uiIconSocPhone start-call"></i>
         <v-card-text v-html="callerMessage" />
@@ -30,10 +30,21 @@
             outlined 
             fab 
             color="#aeb3b7" 
-            @click="passRejected">
+            @click="passRejected()">
             <i class="uiIconClose"></i>
           </v-btn>
           <span class="button-title">Ignore</span>
+          <!-- <i v-html="callPopupRing.incomingAudio"></i>
+          <i v-html="callPopupRing.declineAudio"></i>-->
+          <audio 
+            ref="audio" 
+            style="display: none" 
+            autoplay 
+            loop 
+            preload="auto">
+            <source :src="ringtone" />
+            <p>"Your browser does not support the audio element</p>
+          </audio>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -41,7 +52,6 @@
 </template>
 
 <script>
-
 export default {
   name: "CallPopup",
   props: {
@@ -69,24 +79,48 @@ export default {
   },
   data() {
     return {
-      ringtone: ""
+      ringtone: "/jitsi/resources/audio/ringtone_exo-1.m4a",
+      callRinging: "",
+      ringId: ""
     };
   },
-  // watch: {
-  //   playRingtone(oldValue, newValue) {
-  //     if (oldValue === true || newValue === true) {
-  //       this.addSound("/webrtc/audio/line.mp3");
-  //       this.audio.play();
-  //     }
-  //   }
-  // },
+  created() {
+    this.ringId = `jitsi-call-ring-${this.caller}`;
+    // let $ring;
+    localStorage.removeItem(this.ringId);
+    this.callRinging = JSON.parse(localStorage.getItem(this.ringId));
+    //log.trace(callRinging);
+    if (!this.callRinging || Date.now() - this.callRinging.time > 5000) {
+      // log.trace(">>> Ringing the caller: " + callerId);
+      // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
+      localStorage.setItem(
+        this.ringId,
+        JSON.stringify({
+          time: Date.now()
+        })
+      ); // set it quick as possible to avoid rice conditions
+
+      this.callRinging = true;
+    }
+  },
+  mounted() {
+    this.$watch(this.ringtone, function() {
+      this.$refs.player.load();
+    });
+  },
   methods: {
     passAccepted() {
+      if (this.callRinging) {
+        localStorage.removeItem(this.ringId);
+      }
       this.$emit("accepted");
     },
     passRejected() {
+      if (this.callRinging) {
+        localStorage.removeItem(this.ringId);
+      }
       this.$emit("rejected");
-    },
+    }
   }
 };
 </script>
@@ -101,7 +135,6 @@ export default {
       position: absolute;
       bottom: 7%;
       right: 7%;
-      
     }
   }
   .v-dialog {
