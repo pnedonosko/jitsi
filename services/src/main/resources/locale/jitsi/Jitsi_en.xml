@@ -13,7 +13,7 @@
   </UIEditUserProfileForm>
   <UICallButton>
     <label>
-      <jitsi>Jitsi Call</jitsi>
+      <jitsi>Call</jitsi>
       <join>Join</join>
       <joined>Joined</joined>
     </label>
