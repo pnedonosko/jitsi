@@ -3,6 +3,7 @@ package org.exoplatform.webconferencing.jitsi.rest;
 import static org.exoplatform.webconferencing.Utils.getCurrentContext;
 
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.jcr.RepositoryException;
@@ -118,6 +119,7 @@ public class JitsiContextResource implements ResourceContainer {
     String owner = null;
     Boolean isGroup = null;
     String moderator = null;
+    List<String> participants = null;
     try {
       Claims body = Jwts.parser()
                         .setSigningKey(Keys.hmacShaKeyFor(provider.getExternalAuthSecret().getBytes()))
@@ -127,6 +129,11 @@ public class JitsiContextResource implements ResourceContainer {
       isGroup = body.get("isGroup", Boolean.class);
       moderator = body.get("moderator", String.class);
       callId = body.get("callId", String.class);
+      participants = (List<String>) body.get("participants", List.class);
+      LOG.info("Participants: ");
+      for (String part : participants) {
+        LOG.info(part);
+      }
     } catch (Exception e) {
       LOG.error("Cannot parse JWT token for uploading recording", e.getMessage());
       return Response.status(Status.BAD_REQUEST).entity("{\"error\":\"JWT token is invalid\"}").build();
@@ -138,7 +145,7 @@ public class JitsiContextResource implements ResourceContainer {
     }
 
     try {
-      UploadFileInfo uploadFileInfo = new UploadFileInfo(callId, owner, isGroup, moderator);
+      UploadFileInfo uploadFileInfo = new UploadFileInfo(callId, owner, isGroup, moderator, participants);
       webconferencing.uploadFile(uploadFileInfo, request);
       return Response.ok().build();
     } catch (RepositoryException | UploadFileException e) {
