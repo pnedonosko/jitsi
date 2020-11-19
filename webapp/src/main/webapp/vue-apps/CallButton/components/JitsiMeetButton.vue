@@ -42,12 +42,11 @@ export default {
   computed: {
     buttonTitle: function() {
       let title;
-      console.log(`Call state for the button's title: ${this.callSettings.callState}`);
       if (this.callSettings.callState === "joined") {
         title = this.i18n.te("UICallButton.label.joined")
           ? this.$t("UICallButton.label.joined")
           : "Joined";
-      } else if (this.callSettings.callState === "started") {
+      } else if (this.callSettings.callState === "started" || this.callSettings.callState === "leaved") {
         title = this.i18n.te("UICallButton.label.join")
           ? this.$t("UICallButton.label.join")
           : "Join";

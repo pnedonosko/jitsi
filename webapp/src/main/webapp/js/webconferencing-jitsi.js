@@ -728,6 +728,9 @@
                   closeCallPopup(callId, "joined");
                 }
               } else if (update.eventType == "call_leaved") {
+                if (currentUserId === update.part.id) {
+                  callButton.updateCallState(callId, "leaved");
+                }
                 log.debug("User call leaved: " + update.callId);
                 // When user leaves a call, we unlock his button, thus it will
                 // be possible to join the call again -
@@ -823,7 +826,20 @@
         var gettingProcess = new Promise(function(resolve) {
           const callId = getCallId(context, target);
           webConferencing.getCall(callId).done(function(call) {
-            resolve(call.state);
+            let user;
+            if (call.state === "started") {
+              for(const participant of call.participants) {
+                if (participant.id === context.currentUser.id) {
+                  user = participant;
+                  break;
+                }
+              }
+            }
+            if(user) {
+              resolve(user.state);
+            } else {
+              resolve(call.state);
+            }
           }).fail(function(err) {
             if (err) {
               if (err.code === "NOT_FOUND_ERROR") {
