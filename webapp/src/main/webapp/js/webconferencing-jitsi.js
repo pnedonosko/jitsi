@@ -431,45 +431,22 @@
                         let playRingtone = !user || user.status == "available" || user.status == "away";
                         callButton.initCallPopup(callId, update.callState, callerId, callerLink, callerAvatar, callerMessage, playRingtone).then((popup) => {
                           callPopup = popup;
-                          if (playRingtone) {
-                            const ringId = "jitsi-call-ring-" + callerId;
-                            // let $ring;
-                            localStorage.removeItem(ringId);
-                            let callRinging = JSON.parse(localStorage.getItem(ringId));
-                            //log.trace(callRinging);
-                            if (!callRinging || Date.now() - callRinging.time > 5000) {
-                              // log.trace(">>> Ringing the caller: " + callerId);
-                              // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
-                              localStorage.setItem(ringId, JSON.stringify({
-                               time: Date.now()
-                              })); // set it quick as possible to avoid rice conditions
-                              callRinging = true; // it's String from local storage, don't set it to bool!!
-                            }
-                          } 
-                          popup.onAccepted(() => {
-                            playRingtone = false;
+                          callPopup.onAccepted(() => {
                             log.info("User accepted call: " + callId);
-                            //var callUrl = window.location.protocol + "//" + window.location.host + "/jitsi/meet/" + encodeURIComponent(callId);
-                            var callUrl = getCallUrl(callId);
-                            var callWindow = webConferencing.showCallWindow(callUrl, self.getTitle() + " " + callId);
+                            const callUrl = getCallUrl(callId);
+                            const callWindow = webConferencing.showCallWindow(callUrl, self.getTitle() + " " + callId);
                             callWindow.document.title = call.title;
-                            if (callRinging) {
-                              localStorage.removeItem(ringId);
-                            }
                           });
-                          popup.onRejected(() => {
+                          callPopup.onRejected(() => {
                             if (!isGroup && popup.callState != "stopped" && popup.callState != "joined") {
                               // Delete the call if it is not group one, not
                               // already stopped and wasn't joined -
                               // a group call will be deleted automatically
                               // when last party leave it.
                               closeCallPopup(callId, "stopped");
-                                log.trace("<<< User declined " + (popup.callState ? " just " + popup.callState : "") +
+                              log.trace("<<< User declined " + (popup.callState ? " just " + popup.callState : "") +
                                 " call " + callId + ", deleting it.");
                               webConferencing.deleteCall(callId).done(function() {
-                                if (callRinging) {
-                                  localStorage.removeItem(ringId);
-                                }
                                 log.info("Call deleted: " + callId);
                               }).fail(function(err) {
                                 if (err && (err.code == "NOT_FOUND_ERROR")) {
