@@ -1,15 +1,9 @@
 <template>
   <v-row justify="center">
-    <v-dialog 
-      v-model="isDialogVisible" 
-      width="430"
-      @click:outside="passRejected">
+    <v-dialog v-model="isDialogVisible" width="430" @click:outside="passRejected">
       <v-card>
-        <v-avatar 
-          color="#578dc9" 
-          width="70" 
-          height="70">
-          <img :src="avatar" :alt="caller" >
+        <v-avatar color="#578dc9" width="70" height="70">
+          <img :src="avatar" :alt="caller" />
         </v-avatar>
         <i class="uiIconSocPhone start-call"></i>
         <v-card-text v-html="callerMessage" />
@@ -29,13 +23,22 @@
             class="ma-2 decline-button" 
             outlined 
             fab 
-            color="#aeb3b7" 
-            @click="passRejected">
+            color="#aeb3b7"
+            @click="passRejected()">
             <i class="uiIconClose"></i>
           </v-btn>
           <span class="button-title">Ignore</span>
           <!-- <i v-html="callPopupRing.incomingAudio"></i>
-          <i v-html="callPopupRing.declineAudio"></i> -->
+          <i v-html="callPopupRing.declineAudio"></i>-->
+          <audio
+            ref="audio"
+            style="display: none"
+            autoplay
+            loop
+            preload="auto">
+            <source :src="ringtone" />
+            <p>"Your browser does not support the audio element</p>
+          </audio>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -43,7 +46,6 @@
 </template>
 
 <script>
-
 export default {
   name: "CallPopup",
   props: {
@@ -68,39 +70,27 @@ export default {
       type: Boolean,
       required: true
     },
-    callPopupRing: {
-      type: Object,
-      required: true
-    }
   },
   data() {
     return {
-      ringtone: ""
+      ringtone: "/jitsi/resources/audio/ringtone_exo-1.m4a"
     };
   },
-  //  watch: {
-  //   ringtone() {
-  //     return this.callPopupRing.incomingSound;
-  //   },
-  // },
-  // watch: {
-  //   playRingtone(oldValue, newValue) {
-  //     if (oldValue === true || newValue === true) {
-  //       this.addSound("/webrtc/audio/line.mp3");
-  //       this.audio.play();
-  //     }
-  //   }
-  // },
+  mounted() {
+    this.$watch(this.ringtone, function() {
+      this.$refs.player.load();
+    });
+  },
   methods: {
-    // closePopup() {
-    //   this.dialog = false;
+    // switchRingtone() {
+    //   this.ringtone = "/jitsi/resources/audio/incoming_cancel.mp3";
     // },
     passAccepted() {
       this.$emit("accepted");
     },
     passRejected() {
       this.$emit("rejected");
-    },
+    }
   }
 };
 </script>
@@ -115,7 +105,6 @@ export default {
       position: absolute;
       bottom: 7%;
       right: 7%;
-      
     }
   }
   .v-dialog {
