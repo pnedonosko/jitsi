@@ -53,7 +53,7 @@ export default {
       } else {
         title = this.i18n.te("UICallButton.label.jitsi")
           ? this.$t("UICallButton.label.jitsi")
-          : "Jitsi Call";
+          : "Call";
       }
       return title;
     },
