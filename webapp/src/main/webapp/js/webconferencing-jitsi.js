@@ -408,6 +408,7 @@
           let callPopup;
           var closeCallPopup = function(callId, state) {
             if (callPopup && callPopup.callId && callPopup.callId == callId) {
+              callButton.updateCallState(callId, state);
               callPopup.callState = state;
               callPopup.close();
             }
@@ -423,6 +424,7 @@
                 // rely on logic implemented in callButton() here: group call ID
                 // starts with 'g/'
                 var isGroup = callId.startsWith("g_");
+                callButton.updateCallState(callId, update.callState);
                 log.trace(">>> User call state updated: " + JSON.stringify(update));
                 if (update.callState == "started") {
                   // When call started it means we have an incoming call for
@@ -464,10 +466,12 @@
                               closeCallPopup(callId, "stopped");
                               log.trace("<<< User declined " + (popup.callState ? " just " + popup.callState : "") +
                                 " call " + callId + ", deleting it.");
-                              webConferencing.deleteCall(callId).done(function() {
+                              webConferencing.deleteCall(callId).done(function(call) {
+                                callButton.updateCallState(callId, call.state);
                                 log.info("Call deleted: " + callId);
                               }).fail(function(err) {
                                 if (err && (err.code == "NOT_FOUND_ERROR")) {
+                                  callButton.updateCallState(callId, err.code);
                                   // already deleted
                                   log.trace("<< Call not found " + callId);
                                 } else {
