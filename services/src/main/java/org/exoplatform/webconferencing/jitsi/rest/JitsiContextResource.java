@@ -117,7 +117,7 @@ public class JitsiContextResource implements ResourceContainer {
   public Response upload(@Context HttpServletRequest request, @QueryParam("token") String token) {
     String callId = null;
     String owner = null;
-    Boolean isGroup = null;
+    String type = null;
     String moderator = null;
     List<String> participants = null;
     try {
@@ -126,26 +126,22 @@ public class JitsiContextResource implements ResourceContainer {
                         .parseClaimsJws(token)
                         .getBody();
       owner = body.get("owner", String.class);
-      isGroup = body.get("isGroup", Boolean.class);
+      type = body.get("type", String.class);
       moderator = body.get("moderator", String.class);
       callId = body.get("callId", String.class);
       participants = (List<String>) body.get("participants", List.class);
-      LOG.info("Participants: ");
-      for (String part : participants) {
-        LOG.info(part);
-      }
     } catch (Exception e) {
       LOG.error("Cannot parse JWT token for uploading recording", e.getMessage());
       return Response.status(Status.BAD_REQUEST).entity("{\"error\":\"JWT token is invalid\"}").build();
     }
-    if (callId == null || owner == null || isGroup == null || moderator == null) {
+    if (callId == null || owner == null || type == null || moderator == null) {
       return Response.status(Status.BAD_REQUEST)
-                     .entity("{\"error\":\"JWT token should contain owner, isGroup, moderator\"}")
+                     .entity("{\"error\":\"JWT token should contain owner, type, moderator\"}")
                      .build();
     }
 
     try {
-      UploadFileInfo uploadFileInfo = new UploadFileInfo(callId, owner, isGroup, moderator, participants);
+      UploadFileInfo uploadFileInfo = new UploadFileInfo(callId, owner, type, moderator, participants);
       webconferencing.uploadFile(uploadFileInfo, request);
       return Response.ok().build();
     } catch (RepositoryException | UploadFileException e) {
