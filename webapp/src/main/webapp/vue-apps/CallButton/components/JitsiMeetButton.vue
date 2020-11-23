@@ -12,6 +12,7 @@
 
 <script>
 export default {
+  name: "JitsiMeetButton",
   props: {
     callSettings: {
       type: Object,
@@ -85,9 +86,12 @@ export default {
   .v-btn:not(.v-btn--round).v-size--default {
     padding: 0px;
     min-width: unset;
+    width: 100%;
+    height: 100%;
   }
   .v-btn {
     padding: 0px;
+    justify-content: flex-start;
   }
   .uiIconSocPhone {
     &:before {
