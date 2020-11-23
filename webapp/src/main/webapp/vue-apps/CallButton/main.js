@@ -76,7 +76,7 @@ export function initCallPopup(
     playRingtone) {
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
     const container = document.createElement("div");
-    container.setAttribute("id", "call-popup"); // TODO why we need an ID unique per page?
+    container.setAttribute("class", "call-popup"); // TODO why we need an ID unique per page?
     let onAccepted;
     let onRejected;
     const comp = new Vue({
@@ -109,7 +109,7 @@ export function initCallPopup(
             accepted: function() {
               if (onAccepted) {
                 onAccepted();
-                // TODO copypasted in thee places, why not a single function?
+                // TODO copypasted in thee places, why not a single function? //
                 thevue.isDialogVisible = false;
                 thevue.$destroy();
               }
@@ -132,6 +132,7 @@ export function initCallPopup(
       close: function() {
         comp.isDialogVisible = false;
         comp.$destroy();
+        // destroyPopup(comp);
       },
       onAccepted: function(callback) {
         onAccepted = callback;

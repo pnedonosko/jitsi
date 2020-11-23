@@ -1,15 +1,15 @@
 <template>
   <v-row justify="center">
-    <v-dialog 
-      v-model="isDialogVisible" 
-      width="430" 
+    <v-dialog
+      v-model="isDialogVisible"
+      width="430"
       @click:outside="passRejected">
       <v-card>
         <v-avatar 
           color="#578dc9" 
           width="70" 
           height="70">
-          <img :src="avatar" :alt="caller" />
+          <img :src="avatar" :alt="caller">
         </v-avatar>
         <i class="uiIconSocPhone start-call"></i>
         <v-card-text v-html="callerMessage" />
@@ -34,15 +34,13 @@
             <i class="uiIconClose"></i>
           </v-btn>
           <span class="button-title">Ignore</span>
-          <!-- <i v-html="callPopupRing.incomingAudio"></i>
-          <i v-html="callPopupRing.declineAudio"></i>-->
           <audio 
             ref="audio" 
             style="display: none" 
             autoplay 
             loop 
             preload="auto">
-            <source :src="ringtone" />
+            <source :src="ringtone">
             <p>"Your browser does not support the audio element</p>
           </audio>
         </v-card-actions>
@@ -103,11 +101,11 @@ export default {
       this.callRinging = true;
     }
   },
-  mounted() {
-    this.$watch(this.ringtone, function() {
-      this.$refs.player.load();
-    });
-  },
+  // mounted() {
+  //   // this.$watch(this.ringtone, function() {
+  //   //   this.$refs.player.load();
+  //   // });
+  // },
   methods: {
     passAccepted() {
       if (this.callRinging) {
@@ -130,11 +128,20 @@ export default {
     flex-grow: unset !important;
     width: 12%;
   }
+  .v-dialog__content {
+    height: fit-content;
+    justify-content: center;
+    left: unset;
+    bottom: 2%;
+    top: unset;
+    right: 2%;
+    width: fit-content;
+  }
   .v-application {
     .v-dialog {
       position: absolute;
-      bottom: 7%;
-      right: 7%;
+      bottom: 2%;
+      right: 2%;
     }
   }
   .v-dialog {
