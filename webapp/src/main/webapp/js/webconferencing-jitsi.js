@@ -157,13 +157,15 @@
             webConferencing.getCall(callId).then(call => {
               // Call already running - join it
               log.info("Call already exists. Joining call: " + callId);
-              // For grop calls
-              // Note: webconf starts call when first user joins it
-              if (call.state === "stopped" && target.type === "chat_room") {
-                var participants = Object.values(target.members).map(function(member) {
-                  return member.id;
-                });
-                webConferencing.updateParticipants(callId, participants);
+              // Note: for group calls, webconf will start the call when first user joined it - join will hapen from the call page
+              if (target.type === "chat_room") {
+                if (call.state === "stopped" || call.participants.length == 0) {
+                  // If room call stopped or empty we update all parties in it
+                  const participants = Object.values(target.members).map(member => {
+                    return member.id;
+                  });
+                  webConferencing.updateParticipants(callId, participants);
+                }
               }
               callProcess.resolve(call);
             }).catch(err => {
@@ -194,7 +196,6 @@
         callProcess.then(call => {
           callWindow.location = getCallUrl(callId);
           callWindow.document.title = call.title; // TODO was target.title
-          callButton.updateCallState(callId, call.state);
         }).catch(err => {
           callWindow.close();
           setTimeout(() => {
@@ -430,57 +431,67 @@
                     var callerMessage = !isGroup ? styledOwnerTitle + " started a Meeting with you." : "A meeting has started in the room " + styledOwnerTitle;
                     var callerRoom = callerId;
                     call.title = call.owner.title; // for callee the call
-                    // title is a caller name
-                    // Get current user status, we need this to figure out a need of playing ringtone
-                    // we'll do for users with status 'Available' or 'Away',
-                    // but ones with 'Do Not Disturb' will not hear an incoming ring.
-                    webConferencing.getUserStatus(currentUserId).then(user => {
-                      // Build a call popover
-                      // We use the popover promise to finish initialization on its progress state, on
-                      // resolved (done) to act on accepted call and on rejected (fail) on declined call.
-                      let playRingtone = !user || user.status == "available" || user.status == "away";
-                      callButton.initCallPopup(callId, callerId, callerLink, callerAvatar, callerMessage, playRingtone).then(popup => {
-                        callPopup = popup;
-                        callPopup.onAccepted(() => {
-                          log.info("User accepted call: " + callId);
-                          const callUrl = getCallUrl(callId);
-                          const callWindow = webConferencing.showCallWindow(callUrl, self.getTitle() + " " + callId);
-                          callWindow.document.title = call.title;
-                        });
-                        callPopup.onRejected(() => {
-                          if (!isGroup && popup.callState != "stopped" && popup.callState != "joined") {
-                            // Delete the call if it is not group one, not
-                            // already stopped and wasn't joined -
-                            // a group call will be deleted automatically
-                            // when last party leave it.
-                            closeCallPopup(callId);
-                            log.trace("<<< User declined " + (popup.callState ? " just " + popup.callState : "") +
-                              " call " + callId + ", deleting it.");
-                            webConferencing.deleteCall(callId).then(call => {
-                              log.info("Call deleted: " + callId);
-                            }).catch(err => {
-                              if (err && (err.code == "NOT_FOUND_ERROR")) {
-                                // already deleted
-                                log.trace("<< Call not found " + callId);
-                              } else {
-                                log.error("Failed to stop call: " + callId, err);
-                                webConferencing.showError("Error stopping call", webConferencing.errorText(err));
-                              }
-                            });
-                          }
+                    // Check if current user not already in the call (joined)
+                    let canJoinCall = true;
+                    for (const part of call.participants) {
+                      if (part.id == currentUserId && part.state == "joined") {
+                        canJoinCall = false;
+                        break;
+                      }
+                    }
+                    if (canJoinCall) {
+                      // User can join the call.
+                      // Get current user status, we need this to figure out a need of playing ringtone
+                      // we'll do for users with status 'Available' or 'Away',
+                      // but ones with 'Do Not Disturb' will not hear an incoming ring.
+                      webConferencing.getUserStatus(currentUserId).then(user => {
+                        // Build a call popover
+                        // We use the popover promise to finish initialization on its progress state, on
+                        // resolved (done) to act on accepted call and on rejected (fail) on declined call.
+                        let playRingtone = !user || user.status == "available" || user.status == "away";
+                        callButton.initCallPopup(callId, callerId, callerLink, callerAvatar, callerMessage, playRingtone).then(popup => {
+                          callPopup = popup;
+                          callPopup.onAccepted(() => {
+                            log.info("User accepted call: " + callId);
+                            const callUrl = getCallUrl(callId);
+                            const callWindow = webConferencing.showCallWindow(callUrl, self.getTitle() + " " + callId);
+                            callWindow.document.title = call.title;
+                          });
+                          callPopup.onRejected(() => {
+                            if (!isGroup && popup.callState != "stopped" && popup.callState != "joined") {
+                              // Delete the call if it is not group one, not already stopped and wasn't joined -
+                              // a group call will be deleted automatically when last party leave it.
+                              closeCallPopup(callId);
+                              log.trace("<<< User declined " + (popup.callState ? " just " + popup.callState : "") +
+                                " call " + callId + ", deleting it.");
+                              webConferencing.deleteCall(callId).then(call => {
+                                log.info("Call deleted: " + callId);
+                              }).catch(err => {
+                                if (err && (err.code == "NOT_FOUND_ERROR")) {
+                                  // already deleted
+                                  log.trace("<< Call not found " + callId);
+                                } else {
+                                  log.error("Failed to stop call: " + callId, err);
+                                  webConferencing.showError("Error stopping call", webConferencing.errorText(err));
+                                }
+                              });
+                            }
+                          });
+                        }).catch(err => {
+                          log.error("Error openning call popup for " + callId, err);
+                          webConferencing.showError("Filed to open incoming call popup", webConferencing.errorText(err));
                         });
                       }).catch(err => {
-                        log.error("Error openning call popup for " + callId, err);
-                        webConferencing.showError("Filed to open incoming call popup", webConferencing.errorText(err));
+                        log.error("Failed to get user status: " + currentUserId, err);
+                        if (err) {
+                          webConferencing.showError("Incoming call error", webConferencing.errorText(err));
+                        } else {
+                          webConferencing.showError("Incoming call error", "Error read user status information from the server");
+                        }
                       });
-                    }).catch(err => {
-                      log.error("Failed to get user status: " + currentUserId, err);
-                      if (err) {
-                        webConferencing.showError("Incoming call error", webConferencing.errorText(err));
-                      } else {
-                        webConferencing.showError("Incoming call error", "Error read user status information from the server");
-                      }
-                    });
+                    } else {
+                      log.trace("User already in the started call: " + currentUserId + " call: " + callId);
+                    }
                   }).catch(err => {
                     log.error("Failed to get call info: " + callId, err);
                     if (err) {
