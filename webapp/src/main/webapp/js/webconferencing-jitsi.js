@@ -155,7 +155,6 @@
         getStatus().then(response => {
           if (response.status === "active") {
             webConferencing.getCall(callId).then(call => {
-              callButton.updateCallState(callId, call.state);
               // Call already running - join it
               log.info("Call already exists. Joining call: " + callId);
               // For grop calls
@@ -164,16 +163,13 @@
                 var participants = Object.values(target.members).map(function(member) {
                   return member.id;
                 });
-                webConferencing.updateParticipants(callId, participants).then(call => {
-                  callButton.updateCallState(callId, call.state);
-                });
+                webConferencing.updateParticipants(callId, participants);
               }
               callProcess.resolve(call);
             }).catch(err => {
               if (err) {
                 if (err.code == "NOT_FOUND_ERROR") {
                   createCall(callId, context.currentUser, target).then(call => {
-                    callButton.updateCallState(callId, call.state);
                     log.info("Call created: " + callId);
                     callProcess.resolve(call);
                   });
@@ -198,6 +194,7 @@
         callProcess.then(call => {
           callWindow.location = getCallUrl(callId);
           callWindow.document.title = call.title; // TODO was target.title
+          callButton.updateCallState(callId, call.state);
         }).catch(err => {
           callWindow.close();
           setTimeout(() => {
@@ -460,11 +457,9 @@
                             log.trace("<<< User declined " + (popup.callState ? " just " + popup.callState : "") +
                               " call " + callId + ", deleting it.");
                             webConferencing.deleteCall(callId).then(call => {
-                              callButton.updateCallState(callId, call.state);
                               log.info("Call deleted: " + callId);
                             }).catch(err => {
                               if (err && (err.code == "NOT_FOUND_ERROR")) {
-                                callButton.updateCallState(callId, err.code);
                                 // already deleted
                                 log.trace("<< Call not found " + callId);
                               } else {
