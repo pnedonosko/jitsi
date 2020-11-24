@@ -19,7 +19,6 @@
             color="#2eb58c"
             elevation="0"
             fab
-            dark
             @click="passAccepted">
             <i class="uiIconSocPhone"></i>
           </v-btn>
@@ -29,7 +28,7 @@
             class="ma-2 decline-button" 
             outlined 
             fab 
-            color="#aeb3b7" 
+            color="#b1b5b9" 
             @click="passRejected()">
             <i class="uiIconClose"></i>
           </v-btn>
@@ -128,6 +127,7 @@ export default {
     flex-grow: unset !important;
     width: 12%;
   }
+  //.theme--light.v-card > .v-card__text
   .v-dialog__content {
     height: fit-content;
     justify-content: center;
@@ -178,6 +178,7 @@ export default {
         grid-row: 1 / span 1;
         padding: 20px 15px 20px 0px;
         font-size: 16px;
+        color: #404040;
       }
       .v-card__actions {
         grid-column: 2 / span 2;
@@ -205,6 +206,9 @@ export default {
             }
           }
           &.decline-button {
+            &:before {
+              color: transparent;
+            }
             .v-btn__content {
               [class^="uiIcon"] {
                 position: relative;
@@ -217,6 +221,9 @@ export default {
                   left: -25px;
                   transform: translate(14px, 5px);
                 }
+              }
+              .uiIconClose {
+                opacity: 1;
               }
             }
           }
