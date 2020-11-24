@@ -1,8 +1,8 @@
 <template>
   <v-btn
-    id="jitsiCallAction"
     ref="jitsi" 
     :ripple="false"
+    class="jitsiCallAction"
     outlined 
     @click.native="startCall">
     <i :class="buttonTitle.icon" class="uiIconSocPhone uiIconBlue"></i>
@@ -106,33 +106,6 @@ export default {
     padding: 0px;
     justify-content: flex-start;
   }
-  .uiIconSocPhone {
-    &:before {
-      height: 16px;
-      width: 16px;
-      margin-right: 4px;
-      margin-left: 3px;
-    }
-  }
-  .callIcon-call {
-    &:before {
-      color: unset;
-      content: "\e92b";
-    }
-  }
-  .callIcon-join {
-    &:before {
-    content: "\E61C";
-    font-size: 16px;
-    color: #fb8e18;
-    }
-  }
-  .callIcon-joined {
-    &:before {
-      color: #2eb58c;
-      content: "\e92b";
-    }
-  }
   .theme--light.v-btn {
     background: inherit;
     &:focus::before {
@@ -150,6 +123,35 @@ export default {
       span {
         color: white;
       }
+    }
+  }
+}
+.jitsiCallAction {
+  .uiIconSocPhone {
+    &:before {
+      height: 16px;
+      width: 16px;
+      margin-right: 4px;
+      margin-left: 3px;
+    }
+  }
+  .callIcon-call {
+    &:before {
+      color: unset;
+      content: "\e92b";
+    }
+  }
+  .callIcon-join {
+    &:before {
+      content: "\E61C";
+      font-size: 16px;
+      color: #fb8e18;
+    }
+  }
+  .callIcon-joined {
+    &:before {
+      color: #2eb58c;
+      content: "\e92b";
     }
   }
 }
