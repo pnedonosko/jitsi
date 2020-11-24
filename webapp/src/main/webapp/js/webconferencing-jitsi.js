@@ -152,9 +152,9 @@
         var callId = getCallId(context, target);
         // Open call window
         var callWindow = webConferencing.showCallWindow("", self.getTitle() + " " + callId);
-        getStatus().then(function(response) {
+        getStatus().then(response => {
           if (response.status === "active") {
-            webConferencing.getCall(callId).done(function(call) {
+            webConferencing.getCall(callId).then(call => {
               callButton.updateCallState(callId, call.state);
               // Call already running - join it
               log.info("Call already exists. Joining call: " + callId);
@@ -164,15 +164,15 @@
                 var participants = Object.values(target.members).map(function(member) {
                   return member.id;
                 });
-                webConferencing.updateParticipants(callId, participants).then((call) => {
+                webConferencing.updateParticipants(callId, participants).then(call => {
                   callButton.updateCallState(callId, call.state);
                 });
               }
               callProcess.resolve(call);
-            }).fail(function(err) {
+            }).catch(err => {
               if (err) {
                 if (err.code == "NOT_FOUND_ERROR") {
-                  createCall(callId, context.currentUser, target).done(function(call) {
+                  createCall(callId, context.currentUser, target).then(call => {
                     callButton.updateCallState(callId, call.state);
                     log.info("Call created: " + callId);
                     callProcess.resolve(call);
@@ -189,19 +189,19 @@
           } else {
             callProcess.reject("The Call App is not active");
           }
-        }).catch(function(err) {
+        }).catch(err => {
           callProcess.reject("The Call App is temporary unavailable.");
         });
 
         // We wait for call readiness and invoke start it in the
         // popup window
-        callProcess.done(function(call) {
+        callProcess.then(call => {
           callWindow.location = getCallUrl(callId);
           callWindow.document.title = call.title; // TODO was target.title
-        }).fail(function(msg) {
+        }).catch(err => {
           callWindow.close();
-          setTimeout(function() {
-            alert("Cannot open call page. " + msg);
+          setTimeout(() => {
+            alert("Cannot open call page. " + err);
           }, 50);
         });
       };
@@ -236,54 +236,53 @@
       this.callButton = function(context, buttonType) {
         var button = $.Deferred();
         if (settings && context && context.currentUser) {
-          context.details().done(
-            function(target) {
-              if (!buttonType || buttonType === "vue") {
-                const callId = getCallId(context, target);
-                const callSettings = {};
-                callSettings.target = target;
-                callSettings.callId = callId;
-                callSettings.context = context;
-                callSettings.provider = self;
-                callSettings.onCallOpen = function() {
-                  startCall(context, target);
-                };
-                // callSettings.callWindow = callWindow;
-                callButton.init(callSettings).then(comp => {
-                  button.resolve(comp);
-                  getCallState(context, target).then((callState) => {
-                    // initial state
-                    callButton.updateCallState(callId, callState);
-                  });
+          context.details().then(target => {
+            if (!buttonType || buttonType === "vue") {
+              const callId = getCallId(context, target);
+              const callSettings = {};
+              callSettings.target = target;
+              callSettings.callId = callId;
+              callSettings.context = context;
+              callSettings.provider = self;
+              callSettings.onCallOpen = () => {
+                startCall(context, target);
+              };
+              // callSettings.callWindow = callWindow;
+              callButton.init(callSettings).then(comp => {
+                button.resolve(comp);
+                getCallState(context, target).then(callState => {
+                  // initial state
+                  callButton.updateCallState(callId, callState);
                 });
-                // Resolve with our button - return Vue object here, so it
-                // will be appended to Call Button UI in the Platform
-              } else if (buttonType === "element") {
-                var $button = $("<a title='" + target.title + "' href='javascript:void(0)' class='myCallAction'>" +
-                  "<i class='uiIconMyCall uiIconVideoPortlet uiIconLightGray'></i>" + "<span class='callTitle'>" +
-                  self.getCallTitle() + "</span></a>");
-                $button.click(function() {
-                  startCall(context, target);
-                });
-                $button.data("targetid", target.id);
-                button.resolve($button[0]);
-              }
-            }).fail(function(err) {
-              // On error, we don't show the button for this context
-              if (err && err.code == "NOT_FOUND_ERROR") {
-                // If target not found, for any reason, we don't need tell it's an
-                // error - just no button for the target
-                button.reject(err.message);
-              } else {
-                // For other failures we seems met an error (server or network)
-                // and send it as a second parameter,
-                // thus the core add-on will be able recognize it and do
-                // accordingly (at least log to server log)
-                var msg = "Error getting context details";
-                log.error(msg, err);
-                button.reject(msg, err);
-              }
-            });
+              });
+              // Resolve with our button - return Vue object here, so it
+              // will be appended to Call Button UI in the Platform
+            } else if (buttonType === "element") {
+              var $button = $("<a title='" + target.title + "' href='javascript:void(0)' class='myCallAction'>" +
+                "<i class='uiIconMyCall uiIconVideoPortlet uiIconLightGray'></i>" + "<span class='callTitle'>" +
+                self.getCallTitle() + "</span></a>");
+              $button.click(function() {
+                startCall(context, target);
+              });
+              $button.data("targetid", target.id);
+              button.resolve($button[0]);
+            }
+          }).catch(err => {
+            // On error, we don't show the button for this context
+            if (err && err.code == "NOT_FOUND_ERROR") {
+              // If target not found, for any reason, we don't need tell it's an
+              // error - just no button for the target
+              button.reject(err.message);
+            } else {
+              // For other failures we seems met an error (server or network)
+              // and send it as a second parameter,
+              // thus the core add-on will be able recognize it and do
+              // accordingly (at least log to server log)
+              var msg = "Error getting context details";
+              log.error(msg, err);
+              button.reject(msg, err);
+            }
+          });
         } else {
           // If not initialized, we don't show the button for this context
           var msg = "Not configured or empty context";
@@ -340,24 +339,24 @@
       //     }
       //   });
       //   process.notify($call);
-        // if (playRingtone) {
-        //   const ringId = "jitsi-call-ring-" + callerId;
-        //   let $ring;
-        //   let callRinging = localStorage.getItem(ringId);
-        //   if (!callRinging || Date.now() - callRinging.time > 5000) {
-        //     log.trace(">>> Ringing the caller: " + callerId);
-        //     // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
-        //     localStorage.setItem(ringId, {
-        //       time: Date.now()
-        //     }); // set it quick as possible to avoid rice conditions
-        //     callRinging = true;
-        //     // Start ringing incoming sound only if requested (depends on user status)
-        //     // TODO ringtone was incoming.mp3 type='audio/mpeg' -- Oct 29, 2020
-        //     $ring = $("<audio loop autoplay style='display: none;'>" +
-        //       "<source src='/jitsi/resources/audio/ringtone_exo-1.m4a'>" +
-        //       "Your browser does not support the audio element.</audio>");
-        //     $(document.body).append($ring);
-        //   }
+      // if (playRingtone) {
+      //   const ringId = "jitsi-call-ring-" + callerId;
+      //   let $ring;
+      //   let callRinging = localStorage.getItem(ringId);
+      //   if (!callRinging || Date.now() - callRinging.time > 5000) {
+      //     log.trace(">>> Ringing the caller: " + callerId);
+      //     // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
+      //     localStorage.setItem(ringId, {
+      //       time: Date.now()
+      //     }); // set it quick as possible to avoid rice conditions
+      //     callRinging = true;
+      //     // Start ringing incoming sound only if requested (depends on user status)
+      //     // TODO ringtone was incoming.mp3 type='audio/mpeg' -- Oct 29, 2020
+      //     $ring = $("<audio loop autoplay style='display: none;'>" +
+      //       "<source src='/jitsi/resources/audio/ringtone_exo-1.m4a'>" +
+      //       "Your browser does not support the audio element.</audio>");
+      //     $(document.body).append($ring);
+      //   }
       //     process.fail(function() {
       //       if ($call.callState != "joined") {
       //         var $cancel = $("<audio autoplay style='display: none;'>" +
@@ -371,13 +370,13 @@
       //     });
       //     process.always(function() {
       //       // Stop incoming ringing on dialog completion
-            // if (callRinging) {
-            //   localStorage.removeItem(ringId);
-            // }
-            // if ($ring) {
-            //   $ring.remove();
-            //   log.trace("<<< Ringing stopped: " + callerId);
-            // }
+      // if (callRinging) {
+      //   localStorage.removeItem(ringId);
+      // }
+      // if ($ring) {
+      //   $ring.remove();
+      //   log.trace("<<< Ringing stopped: " + callerId);
+      // }
       //     });
       //   }
       //   return process.promise();
@@ -389,7 +388,7 @@
       this.getInviteLink = function(call) {
         return getCallUrl(call.id) + "?inviteId=" + call.inviteId;
       };
-      
+
       /**
        * OPTIONAL method. If implemented, it will be called by Web Conferencing
        * core on addProvider() method. It is assumed that the connector will
@@ -401,10 +400,7 @@
           // We want initialize call buttons and incoming calls dialog only for
           // portal pages (including Chat)
           var currentUserId = webConferencing.getUser().id;
-          // Incoming call popup (embedded into the current page), it is based
-          // on jQueryUI dialog widget
-          // var $popup;
-
+          // Incoming call popup
           let callPopup;
           var closeCallPopup = function(callId, state) {
             if (callPopup && callPopup.callId && callPopup.callId == callId) {
@@ -414,7 +410,7 @@
             }
           };
           // Subscribe to user updates (incoming calls will be notified here)
-          webConferencing.onUserUpdate(currentUserId, function(update) {
+          webConferencing.onUserUpdate(currentUserId, update => {
             // This connector cares only about own provider events
             if (update.providerType == self.getType()) {
               var callId = update.callId;
@@ -431,77 +427,76 @@
                   // this particular user
                   log.info("Incoming call: " + callId);
                   // Get call details by ID
-                  webConferencing.getCall(callId).then(
-                    function(call) {
-                      var callerId = call.owner.id;
-                      var callerLink = call.owner.profileLink;
-                      var callerAvatar = call.owner.avatarLink;
-                      const styledOwnerTitle = call.owner.title.bold();
-                      var callerMessage = !isGroup ? styledOwnerTitle + " started a Meeting with you." : "A meeting has started in the room " + styledOwnerTitle;
-                      var callerRoom = callerId;
-                      call.title = call.owner.title; // for callee the call
-                      // title is a caller name
-                      // Get current user status, we need this to figure out a need of playing ringtone
-                      // we'll do for users with status 'Available' or 'Away',
-                      // but ones with 'Do Not Disturb' will not hear an incoming ring.
-                      webConferencing.getUserStatus(currentUserId).then(user => {
-                        // Build a call popover
-                        // We use the popover promise to finish initialization on its progress state, on
-                        // resolved (done) to act on accepted call and on rejected (fail) on declined call.
-                        let playRingtone = !user || user.status == "available" || user.status == "away";
-                        callButton.initCallPopup(callId, update.callState, callerId, callerLink, callerAvatar, callerMessage, playRingtone).then((popup) => {
-                          callPopup = popup;
-                          callPopup.onAccepted(() => {
-                            log.info("User accepted call: " + callId);
-                            const callUrl = getCallUrl(callId);
-                            const callWindow = webConferencing.showCallWindow(callUrl, self.getTitle() + " " + callId);
-                            callWindow.document.title = call.title;
-                          });
-                          callPopup.onRejected(() => {
-                            if (!isGroup && popup.callState != "stopped" && popup.callState != "joined") {
-                              // Delete the call if it is not group one, not
-                              // already stopped and wasn't joined -
-                              // a group call will be deleted automatically
-                              // when last party leave it.
-                              closeCallPopup(callId, "stopped");
-                              log.trace("<<< User declined " + (popup.callState ? " just " + popup.callState : "") +
-                                " call " + callId + ", deleting it.");
-                              webConferencing.deleteCall(callId).done(function(call) {
-                                callButton.updateCallState(callId, call.state);
-                                log.info("Call deleted: " + callId);
-                              }).fail(function(err) {
-                                if (err && (err.code == "NOT_FOUND_ERROR")) {
-                                  callButton.updateCallState(callId, err.code);
-                                  // already deleted
-                                  log.trace("<< Call not found " + callId);
-                                } else {
-                                  log.error("Failed to stop call: " + callId, err);
-                                  webConferencing.showError("Error stopping call", webConferencing.errorText(err));
-                                }
-                              });
-                            }
-                          });
-                        }).catch(error => {
-                          log.error("Error openning call popup for " + callId, error);
-                          webConferencing.showError("Filed to open incoming call popup", webConferencing.errorText(error));
+                  webConferencing.getCall(callId).then(call => {
+                    var callerId = call.owner.id;
+                    var callerLink = call.owner.profileLink;
+                    var callerAvatar = call.owner.avatarLink;
+                    const styledOwnerTitle = call.owner.title.bold();
+                    var callerMessage = !isGroup ? styledOwnerTitle + " started a Meeting with you." : "A meeting has started in the room " + styledOwnerTitle;
+                    var callerRoom = callerId;
+                    call.title = call.owner.title; // for callee the call
+                    // title is a caller name
+                    // Get current user status, we need this to figure out a need of playing ringtone
+                    // we'll do for users with status 'Available' or 'Away',
+                    // but ones with 'Do Not Disturb' will not hear an incoming ring.
+                    webConferencing.getUserStatus(currentUserId).then(user => {
+                      // Build a call popover
+                      // We use the popover promise to finish initialization on its progress state, on
+                      // resolved (done) to act on accepted call and on rejected (fail) on declined call.
+                      let playRingtone = !user || user.status == "available" || user.status == "away";
+                      callButton.initCallPopup(callId, update.callState, callerId, callerLink, callerAvatar, callerMessage, playRingtone).then(popup => {
+                        callPopup = popup;
+                        callPopup.onAccepted(() => {
+                          log.info("User accepted call: " + callId);
+                          const callUrl = getCallUrl(callId);
+                          const callWindow = webConferencing.showCallWindow(callUrl, self.getTitle() + " " + callId);
+                          callWindow.document.title = call.title;
                         });
-                      }).catch(error => {
-                        log.error("Failed to get user status: " + currentUserId, error);
-                        if (error) {
-                          webConferencing.showError("Incoming call error", webConferencing.errorText(error));
-                        } else {
-                          webConferencing.showError("Incoming call error",
-                            "Error read user status information from the server");
-                        }
+                        callPopup.onRejected(() => {
+                          if (!isGroup && popup.callState != "stopped" && popup.callState != "joined") {
+                            // Delete the call if it is not group one, not
+                            // already stopped and wasn't joined -
+                            // a group call will be deleted automatically
+                            // when last party leave it.
+                            closeCallPopup(callId, "stopped");
+                            log.trace("<<< User declined " + (popup.callState ? " just " + popup.callState : "") +
+                              " call " + callId + ", deleting it.");
+                            webConferencing.deleteCall(callId).then(call => {
+                              callButton.updateCallState(callId, call.state);
+                              log.info("Call deleted: " + callId);
+                            }).catch(err => {
+                              if (err && (err.code == "NOT_FOUND_ERROR")) {
+                                callButton.updateCallState(callId, err.code);
+                                // already deleted
+                                log.trace("<< Call not found " + callId);
+                              } else {
+                                log.error("Failed to stop call: " + callId, err);
+                                webConferencing.showError("Error stopping call", webConferencing.errorText(err));
+                              }
+                            });
+                          }
+                        });
+                      }).catch(err => {
+                        log.error("Error openning call popup for " + callId, err);
+                        webConferencing.showError("Filed to open incoming call popup", webConferencing.errorText(err));
                       });
-                    }).catch(error => {
-                      log.error("Failed to get call info: " + callId, error);
-                      if (error) {
-                        webConferencing.showError("Incoming call error", webConferencing.errorText(error));
+                    }).catch(err => {
+                      log.error("Failed to get user status: " + currentUserId, err);
+                      if (err) {
+                        webConferencing.showError("Incoming call error", webConferencing.errorText(err));
                       } else {
-                        webConferencing.showError("Incoming call error", "Error read call information from the server");
+                        webConferencing.showError("Incoming call error",
+                          "Error read user status information from the server");
                       }
                     });
+                  }).catch(err => {
+                    log.error("Failed to get call info: " + callId, err);
+                    if (err) {
+                      webConferencing.showError("Incoming call error", webConferencing.errorText(err));
+                    } else {
+                      webConferencing.showError("Incoming call error", "Error read call information from the server");
+                    }
+                  });
                 } else if (update.callState == "stopped") {
                   log.info("Call stopped remotelly: " + callId);
                   // Hide call popover for this call, if any callWindow
@@ -532,7 +527,7 @@
                 log.debug("Unexpected user update: " + JSON.stringify(update));
               }
             } // it's other provider type - skip it
-          }, function(err) {
+          }, err => {
             log.error("Failed to listen on user updates", err);
           });
         }
@@ -615,22 +610,22 @@
       var getCallState = function(context, target) {
         var gettingProcess = new Promise(function(resolve) {
           const callId = getCallId(context, target);
-          webConferencing.getCall(callId).done(function(call) {
+          webConferencing.getCall(callId).then(call => {
             let user;
             if (call.state === "started") {
-              for(const participant of call.participants) {
+              for (const participant of call.participants) {
                 if (participant.id === context.currentUser.id) {
                   user = participant;
                   break;
                 }
               }
             }
-            if(user) {
+            if (user) {
               resolve(user.state);
             } else {
               resolve(call.state);
             }
-          }).fail(function(err) {
+          }).catch(err => {
             if (err) {
               if (err.code === "NOT_FOUND_ERROR") {
                 resolve(err.code);
