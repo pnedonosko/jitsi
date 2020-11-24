@@ -68,7 +68,6 @@ export function updateCallState(callId, state) {
 
 export function initCallPopup(
     callId,
-    callState,
     callerId,
     callerLink,
     callerAvatar,
@@ -127,7 +126,6 @@ export function initCallPopup(
     });
     return {
       callId,
-      callState,
       callerId,
       close: function() {
         comp.isDialogVisible = false;

@@ -402,10 +402,8 @@
           var currentUserId = webConferencing.getUser().id;
           // Incoming call popup
           let callPopup;
-          var closeCallPopup = function(callId, state) {
+          var closeCallPopup = function(callId) {
             if (callPopup && callPopup.callId && callPopup.callId == callId) {
-              callButton.updateCallState(callId, state);
-              callPopup.callState = state;
               callPopup.close();
             }
           };
@@ -444,7 +442,7 @@
                       // We use the popover promise to finish initialization on its progress state, on
                       // resolved (done) to act on accepted call and on rejected (fail) on declined call.
                       let playRingtone = !user || user.status == "available" || user.status == "away";
-                      callButton.initCallPopup(callId, update.callState, callerId, callerLink, callerAvatar, callerMessage, playRingtone).then(popup => {
+                      callButton.initCallPopup(callId, callerId, callerLink, callerAvatar, callerMessage, playRingtone).then(popup => {
                         callPopup = popup;
                         callPopup.onAccepted(() => {
                           log.info("User accepted call: " + callId);
@@ -458,7 +456,7 @@
                             // already stopped and wasn't joined -
                             // a group call will be deleted automatically
                             // when last party leave it.
-                            closeCallPopup(callId, "stopped");
+                            closeCallPopup(callId);
                             log.trace("<<< User declined " + (popup.callState ? " just " + popup.callState : "") +
                               " call " + callId + ", deleting it.");
                             webConferencing.deleteCall(callId).then(call => {
@@ -485,8 +483,7 @@
                       if (err) {
                         webConferencing.showError("Incoming call error", webConferencing.errorText(err));
                       } else {
-                        webConferencing.showError("Incoming call error",
-                          "Error read user status information from the server");
+                        webConferencing.showError("Incoming call error", "Error read user status information from the server");
                       }
                     });
                   }).catch(err => {
@@ -500,9 +497,7 @@
                 } else if (update.callState == "stopped") {
                   log.info("Call stopped remotelly: " + callId);
                   // Hide call popover for this call, if any callWindow
-                  closeCallPopup(callId, update.callState);
-                  // Unclock the call button
-                  //unlockCallButton(callId); // TODO cleanup
+                  closeCallPopup(callId);
                 }
               } else if (update.eventType == "call_joined") {
                 log.debug("User call joined: " + update.callId);
@@ -510,19 +505,13 @@
                 // user's windows/clients), then close it
                 if (currentUserId == update.part.id) {
                   callButton.updateCallState(callId, "joined");
-                  closeCallPopup(callId, "joined");
+                  closeCallPopup(callId);
                 }
               } else if (update.eventType == "call_leaved") {
                 if (currentUserId === update.part.id) {
                   callButton.updateCallState(callId, "leaved");
                 }
                 log.debug("User call leaved: " + update.callId);
-                // When user leaves a call, we unlock his button, thus it will
-                // be possible to join the call again -
-                // actual for group conversations.
-                //if (currentUserId == update.part.id) {
-                //  unlockCallButton(callId); // TODO cleanup
-                //}
               } else {
                 log.debug("Unexpected user update: " + JSON.stringify(update));
               }
