@@ -61,9 +61,12 @@ export function init(settings) {
 }
 
 export function updateCallState(callId, state) {
-  callsStates.get(callId).forEach((stateHandler) => {
-    stateHandler.setCallState(state);
-  });
+  const buttonStates = callsStates.get(callId);
+  if (buttonStates) {
+    buttonStates.forEach((stateHandler) => {
+      stateHandler.setCallState(state);
+    });
+  }
 }
 
 export function initCallPopup(
