@@ -5,8 +5,8 @@
     :ripple="false"
     outlined 
     @click.native="startCall">
-    <i class="uiIconSocPhone uiIconBlue"></i>
-    <span>{{ buttonTitle }}</span>
+    <i :class="buttonTitle.icon" class="uiIconSocPhone uiIconBlue"></i>
+    <span>{{ buttonTitle.title }}</span>
   </v-btn>
 </template>
 
@@ -36,28 +36,41 @@ export default {
     return {
       settings: this.callSettings,
       log: null,
-      callWindow: null,
-      callState: null
+      callWindow: null
+      // callState: null
     };
   },
   computed: {
-    buttonTitle: function() {
-      let title;
-      if (this.callSettings.callState === "joined") {
-        title = this.i18n.te("UICallButton.label.joined")
-          ? this.$t("UICallButton.label.joined")
-          : "Joined";
-      } else if (this.callSettings.callState === "started" || this.callSettings.callState === "leaved") {
-        title = this.i18n.te("UICallButton.label.join")
-          ? this.$t("UICallButton.label.join")
-          : "Join";
-      } else {
-        title = this.i18n.te("UICallButton.label.jitsi")
-          ? this.$t("UICallButton.label.jitsi")
-          : "Call";
-      }
-      return title;
+    callState: function() {
+      return this.callSettings.callState;
     },
+    buttonTitle: function() {
+      if (this.callState === "joined") {
+        return {
+          title: this.i18n.te("UICallButton.label.joined")
+            ? this.$t("UICallButton.label.joined")
+            : "Joined",
+          icon: "callIcon-joined"
+        };
+      } else if (
+        this.callState === "started" ||
+        this.callState === "leaved"
+      ) {
+        return {
+          title: this.i18n.te("UICallButton.label.join")
+            ? this.$t("UICallButton.label.join")
+            : "Join",
+          icon: "callIcon-join"
+        };
+      } else {
+        return {
+          title: this.i18n.te("UICallButton.label.jitsi")
+            ? this.$t("UICallButton.label.jitsi")
+            : "Call",
+          icon: "callIcon-call"
+        };
+      }
+    }
   },
   created() {
     this.log = webConferencing.getLog("jitsi");
@@ -95,11 +108,28 @@ export default {
   }
   .uiIconSocPhone {
     &:before {
-      color: unset;
       height: 16px;
       width: 16px;
       margin-right: 4px;
       margin-left: 3px;
+    }
+  }
+  .callIcon-call {
+    &:before {
+      color: unset;
+      content: "\e92b";
+    }
+  }
+  .callIcon-join {
+    &:before {
+    content: "\E61C";
+    font-size: 16px;
+    color: #fb8e18;
+    }
+  }
+  .callIcon-joined {
+    &:before {
+      color: #2eb58c;
       content: "\e92b";
     }
   }
