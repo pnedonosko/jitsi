@@ -514,6 +514,7 @@
                 // If user has incoming popup open for this call (in several
                 // user's windows/clients), then close it
                 if (currentUserId == update.part.id) {
+                  callButton.updateCallState(callId, "joined");
                   closeCallPopup(callId, "joined");
                 }
               } else if (update.eventType == "call_leaved") {
