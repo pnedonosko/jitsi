@@ -52,10 +52,7 @@ export default {
             : "Joined",
           icon: "callIcon-joined"
         };
-      } else if (
-        this.callState === "started" ||
-        this.callState === "leaved"
-      ) {
+      } else if (this.callState === "started" || this.callState === "leaved") {
         return {
           title: this.i18n.te("UICallButton.label.join")
             ? this.$t("UICallButton.label.join")
@@ -124,6 +121,97 @@ export default {
         color: white;
       }
     }
+  }
+.call-button-container {
+  button {
+      .v-btn__content {
+        letter-spacing: 0.1px;
+        padding: 0 10px;
+      }
+    }
+  &.single {
+      &:hover {
+        button  {
+          background-color: var(--allPagesGreyColor, #e1e8ee);
+        }
+        button:hover {
+          i {
+            color: @primaryColor;
+          }
+          span {
+            color: unset;
+          }
+        }
+      }
+    }
+}
+  .call-button-mini {
+    .call-button-container {
+      .dropdown-vue {
+        .buttons-container {
+          [class^="call-button-container-"] {
+            button {
+              background: transparent;
+              box-shadow: none;
+              border: none;
+            }
+          }
+        }
+      }
+      &.single {
+        .single-btn-container {
+          button {
+            margin-right: 0;
+            border: none;
+            background: transparent;
+            .v-btn__content {
+              span {
+                display: none;
+              }
+            }
+          }
+        }
+      }
+    }
+    &:hover {
+      &.single {
+        .single-btn-container {
+          button {
+            width: inherit;
+            margin-right: 0;
+            border: none;
+            background: #ffffff;
+            span {
+              width: inherit;
+            }
+          }
+        }
+      }
+    }
+  }
+  .call-button-mini.call-button--tiptip {
+  .call-button-container {
+    .buttons-container {
+      [class^="call-button-container-"] {
+        button:hover {
+          i, span {
+            color: white;
+          }
+        }
+        button {
+          padding-left: 0;
+          .v-btn__content {
+            .uiIconSocPhone  {
+              font-size: 16px !important;
+                &::before {
+                content: "\e92b";
+              }
+            }
+          }
+        }
+      }
+    }
+  }
   }
 }
 .jitsiCallAction {
