@@ -120,16 +120,16 @@ export default {
       }
     }
   }
-.call-button-container {
-  button {
+  .call-button-container {
+    button {
       .v-btn__content {
         letter-spacing: 0.1px;
         padding: 0 10px;
       }
     }
-  &.single {
+    &.single {
       &:hover {
-        button  {
+        button {
           background-color: var(--allPagesGreyColor, #e1e8ee);
         }
         button:hover {
@@ -142,8 +142,10 @@ export default {
         }
       }
     }
+  }
 }
-  .call-button-mini {
+.call-button-mini {
+  .VuetifyApp {
     .call-button-container {
       .dropdown-vue {
         .buttons-container {
@@ -187,29 +189,31 @@ export default {
       }
     }
   }
-  .call-button-mini.call-button--tiptip {
-  .call-button-container {
-    .buttons-container {
-      [class^="call-button-container-"] {
-        button:hover {
-          i, span {
-            color: white;
-          }
-        }
-        button {
-          padding-left: 0;
-          .v-btn__content {
-            .uiIconSocPhone  {
-              font-size: 16px !important;
-                &::before {
-                content: "\e92b";
+  &.call-button--tiptip {
+    .VuetifyApp {
+      .call-button-container {
+        .buttons-container {
+          [class^="call-button-container-"] {
+            button:hover {
+              i, span {
+                color: white;
+              }
+            }
+            button {
+              padding-left: 0;
+              .v-btn__content {
+                .uiIconSocPhone {
+                  font-size: 16px !important;
+                  &::before {
+                    content: "\e92b";
+                  }
+                }
               }
             }
           }
         }
       }
     }
-  }
   }
 }
 .jitsiCallAction {
