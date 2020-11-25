@@ -49,7 +49,7 @@
 
 <script>
 
-let ringId = null;
+//let ringId = null;
 
 export default {
   name: "CallPopup",
@@ -81,18 +81,20 @@ export default {
 //     };
 //   },
   mounted() {
-    ringId = `jitsi-call-ring-${this.caller}`;
-    const callRinging = localStorage.getItem(ringId);
-    if (!callRinging || Date.now() - callRinging > 5000) {
-      // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
-      localStorage.setItem(
-        ringId,
-        Date.now()
-      ); // set it quick as possible to avoid race conditions
+    //ringId = `jitsi-call-ring-${this.caller}`;
+//    const callRinging = localStorage.getItem(ringId);
+//     if (!callRinging || Date.now() - callRinging > 5000) {
+//       // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
+//       localStorage.setItem(
+//         ringId,
+//         Date.now()
+//       ); // set it quick as possible to avoid race conditions
+    if (this.playRingtone) {
       this.$refs.audio.play();
-    } else {
-      this.$refs.audio.stop();
     }
+//     } else {
+//       this.$refs.audio.stop();
+//     }
   },
   // mounted() {
   //   // this.$watch(this.ringtone, function() {
@@ -102,12 +104,12 @@ export default {
   methods: {
     passAccepted() {
       this.$refs.audio.stop();
-      localStorage.removeItem(ringId);
+      //localStorage.removeItem(ringId);
       this.$emit("accepted");
     },
     passRejected() {
       this.$refs.audio.stop();
-      localStorage.removeItem(this.ringId);
+      //localStorage.removeItem(this.ringId);
       this.$emit("rejected");
     }
   }

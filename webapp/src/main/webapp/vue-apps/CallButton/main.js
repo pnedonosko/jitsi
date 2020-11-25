@@ -76,6 +76,21 @@ export function initCallPopup(
     callerAvatar,
     callerMessage,
     playRingtone) {
+      
+  const ringId = `jitsi-call-ring-${this.caller}`;
+  if (playRingtone) {
+    const callRinging = localStorage.getItem(ringId);
+    if (!callRinging || Date.now() - callRinging > 5000) {
+      // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
+      localStorage.setItem(
+        ringId,
+        Date.now()
+      ); // set it quick as possible to avoid race conditions
+    } else {
+      playRingtone = false; // don't play ringtone - TODO actually do we need this?
+    }   
+  }    
+      
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
     const container = document.createElement("div");
     container.setAttribute("class", "call-popup"); // TODO why we need an ID unique per page?
@@ -109,6 +124,9 @@ export function initCallPopup(
           },
           on: {
             accepted: function() {
+              if (playRingtone) {
+                localStorage.removeItem(ringId);
+              }
               if (onAccepted) {
                 onAccepted();
                 // TODO copypasted in thee places, why not a single function? //
@@ -117,6 +135,9 @@ export function initCallPopup(
               }
             },
             rejected: function(isClosed) {
+              if (playRingtone) {
+                localStorage.removeItem(ringId);
+              }
               if (onRejected) {
                 onRejected(isClosed);
                 thevue.isDialogVisible = false;
