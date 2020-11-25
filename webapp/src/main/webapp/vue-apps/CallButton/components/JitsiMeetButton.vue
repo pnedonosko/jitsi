@@ -155,6 +155,9 @@ export default {
               box-shadow: none;
               border: none;
             }
+            .v-btn {
+              padding: 0px;
+            }
           }
         }
       }
@@ -164,6 +167,7 @@ export default {
             margin-right: 0;
             border: none;
             background: transparent;
+            justify-content: center;
             .v-btn__content {
               span {
                 display: none;
