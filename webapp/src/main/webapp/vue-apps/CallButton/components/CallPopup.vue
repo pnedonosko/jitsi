@@ -82,19 +82,21 @@ export default {
   },
   methods: {
     passAccepted() {
-      this.$emit("accepted");
       if (audio) {
         // TODO in FF sometime it can fail with
         // TypeError: u.stop is not a function
         // why, what is it actuall audio ref here?
-        audio.stop();
+        audio.pause();
+        audio.currentTime = 0;
       }
+      this.$emit("accepted");
     },
     passRejected() {
-      this.$emit("rejected");
       if (audio) {
-        audio.stop();
+        audio.pause();
+        audio.currentTime = 0;
       }
+       this.$emit("rejected");
     }
   }
 };
