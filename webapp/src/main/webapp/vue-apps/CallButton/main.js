@@ -77,8 +77,8 @@ export function initCallPopup(
     callerMessage,
     playRingtone) {
       
-  const ringId = `jitsi-call-ring-${this.caller}`;
-  if (playRingtone) {
+  const ringId = `jitsi-call-ring-${callerId}`;
+  // if (playRingtone) {
     const callRinging = localStorage.getItem(ringId);
     if (!callRinging || Date.now() - callRinging > 5000) {
       // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
@@ -89,7 +89,7 @@ export function initCallPopup(
     } else {
       playRingtone = false; // don't play ringtone - TODO actually do we need this?
     }   
-  }    
+  // }    
       
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
     const container = document.createElement("div");
