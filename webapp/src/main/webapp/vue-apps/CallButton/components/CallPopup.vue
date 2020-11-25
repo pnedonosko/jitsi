@@ -22,7 +22,7 @@
             @click="passAccepted">
             <i class="uiIconSocPhone"></i>
           </v-btn>
-          <span class="button-title">JoIn</span>
+          <span class="button-title" @click="passAccepted">JoIn</span>
           <v-spacer />
           <v-btn 
             class="ma-2 decline-button" 
@@ -32,7 +32,7 @@
             @click="passRejected()">
             <i class="uiIconClose"></i>
           </v-btn>
-          <span class="button-title">Ignore</span>
+          <span class="button-title" @click="passRejected()">Ignore</span>
           <audio 
             ref="audio" 
             style="display: none" 
@@ -218,6 +218,7 @@ export default {
         .button-title {
           font-weight: 700;
           font-size: 14px;
+          cursor: pointer;
         }
       }
     }
