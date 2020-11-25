@@ -2,8 +2,8 @@
   <v-row justify="center">
     <v-dialog
       v-model="isDialogVisible"
-      width="430"
-      @click:outside="passRejected">
+      persistent
+      width="430">
       <v-card>
         <v-avatar 
           color="#578dc9" 
