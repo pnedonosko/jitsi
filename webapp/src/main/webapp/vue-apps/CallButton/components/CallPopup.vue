@@ -38,7 +38,7 @@
             style="display: none" 
             loop 
             preload="auto">
-            <source :src="ringtone">
+            <source src="/jitsi/resources/audio/ringtone_exo-1.m4a">
             <p>"Your browser does not support the audio element</p>
           </audio>
         </v-card-actions>
@@ -48,6 +48,7 @@
 </template>
 
 <script>
+let ringId = null;
 export default {
   name: "CallPopup",
   props: {
@@ -75,16 +76,15 @@ export default {
   },
   data() {
     return {
-      ringtone: "/jitsi/resources/audio/ringtone_exo-1.m4a",
-      callRinging: "",
+      // ringtone: "/jitsi/resources/audio/ringtone_exo-1.m4a",
+      // callRinging: "",
       ringId: ""
     };
   },
   mounted() {
-    const ringId = `jitsi-call-ring-${this.caller}`;
-    this.ringId = ringId;
+    ringId = `jitsi-call-ring-${this.caller}`;
+    // this.ringId = ringId;
     // // let $ring;
-    // localStorage.removeItem(this.ringId);
     const callRinging = localStorage.getItem(ringId);
     // log.trace(callRinging);
 
@@ -108,14 +108,14 @@ export default {
   // },
   methods: {
     passAccepted() {
-      if (localStorage.getItem(this.ringId)) {
-        localStorage.removeItem(this.ringId);
+      if (localStorage.getItem(ringId)) {
+        localStorage.removeItem(ringId);
       }
       this.$emit("accepted");
     },
     passRejected() {
-      if (localStorage.getItem(this.ringId)) {
-        localStorage.removeItem(this.ringId);
+      if (localStorage.getItem(ringId)) {
+        localStorage.removeItem(ringId);
       }
       this.$emit("rejected");
     }
