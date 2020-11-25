@@ -103,12 +103,10 @@ export default {
   // },
   methods: {
     passAccepted() {
-      // this.$refs.audio.stop();
       //localStorage.removeItem(ringId);
       this.$emit("accepted");
     },
     passRejected() {
-      // this.$refs.audio.stop();
       //localStorage.removeItem(this.ringId);
       this.$emit("rejected");
     }
