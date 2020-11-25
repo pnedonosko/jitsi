@@ -74,7 +74,6 @@ export function initCallPopup(
     callerId,
     callerLink,
     callerAvatar,
-
     callerMessage,
     playRingtone) {
       
@@ -82,11 +81,15 @@ export function initCallPopup(
   if (playRingtone) {
     const callRinging = localStorage.getItem(ringId);
     if (!callRinging || Date.now() - callRinging > 5000) {
+      console.log(">>> Call start ringing: " + callId + " for " + callerId);
       // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
       localStorage.setItem(
         ringId,
         Date.now()
       ); // set it quick as possible to avoid race conditions
+    } else {
+      playRingtone = false;
+      console.log(">>> Call already ringing: " + callId + " for " + callerId);
     }
   }    
       

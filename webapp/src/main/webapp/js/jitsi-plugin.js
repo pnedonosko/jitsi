@@ -29,9 +29,7 @@ const webconferencingJitsiExts = [{
   }];
 require(["SHARED/extensionRegistry", "SHARED/webConferencing"], function(extensionRegistry, webConferencing) {
   // webConferencing.init(); // TODO why we care about WebConf init from one of its providers??
-  const log = webConferencing.getLog("jitsi-plugin");
   for (const extension of webconferencingJitsiExts) {
     extensionRegistry.registerExtension(extension.target, extension.type, extension);
-    log.trace(`Register extension type of ${extension.type} for ${extension.target}`);
   }
 });

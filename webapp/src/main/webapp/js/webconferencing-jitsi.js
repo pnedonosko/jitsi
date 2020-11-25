@@ -144,14 +144,19 @@
         return webConferencing.addCall(callId, callInfo);
       };
 
+      var callWindowName = function(callId) {
+        // Window name should be without spaces
+        return self.getType() + "-" + callId;
+      };
+
       /**
        * Start a call in given context. 
        */
       var startCall = function(context, target) {
-        var callProcess = $.Deferred();
-        var callId = getCallId(context, target);
+        let callProcess = $.Deferred();
+        let callId = getCallId(context, target);
         // Open call window
-        var callWindow = webConferencing.showCallWindow("", self.getTitle() + " " + callId);
+        let callWindow = webConferencing.showCallWindow("", callWindowName(callId));
         getStatus().then(response => {
           if (response.status === "active") {
             webConferencing.getCall(callId).then(call => {
@@ -245,7 +250,6 @@
               callSettings.onCallOpen = () => {
                 startCall(context, target);
               };
-              // callSettings.callWindow = callWindow;
               callButton.init(callSettings).then(comp => {
                 button.resolve(comp);
                 getCallState(context, target).then(callState => {
@@ -454,7 +458,7 @@
                           callPopup.onAccepted(() => {
                             log.info("User accepted call: " + callId);
                             const callUrl = getCallUrl(callId);
-                            const callWindow = webConferencing.showCallWindow(callUrl, self.getTitle() + " " + callId);
+                            const callWindow = webConferencing.showCallWindow(callUrl, callWindowName(callId));
                             callWindow.document.title = call.title;
                           });
                           callPopup.onRejected(() => {
@@ -506,7 +510,7 @@
                   closeCallPopup(callId);
                 }
               } else if (update.eventType == "call_joined") {
-                log.debug("User call joined: " + update.callId);
+                log.debug("User call joined: " + update.callId + ", participant: " + update.part.id);
                 // If user has incoming popup open for this call (in several
                 // user's windows/clients), then close it
                 if (currentUserId == update.part.id) {
@@ -514,10 +518,10 @@
                   closeCallPopup(callId);
                 }
               } else if (update.eventType == "call_leaved") {
+                log.debug("User call leaved: " + update.callId + ", participant: " + update.part.id);
                 if (currentUserId === update.part.id) {
                   callButton.updateCallState(callId, "leaved");
                 }
-                log.debug("User call leaved: " + update.callId);
               } else {
                 log.debug("Unexpected user update: " + JSON.stringify(update));
               }
