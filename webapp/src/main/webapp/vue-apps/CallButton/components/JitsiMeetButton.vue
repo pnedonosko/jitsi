@@ -77,7 +77,6 @@ export default {
   mounted() {
     // Assign target ID to the button for later use on started
     // event in init()
-    // console.log(this.settings)
   },
   methods: {
     startCall: function() {
@@ -129,9 +128,6 @@ export default {
     }
     &.single {
       &:hover {
-        button {
-          background-color: var(--allPagesGreyColor, #e1e8ee);
-        }
         button:hover {
           i {
             color: @primaryColor;
@@ -157,6 +153,7 @@ export default {
             }
             .v-btn {
               padding: 0px;
+              vertical-align: baseline;
             }
           }
         }
