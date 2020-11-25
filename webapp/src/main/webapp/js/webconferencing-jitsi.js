@@ -199,8 +199,11 @@
         // We wait for call readiness and invoke start it in the
         // popup window
         callProcess.then(call => {
-          callWindow.location = getCallUrl(callId);
-          callWindow.document.title = call.title; // TODO was target.title
+          const callUrl = getCallUrl(callId);
+          if (callWindow.location.href !== callUrl) {
+            callWindow.location = callUrl;
+            callWindow.document.title = call.title; // TODO was target.title
+          }
         }).catch(err => {
           callWindow.close();
           setTimeout(() => {
