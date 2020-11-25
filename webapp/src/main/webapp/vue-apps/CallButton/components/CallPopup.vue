@@ -36,7 +36,6 @@
           <audio 
             ref="audio" 
             style="display: none" 
-            autoplay 
             loop 
             preload="auto">
             <source :src="ringtone">
@@ -81,23 +80,25 @@ export default {
       ringId: ""
     };
   },
-  created() {
-    this.ringId = `jitsi-call-ring-${this.caller}`;
-    // let $ring;
-    localStorage.removeItem(this.ringId);
-    this.callRinging = JSON.parse(localStorage.getItem(this.ringId));
-    //log.trace(callRinging);
-    if (!this.callRinging || Date.now() - this.callRinging.time > 5000) {
+  mounted() {
+    const ringId = `jitsi-call-ring-${this.caller}`;
+    this.ringId = ringId;
+    // // let $ring;
+    // localStorage.removeItem(this.ringId);
+    const callRinging = localStorage.getItem(ringId);
+    // log.trace(callRinging);
+
+    if (!callRinging || Date.now() - callRinging > 5000) {
       // log.trace(">>> Ringing the caller: " + callerId);
       // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
       localStorage.setItem(
-        this.ringId,
-        JSON.stringify({
-          time: Date.now()
-        })
+        ringId,
+        Date.now()
       ); // set it quick as possible to avoid rice conditions
-
-      this.callRinging = true;
+      this.$refs.audio.play();
+    } 
+    else {
+      this.$refs.audio.stop();
     }
   },
   // mounted() {
@@ -107,13 +108,13 @@ export default {
   // },
   methods: {
     passAccepted() {
-      if (this.callRinging) {
+      if (localStorage.getItem(this.ringId)) {
         localStorage.removeItem(this.ringId);
       }
       this.$emit("accepted");
     },
     passRejected() {
-      if (this.callRinging) {
+      if (localStorage.getItem(this.ringId)) {
         localStorage.removeItem(this.ringId);
       }
       this.$emit("rejected");
@@ -129,20 +130,15 @@ export default {
   }
   //.theme--light.v-card > .v-card__text
   .v-dialog__content {
-    height: fit-content;
     justify-content: center;
     left: unset;
     bottom: 2%;
     top: unset;
     right: 2%;
+    height: fit-content;
     width: fit-content;
-  }
-  .v-application {
-    .v-dialog {
-      position: absolute;
-      bottom: 2%;
-      right: 2%;
-    }
+    height: -moz-fit-content;
+    width: -moz-fit-content;
   }
   .v-dialog {
     border-radius: 2px;
