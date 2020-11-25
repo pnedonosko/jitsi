@@ -48,7 +48,9 @@
 </template>
 
 <script>
+
 let ringId = null;
+
 export default {
   name: "CallPopup",
   props: {
@@ -74,30 +76,21 @@ export default {
       required: true
     }
   },
-  data() {
-    return {
-      // ringtone: "/jitsi/resources/audio/ringtone_exo-1.m4a",
-      // callRinging: "",
-      ringId: ""
-    };
-  },
+//   data() {
+//     return {
+//     };
+//   },
   mounted() {
     ringId = `jitsi-call-ring-${this.caller}`;
-    // this.ringId = ringId;
-    // // let $ring;
     const callRinging = localStorage.getItem(ringId);
-    // log.trace(callRinging);
-
     if (!callRinging || Date.now() - callRinging > 5000) {
-      // log.trace(">>> Ringing the caller: " + callerId);
       // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
       localStorage.setItem(
         ringId,
         Date.now()
-      ); // set it quick as possible to avoid rice conditions
+      ); // set it quick as possible to avoid race conditions
       this.$refs.audio.play();
-    } 
-    else {
+    } else {
       this.$refs.audio.stop();
     }
   },
@@ -108,15 +101,13 @@ export default {
   // },
   methods: {
     passAccepted() {
-      if (localStorage.getItem(ringId)) {
-        localStorage.removeItem(ringId);
-      }
+      this.$refs.audio.stop();
+      localStorage.removeItem(ringId);
       this.$emit("accepted");
     },
     passRejected() {
-      if (localStorage.getItem(ringId)) {
-        localStorage.removeItem(ringId);
-      }
+      this.$refs.audio.stop();
+      localStorage.removeItem(this.ringId);
       this.$emit("rejected");
     }
   }
