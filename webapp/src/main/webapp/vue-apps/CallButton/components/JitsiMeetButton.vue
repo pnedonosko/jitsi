@@ -81,9 +81,7 @@ export default {
   },
   methods: {
     startCall: function() {
-      if (this.callSettings.callState !== "joined") {
-        this.callSettings.onCallOpen();
-      }
+      this.callSettings.onCallOpen();
     }
   }
 };
