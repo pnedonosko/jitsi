@@ -48,9 +48,7 @@
 </template>
 
 <script>
-
-//let ringId = null;
-
+let audio;
 export default {
   name: "CallPopup",
   props: {
@@ -76,39 +74,27 @@ export default {
       required: true
     }
   },
-//   data() {
-//     return {
-//     };
-//   },
   mounted() {
-    //ringId = `jitsi-call-ring-${this.caller}`;
-//    const callRinging = localStorage.getItem(ringId);
-//     if (!callRinging || Date.now() - callRinging > 5000) {
-//       // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
-//       localStorage.setItem(
-//         ringId,
-//         Date.now()
-//       ); // set it quick as possible to avoid race conditions
     if (this.playRingtone) {
       this.$refs.audio.play();
+      audio = this.$refs.audio;
     }
-//     } else {
-//       this.$refs.audio.stop();
-//     }
   },
-  // mounted() {
-  //   // this.$watch(this.ringtone, function() {
-  //   //   this.$refs.player.load();
-  //   // });
-  // },
   methods: {
     passAccepted() {
-      //localStorage.removeItem(ringId);
       this.$emit("accepted");
+      if (audio) {
+        // TODO in FF sometime it can fail with
+        // TypeError: u.stop is not a function
+        // why, what is it actuall audio ref here?
+        audio.stop();
+      }
     },
     passRejected() {
-      //localStorage.removeItem(this.ringId);
       this.$emit("rejected");
+      if (audio) {
+        audio.stop();
+      }
     }
   }
 };

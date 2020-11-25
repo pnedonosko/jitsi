@@ -9,8 +9,7 @@ const vuetify = new Vuetify({
 });
 
 // getting language of user
-const lang =
-  (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || "en";
+const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || "en";
 const localePortlet = "locale.jitsi";
 const resourceBundleName = "Jitsi";
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/${localePortlet}.${resourceBundleName}-${lang}.json`;
@@ -156,7 +155,6 @@ export function initCallPopup(
       close: function() {
         comp.isDialogVisible = false;
         comp.$destroy();
-        // destroyPopup(comp);
       },
       onAccepted: function(callback) {
         onAccepted = callback;

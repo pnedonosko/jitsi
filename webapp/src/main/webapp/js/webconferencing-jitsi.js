@@ -465,23 +465,29 @@
                             callWindow.document.title = call.title;
                           });
                           callPopup.onRejected(() => {
-                            if (!isGroup && popup.callState != "stopped" && popup.callState != "joined") {
-                              // Delete the call if it is not group one, not already stopped and wasn't joined -
-                              // a group call will be deleted automatically when last party leave it.
-                              closeCallPopup(callId);
-                              log.trace("<<< User declined " + (popup.callState ? " just " + popup.callState : "") +
-                                " call " + callId + ", deleting it.");
-                              webConferencing.deleteCall(callId).then(call => {
-                                log.info("Call deleted: " + callId);
-                              }).catch(err => {
-                                if (err && (err.code == "NOT_FOUND_ERROR")) {
-                                  // already deleted
-                                  log.trace("<< Call not found " + callId);
-                                } else {
-                                  log.error("Failed to stop call: " + callId, err);
-                                  webConferencing.showError("Error stopping call", webConferencing.errorText(err));
-                                }
-                              });
+                            log.trace("<<< User declined " + (popup.callState ? " just " + popup.callState : "") + " call " + callId + ".");
+                            closeCallPopup(callId);
+                            if (isGroup) {
+                              // We need inform other windows of the user in the browser to close popups in them
+                              webConferencing.updateCall(callId, "leaved").then(() => {
+                                log.info("Call declined: " + callId + " by user " + currentUserId);
+                              });                              
+                            } else { 
+                              if (popup.callState != "stopped" && popup.callState != "joined") {
+                                // Delete the call if it is not group one, not already stopped and wasn't joined -
+                                // a group call will be deleted automatically when last party leave it.
+                                webConferencing.deleteCall(callId).then(call => {
+                                  log.info("Call deleted: " + callId + " by user " + currentUserId);
+                                }).catch(err => {
+                                  if (err && (err.code == "NOT_FOUND_ERROR")) {
+                                    // already deleted
+                                    log.trace("<< Call not found " + callId);
+                                  } else {
+                                    log.error("Failed to stop call: " + callId, err);
+                                    webConferencing.showError("Error stopping call", webConferencing.errorText(err));
+                                  }
+                                });
+                              }
                             }
                           });
                         }).catch(err => {
@@ -524,6 +530,7 @@
                 log.debug("User call leaved: " + update.callId + ", participant: " + update.part.id);
                 if (currentUserId === update.part.id) {
                   callButton.updateCallState(callId, "leaved");
+                  closeCallPopup(callId);
                 }
               } else {
                 log.debug("Unexpected user update: " + JSON.stringify(update));
