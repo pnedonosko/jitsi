@@ -1,50 +1,51 @@
 <template>
-  <v-row justify="center">
-    <v-dialog
-      v-model="isDialogVisible"
-      persistent
-      width="430">
-      <v-card>
-        <v-avatar 
-          color="#578dc9" 
-          width="70" 
-          height="70">
-          <img :src="avatar" :alt="caller">
-        </v-avatar>
-        <i class="uiIconSocPhone start-call"></i>
-        <v-card-text v-html="callerMessage" />
-        <v-card-actions>
-          <v-btn
-            class="ma-2 accept-button"
-            color="#2eb58c"
-            elevation="0"
-            fab
-            @click="passAccepted">
-            <i class="uiIconSocPhone"></i>
-          </v-btn>
-          <span class="button-title" @click="passAccepted">JoIn</span>
-          <v-spacer />
-          <v-btn 
-            class="ma-2 decline-button" 
-            outlined 
-            fab 
-            color="#b1b5b9" 
-            @click="passRejected()">
-            <i class="uiIconClose"></i>
-          </v-btn>
-          <span class="button-title" @click="passRejected()">Ignore</span>
-          <audio 
-            ref="audio" 
-            style="display: none" 
-            loop 
-            preload="auto">
-            <source src="/jitsi/resources/audio/ringtone_exo-1.m4a">
-            <p>"Your browser does not support the audio element</p>
-          </audio>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-row>
+  <v-dialog
+    ref="incoming"
+    v-model="isDialogVisible"
+    no-click-animation
+    persistent
+    hide-overlay="true"
+    width="430">
+    <v-card>
+      <v-avatar 
+        color="#578dc9" 
+        width="70" 
+        height="70">
+        <img :src="avatar" :alt="caller">
+      </v-avatar>
+      <i class="uiIconSocPhone start-call"></i>
+      <v-card-text v-html="callerMessage" />
+      <v-card-actions>
+        <v-btn
+          class="ma-2 accept-button"
+          color="#2eb58c"
+          elevation="0"
+          fab
+          @click="passAccepted">
+          <i class="uiIconSocPhone"></i>
+        </v-btn>
+        <span class="button-title" @click="passAccepted">JoIn</span>
+        <v-spacer />
+        <v-btn 
+          class="ma-2 decline-button" 
+          outlined 
+          fab 
+          color="#b1b5b9" 
+          @click="passRejected()">
+          <i class="uiIconClose"></i>
+        </v-btn>
+        <span class="button-title" @click="passRejected()">Ignore</span>
+        <audio 
+          ref="audio" 
+          style="display: none" 
+          loop 
+          preload="auto">
+          <source src="/jitsi/resources/audio/ringtone_exo-1.m4a">
+          <p>"Your browser does not support the audio element</p>
+        </audio>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
@@ -72,12 +73,6 @@ export default {
     playRingtone: {
       type: Boolean,
       required: true
-    }
-  },
-  mounted() {
-    if (this.playRingtone) {
-      this.$refs.audio.play();
-      audio = this.$refs.audio;
     }
   },
   methods: {
