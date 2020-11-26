@@ -1,6 +1,7 @@
 <template>
   <v-dialog
     ref="incoming"
+    :retain-focus="false"
     v-model="isDialogVisible"
     no-click-animation
     persistent
@@ -93,17 +94,17 @@ export default {
         // TODO in FF sometime it can fail with
         // TypeError: u.stop is not a function
         // why, what is it actuall audio ref here?
-        audio.stop();
-        //audio.pause();
-        //audio.currentTime = 0;
+        // audio.stop();
+        audio.pause();
+        audio.currentTime = 0;
       }
     },
     passRejected() {
       this.$emit("rejected");
       if (audio && audio.stop) {
-        audio.stop();
-        //audio.pause();
-        //audio.currentTime = 0;
+        // audio.stop();
+        audio.pause();
+        audio.currentTime = 0;
       }
     }
   }
