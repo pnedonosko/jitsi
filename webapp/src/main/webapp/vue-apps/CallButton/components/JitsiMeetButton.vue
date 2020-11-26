@@ -143,6 +143,15 @@ export default {
 .call-button-mini {
   .VuetifyApp {
     .call-button-container {
+      &.single {
+      &:hover {
+        button:hover {
+          i {
+            color:  var(--allPagesGreyColorLighten1, #a8b3c5);
+          }
+        }
+      }
+    }
       .dropdown-vue {
         .buttons-container {
           [class^="call-button-container-"] {
