@@ -477,20 +477,20 @@
                         // resolved (done) to act on accepted call and on rejected (fail) on declined call.
                         let playRingtone = !user || user.status == "available" || user.status == "away";
                         callButton.initCallPopup(callId, callerId, callerLink, callerAvatar, callerMessage, playRingtone).then(popup => {
-                          const autoRejectId = setTimeout(() => {
+                          /*const autoRejectId = setTimeout(() => {
                             log.trace("Auto reject for the call: "+ callId);
                             rejectCall(callId, popup, isGroup);
                           }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
-                          callAutoRejectsIds.set(callId, autoRejectId);
+                          callAutoRejectsIds.set(callId, autoRejectId);*/
                           popup.onAccepted(() => {
-                            clearTimeout(autoRejectId);
+                            //clearTimeout(autoRejectId);
                             log.info("User accepted call: " + callId);
                             const callUrl = getCallUrl(callId);
                             const callWindow = webConferencing.showCallWindow(callUrl, callWindowName(callId));
                             callWindow.document.title = call.title;
                           });
                           popup.onRejected(() => {
-                            clearTimeout(autoRejectId);
+                            //clearTimeout(autoRejectId);
                             rejectCall(callId, popup, isGroup);
                           });
                         }).catch(err => {
