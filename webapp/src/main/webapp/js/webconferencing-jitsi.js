@@ -405,17 +405,9 @@
           // We want initialize call buttons and incoming calls dialog only for
           // portal pages (including Chat)
           var currentUserId = webConferencing.getUser().id;
-          // Incoming call popup
-          let callPopup;
-          var closeCallPopup = function(callId) {
-            if (callPopup && callPopup.callId && callPopup.callId == callId) {
-              callPopup.close();
-            }
-          };
           const callAutoRejectsIds = new Map();
           var rejectCall = function(callId, popup, isGroup) {
             log.trace("<<< User declined " + (popup.callState ? " just " + popup.callState : "") + " call " + callId + ".");
-            closeCallPopup(callId);
             if (isGroup) {
               // We need inform other windows of the user in the browser to close popups in them
               webConferencing.updateCall(callId, "leaved").then(() => {
@@ -485,20 +477,19 @@
                         // resolved (done) to act on accepted call and on rejected (fail) on declined call.
                         let playRingtone = !user || user.status == "available" || user.status == "away";
                         callButton.initCallPopup(callId, callerId, callerLink, callerAvatar, callerMessage, playRingtone).then(popup => {
-                          callPopup = popup;
                           const autoRejectId = setTimeout(() => {
                             log.trace("Auto reject for the call: "+ callId);
                             rejectCall(callId, popup, isGroup);
                           }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
                           callAutoRejectsIds.set(callId, autoRejectId);
-                          callPopup.onAccepted(() => {
+                          popup.onAccepted(() => {
                             clearTimeout(autoRejectId);
                             log.info("User accepted call: " + callId);
                             const callUrl = getCallUrl(callId);
                             const callWindow = webConferencing.showCallWindow(callUrl, callWindowName(callId));
                             callWindow.document.title = call.title;
                           });
-                          callPopup.onRejected(() => {
+                          popup.onRejected(() => {
                             clearTimeout(autoRejectId);
                             rejectCall(callId, popup, isGroup);
                           });
@@ -532,7 +523,7 @@
                   }
                   log.info("Call stopped remotelly: " + callId);
                   // Hide call popover for this call, if any callWindow
-                  closeCallPopup(callId);
+                  callButton.closeCallPopup(callId);
                 }
               } else if (update.eventType == "call_joined") {
                 log.debug("User call joined: " + update.callId + ", participant: " + update.part.id);
@@ -540,13 +531,13 @@
                 // user's windows/clients), then close it
                 if (currentUserId == update.part.id) {
                   callButton.updateCallState(callId, "joined");
-                  closeCallPopup(callId);
+                  callButton.closeCallPopup(callId);
                 }
               } else if (update.eventType == "call_leaved") {
                 log.debug("User call leaved: " + update.callId + ", participant: " + update.part.id);
                 if (currentUserId === update.part.id) {
                   callButton.updateCallState(callId, "leaved");
-                  closeCallPopup(callId);
+                  callButton.closeCallPopup(callId);
                 }
               } else {
                 log.debug("Unexpected user update: " + JSON.stringify(update));

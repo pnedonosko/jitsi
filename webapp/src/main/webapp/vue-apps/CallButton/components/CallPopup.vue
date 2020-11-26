@@ -75,23 +75,36 @@ export default {
       required: true
     }
   },
+  mounted() {
+    if (this.playRingtone) {
+      try {
+        this.$refs.audio.play();
+        audio = this.$refs.audio;        
+      } catch(e) {
+        // TODO we need remove this popup falg from local storage to let others to play
+        console.log("Error playing ringtone for Jitsi call: " + e, e);
+      }
+    }
+  },
   methods: {
     passAccepted() {
-      if (audio) {
+      this.$emit("accepted");
+      if (audio && audio.stop) {
         // TODO in FF sometime it can fail with
         // TypeError: u.stop is not a function
         // why, what is it actuall audio ref here?
-        audio.pause();
-        audio.currentTime = 0;
+        audio.stop();
+        //audio.pause();
+        //audio.currentTime = 0;
       }
-      this.$emit("accepted");
     },
     passRejected() {
-      if (audio) {
-        audio.pause();
-        audio.currentTime = 0;
+      this.$emit("rejected");
+      if (audio && audio.stop) {
+        audio.stop();
+        //audio.pause();
+        //audio.currentTime = 0;
       }
-       this.$emit("rejected");
     }
   }
 };

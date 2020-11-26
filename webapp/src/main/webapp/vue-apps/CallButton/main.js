@@ -13,7 +13,8 @@ const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || "e
 const localePortlet = "locale.jitsi";
 const resourceBundleName = "Jitsi";
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/${localePortlet}.${resourceBundleName}-${lang}.json`;
-const callsStates = new Map();
+const callStates = new Map();
+const callPopups = new Map();
 
 export function init(settings) {
   // getting locale ressources
@@ -26,11 +27,11 @@ export function init(settings) {
         };
       },
       created() {
-        if(!callsStates.has(this.callSettings.callId)) {
-          callsStates.set(this.callSettings.callId, new Map());
+        if(!callStates.has(this.callSettings.callId)) {
+          callStates.set(this.callSettings.callId, new Map());
         }
         // different buttons for the same call states
-        const statesForTheSameCall = callsStates.get(this.callSettings.callId);
+        const statesForTheSameCall = callStates.get(this.callSettings.callId);
         statesForTheSameCall.set(this.callSettings.context.parentClasses, {
           setCallState: this.setCallState,
           getCallState: this.getCallState
@@ -51,7 +52,7 @@ export function init(settings) {
             i18n: i18n,
             language: lang,
             resourceBundleName: resourceBundleName,
-          },
+          }
         }),
       i18n,
       vuetify,
@@ -60,7 +61,7 @@ export function init(settings) {
 }
 
 export function updateCallState(callId, state) {
-  const buttonStates = callsStates.get(callId);
+  const buttonStates = callStates.get(callId);
   if (buttonStates) {
     buttonStates.forEach((stateHandler) => {
       stateHandler.setCallState(state);
@@ -100,7 +101,7 @@ export function initCallPopup(
     const comp = new Vue({
       el: container,
       components: {
-        CallPopup,
+        CallPopup
       },
       data() {
         return {
@@ -108,7 +109,7 @@ export function initCallPopup(
           callerId: callerId,
           avatar: callerAvatar,
           callerMessage: callerMessage,
-          playRingtone: playRingtone,
+          playRingtone: playRingtone
         };
       },
       i18n,
@@ -128,6 +129,7 @@ export function initCallPopup(
               if (playRingtone) {
                 localStorage.removeItem(ringId);
               }
+              closeCallPopup(callId);
               if (onAccepted) {
                 onAccepted();
                 // TODO copypasted in thee places, why not a single function? //
@@ -139,17 +141,19 @@ export function initCallPopup(
               if (playRingtone) {
                 localStorage.removeItem(ringId);
               }
+              closeCallPopup(callId);
               if (onRejected) {
                 onRejected(isClosed);
                 thevue.isDialogVisible = false;
                 thevue.$destroy();
               }
-            },
-          },
+            }
+          }
         });
       },
     });
-    return {
+    
+    const popup = {
       callId,
       callerId,
       close: function() {
@@ -161,7 +165,17 @@ export function initCallPopup(
       },
       onRejected: function(callback) {
         onRejected = callback;
-      },
+      }
     };
+    callPopups.set(callId, popup);
+    return popup;
   });
+}
+
+export function closeCallPopup(callId) {
+  const popup = callPopups.get(callId);
+  if (popup) {
+    callPopups.delete(callId);
+    popup.close();
+  }
 }
