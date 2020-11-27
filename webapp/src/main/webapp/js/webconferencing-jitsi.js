@@ -405,33 +405,6 @@
           // We want initialize call buttons and incoming calls dialog only for
           // portal pages (including Chat)
           var currentUserId = webConferencing.getUser().id;
-          const callAutoRejectsIds = new Map();
-          var rejectCall = function(callId, popup, isGroup) {
-            log.trace("<<< User declined " + (popup.callState ? " just " + popup.callState : "") + " call " + callId + ".");
-            if (isGroup) {
-              // We need inform other windows of the user in the browser to close popups in them
-              webConferencing.updateCall(callId, "leaved").then(() => {
-                log.info("Call declined: " + callId + " by user " + currentUserId);
-              });
-            } else {
-              if (popup.callState !== "stopped" && popup.callState !== "joined") {
-                // Delete the call if it is not group one, not already stopped and wasn't joined -
-                // a group call will be deleted automatically when last party leave it.
-                webConferencing.deleteCall(callId).then(call => {
-                  log.info("Call deleted: " + callId + " by user " + currentUserId);
-                }).catch(err => {
-                  if (err && (err.code === "NOT_FOUND_ERROR")) {
-                    // already deleted
-                    log.trace("<< Call not found " + callId);
-                  } else {
-                    log.error("Failed to stop call: " + callId, err);
-                    webConferencing.showError("Error stopping call", webConferencing.errorText(err));
-                  }
-                });
-              }
-            }
-            callAutoRejectsIds.delete(callId);
-          }
           // Subscribe to user updates (incoming calls will be notified here)
           webConferencing.onUserUpdate(currentUserId, update => {
             // This connector cares only about own provider events
@@ -477,21 +450,36 @@
                         // resolved (done) to act on accepted call and on rejected (fail) on declined call.
                         let playRingtone = !user || user.status == "available" || user.status == "away";
                         callButton.initCallPopup(callId, callerId, callerLink, callerAvatar, callerMessage, playRingtone).then(popup => {
-                          /*const autoRejectId = setTimeout(() => {
-                            log.trace("Auto reject for the call: "+ callId);
-                            rejectCall(callId, popup, isGroup);
-                          }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
-                          callAutoRejectsIds.set(callId, autoRejectId);*/
                           popup.onAccepted(() => {
-                            //clearTimeout(autoRejectId);
                             log.info("User accepted call: " + callId);
                             const callUrl = getCallUrl(callId);
                             const callWindow = webConferencing.showCallWindow(callUrl, callWindowName(callId));
                             callWindow.document.title = call.title;
                           });
                           popup.onRejected(() => {
-                            //clearTimeout(autoRejectId);
-                            rejectCall(callId, popup, isGroup);
+                            log.trace("<<< User declined " + (popup.callState ? " just " + popup.callState : "") + " call " + callId + ".");
+                            if (isGroup) {
+                              // We need inform other windows of the user in the browser to close popups in them
+                              webConferencing.updateCall(callId, "leaved").then(() => {
+                                log.info("Call declined: " + callId + " by user " + currentUserId);
+                              });
+                            } else {
+                              if (popup.callState !== "stopped" && popup.callState !== "joined") {
+                                // Delete the call if it is not group one, not already stopped and wasn't joined -
+                                // a group call will be deleted automatically when last party leave it.
+                                webConferencing.deleteCall(callId).then(call => {
+                                  log.info("Call deleted: " + callId + " by user " + currentUserId);
+                                }).catch(err => {
+                                  if (err && (err.code === "NOT_FOUND_ERROR")) {
+                                    // already deleted
+                                    log.trace("<< Call not found " + callId);
+                                  } else {
+                                    log.error("Failed to stop call: " + callId, err);
+                                    webConferencing.showError("Error stopping call", webConferencing.errorText(err));
+                                  }
+                                });
+                              }
+                            }
                           });
                         }).catch(err => {
                           log.error("Error openning call popup for " + callId, err);
@@ -517,10 +505,6 @@
                     }
                   });
                 } else if (update.callState == "stopped") {
-                  const autoRejectId = callAutoRejectsIds.get(callId);
-                  if(autoRejectId) {
-                    clearTimeout(autoRejectId); // Clear automatically rejection for the call
-                  }
                   log.info("Call stopped remotelly: " + callId);
                   // Hide call popover for this call, if any callWindow
                   callButton.closeCallPopup(callId);
