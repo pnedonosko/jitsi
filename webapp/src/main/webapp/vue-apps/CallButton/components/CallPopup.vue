@@ -25,7 +25,9 @@
           @click="passAccepted">
           <i class="uiIconSocPhone"></i>
         </v-btn>
-        <span class="button-title" @click="passAccepted">JoIn</span>
+        <span class="button-title" @click="passAccepted">{{ i18n.te("UICallPopup.label.join")
+          ? $t("UICallPopup.label.join")
+        : "Join" }}</span>
         <v-spacer />
         <v-btn 
           class="ma-2 decline-button" 
@@ -35,7 +37,9 @@
           @click="passRejected()">
           <i class="uiIconClose"></i>
         </v-btn>
-        <span class="button-title" @click="passRejected()">Ignore</span>
+        <span class="button-title" @click="passRejected()">{{ i18n.te("UICallPopup.label.ignore")
+          ? $t("UICallPopup.label.ignore")
+        : "Ignore" }}</span>
         <audio 
           ref="audio" 
           style="display: none" 
@@ -73,6 +77,10 @@ export default {
     },
     playRingtone: {
       type: Boolean,
+      required: true
+    },
+    i18n: {
+      type: Object,
       required: true
     }
   },

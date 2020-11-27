@@ -123,6 +123,7 @@ export function initCallPopup(
             avatar: this.avatar,
             callerMessage: this.callerMessage,
             playRingtone: this.playRingtone,
+            i18n,
           },
           on: {
             accepted: function() {
