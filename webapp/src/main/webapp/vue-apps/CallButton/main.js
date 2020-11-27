@@ -94,17 +94,11 @@ export function initCallPopup(
   }    
       
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
-    const autoRejectId = setTimeout(() => {
-      // We get the call to be sure that it exists
-      webConferencing.getCall(callId).then(call => {
-        console.log("Auto reject for the call: "+ callId);
-        onRejected();
-      });
-    }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
     const container = document.createElement("div");
     container.setAttribute("class", "call-popup"); // TODO why we need an ID unique per page?
     let onAccepted;
     let onRejected;
+    let autoRejectId;
     const comp = new Vue({
       el: container,
       components: {
@@ -119,13 +113,13 @@ export function initCallPopup(
           playRingtone: playRingtone
         };
       },
-      watch: {
-        isDialogVisible(newVisibility, oldVisibility) {
-          // When we close the call popup
-          if (!newVisibility) {
-            clearTimeout(autoRejectId); // Clear autoreject for the call
+      mounted() {
+        autoRejectId = setTimeout(() => {
+          if (onRejected) {
+            console.log("Auto reject for the call: " + callId);
+            onRejected();
           }
-        }
+        }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
       },
       i18n,
       vuetify,
@@ -142,26 +136,25 @@ export function initCallPopup(
           },
           on: {
             accepted: function() {
+              cancelCallAutorejection();
               if (playRingtone) {
                 localStorage.removeItem(ringId);
               }
               closeCallPopup(callId);
               if (onAccepted) {
                 onAccepted();
-                // TODO copypasted in thee places, why not a single function? //
-                thevue.isDialogVisible = false;
-                thevue.$destroy();
+                closePopup();
               }
             },
             rejected: function(isClosed) {
+              cancelCallAutorejection();
               if (playRingtone) {
                 localStorage.removeItem(ringId);
               }
               closeCallPopup(callId);
               if (onRejected) {
                 onRejected(isClosed);
-                thevue.isDialogVisible = false;
-                thevue.$destroy();
+                closePopup();
               }
             }
           }
@@ -169,12 +162,22 @@ export function initCallPopup(
       },
     });
     
+    function cancelCallAutorejection() {
+      clearTimeout(autoRejectId); // Clear autoreject for the call
+      console.log("Cancel autoreject for the call: " + callId);
+    }
+
+    function closePopup() {
+      comp.isDialogVisible = false;
+      comp.$destroy();
+    }
+    
     const popup = {
       callId,
       callerId,
       close: function() {
-        comp.isDialogVisible = false;
-        comp.$destroy();
+        cancelCallAutorejection();
+        closePopup();
       },
       onAccepted: function(callback) {
         onAccepted = callback;
