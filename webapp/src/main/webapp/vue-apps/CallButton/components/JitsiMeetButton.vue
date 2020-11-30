@@ -122,7 +122,7 @@ export default {
   .call-button-container {
     button {
       .v-btn__content {
-        letter-spacing: 0.1px;
+        // letter-spacing: 0.1px;
         padding: 0 10px;
       }
     }
@@ -227,6 +227,7 @@ export default {
   }
 }
 .jitsiCallAction {
+  color:  var(--allPagesDarkGrey, #4d5466) !important;
   .uiIconSocPhone {
     &:before {
       height: 16px;
