@@ -112,17 +112,16 @@ export default {
         opacity: 0;
       }
       i {
-        color: white;
+        // color: white;
       }
       span {
-        color: white;
+        // color: white;
       }
     }
   }
   .call-button-container {
     button {
       .v-btn__content {
-        // letter-spacing: 0.1px;
         padding: 0 10px;
       }
     }
@@ -206,8 +205,11 @@ export default {
           [class^="call-button-container-"] {
             button:hover {
               i, span {
-                color: white;
+                // color: white;
               }
+              // i {
+              //   color: white;
+              // }
             }
             button {
               padding-left: 0;
