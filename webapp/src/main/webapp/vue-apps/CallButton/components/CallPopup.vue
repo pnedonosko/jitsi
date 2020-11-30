@@ -3,49 +3,37 @@
     ref="incoming"
     :retain-focus="false"
     v-model="isDialogVisible"
+    content-class="incoming-dialog"
     no-click-animation
     persistent
     hide-overlay="true"
-    width="430">
+    width="430" >
     <v-card>
-      <v-avatar 
-        color="#578dc9" 
-        width="70" 
-        height="70">
+      <v-avatar color="#578dc9" width="70" height="70">
         <img :src="avatar" :alt="caller">
       </v-avatar>
       <i class="uiIconSocPhone start-call"></i>
-      <v-card-text v-html="callerMessage" />
-      <v-card-actions>
-        <v-btn
-          class="ma-2 accept-button"
-          color="#2eb58c"
-          elevation="0"
-          fab
-          @click="passAccepted">
+      <v-card-text color="#333" v-html="callerMessage" />
+      <v-card-actions color="#333">
+        <v-btn class="ma-2 accept-button" color="#2eb58c" elevation="0" fab @click="passAccepted">
           <i class="uiIconSocPhone"></i>
         </v-btn>
-        <span class="button-title" @click="passAccepted">{{ i18n.te("UICallPopup.label.join")
-          ? $t("UICallPopup.label.join")
-        : "Join" }}</span>
+        <span class="button-title" @click="passAccepted">
+          {{ i18n.te("UICallPopup.label.join")
+            ? $t("UICallPopup.label.join")
+          : "Join" }}
+        </span>
         <v-spacer />
-        <v-btn 
-          class="ma-2 decline-button" 
-          outlined 
-          fab 
-          color="#b1b5b9" 
-          @click="passRejected()">
+        <v-btn class="ma-2 decline-button" outlined fab color="#b1b5b9" @click="passRejected()">
           <i class="uiIconClose"></i>
         </v-btn>
-        <span class="button-title" @click="passRejected()">{{ i18n.te("UICallPopup.label.ignore")
-          ? $t("UICallPopup.label.ignore")
-        : "Ignore" }}</span>
-        <audio 
-          ref="audio" 
-          style="display: none" 
-          loop 
-          preload="auto">
-          <source src="/jitsi/resources/audio/ringtone_exo-1.m4a">
+        <span class="button-title" @click="passRejected()">
+          {{ i18n.te("UICallPopup.label.ignore")
+            ? $t("UICallPopup.label.ignore")
+          : "Ignore" }}
+        </span>
+        <audio ref="audio" style="display: none" loop preload="auto">
+          <source src="/jitsi/resources/audio/ringtone_exo-1.m4a" />
           <p>"Your browser does not support the audio element</p>
         </audio>
       </v-card-actions>
@@ -88,8 +76,8 @@ export default {
     if (this.playRingtone) {
       try {
         this.$refs.audio.play();
-        audio = this.$refs.audio;        
-      } catch(e) {
+        audio = this.$refs.audio;
+      } catch (e) {
         // TODO we need remove this popup falg from local storage to let others to play
         console.log("Error playing ringtone for Jitsi call: " + e, e);
       }
@@ -142,7 +130,6 @@ export default {
     .v-sheet.v-card {
       border-radius: 2px;
       height: 160px;
-      border: 1px solid #292929;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(2, 80px);
@@ -170,7 +157,7 @@ export default {
         grid-row: 1 / span 1;
         padding: 20px 15px 20px 0px;
         font-size: 16px;
-        color: #404040;
+        color: #333;
       }
       .v-card__actions {
         grid-column: 2 / span 2;
@@ -204,14 +191,16 @@ export default {
             .v-btn__content {
               [class^="uiIcon"] {
                 position: relative;
+                height: 25px;
+                width: 50px;
                 &::before {
                   color: #aeb3b7;
-                  font-size: 35px;
+                  font-size: 37px;
                   content: "\00d7";
                   position: absolute;
-                  top: -25px;
-                  left: -25px;
-                  transform: translate(14px, 5px);
+                  right: 0%;
+                  bottom: 0%;
+                  transform: translate(-55%, 10%);
                 }
               }
               .uiIconClose {
@@ -224,6 +213,7 @@ export default {
           font-weight: 700;
           font-size: 14px;
           cursor: pointer;
+          color: #333;
         }
       }
     }
@@ -236,4 +226,10 @@ export default {
     //   }
   }
 }
+</style>
+
+<style>
+  .incoming-dialog {
+    border: 1px solid #aeb3b7;
+  }
 </style>
