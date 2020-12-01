@@ -1,10 +1,5 @@
 <template>
-  <v-btn
-    ref="jitsi" 
-    :ripple="false"
-    class="jitsiCallAction"
-    outlined 
-    @click.native="startCall">
+  <v-btn ref="jitsi" :ripple="false" class="jitsiCallAction" outlined @click.native="startCall">
     <i :class="buttonTitle.icon" class="uiIconSocPhone uiIconBlue"></i>
     <span>{{ buttonTitle.title }}</span>
   </v-btn>
@@ -111,17 +106,18 @@ export default {
         color: @primaryColor;
         opacity: 0;
       }
-      i {
-        // color: white;
-      }
-      span {
-        // color: white;
-      }
+      // i {
+      // color: white;
+      // }
+      // span {
+      // color: white;
+      // }
     }
   }
   .call-button-container {
     button {
       .v-btn__content {
+        letter-spacing: normal;
         padding: 0 10px;
       }
     }
@@ -142,15 +138,6 @@ export default {
 .call-button-mini {
   .VuetifyApp {
     .call-button-container {
-      &.single {
-      &:hover {
-        button:hover {
-          i {
-            color:  var(--allPagesGreyColorLighten1, #a8b3c5);
-          }
-        }
-      }
-    }
       .dropdown-vue {
         .buttons-container {
           [class^="call-button-container-"] {
@@ -167,6 +154,13 @@ export default {
         }
       }
       &.single {
+        &:hover {
+          button:hover {
+            i {
+              color: var(--allPagesGreyColorLighten1, #a8b3c5);
+            }
+          }
+        }
         .single-btn-container {
           button {
             margin-right: 0;
@@ -203,14 +197,6 @@ export default {
       .call-button-container {
         .buttons-container {
           [class^="call-button-container-"] {
-            button:hover {
-              i, span {
-                // color: white;
-              }
-              // i {
-              //   color: white;
-              // }
-            }
             button {
               padding-left: 0;
               .v-btn__content {
@@ -229,7 +215,7 @@ export default {
   }
 }
 .jitsiCallAction {
-  color:  var(--allPagesDarkGrey, #4d5466) !important;
+  color: var(--allPagesDarkGrey, #4d5466) !important;
   .uiIconSocPhone {
     &:before {
       height: 16px;
