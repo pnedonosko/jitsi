@@ -83,6 +83,7 @@ export function initCallPopup(
   // Ring ID should be unique per a Platform instance
   const ringId = `jitsi-call-ring-${window.location.host}-${callerId}`;
   if (playRingtone) {
+    // TODO We need play a single ringtone per page - it will play for at least one incoming call
     const callRinging = localStorage.getItem(ringId);
     if (!callRinging || Date.now() - callRinging > 5000) {
       log.trace(">>> Call start ringing: " + callId + " for " + currentUserId);

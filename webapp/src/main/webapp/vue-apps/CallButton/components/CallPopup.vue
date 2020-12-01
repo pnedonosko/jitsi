@@ -42,9 +42,8 @@
 </template>
 
 <script>
-let audio;
 
-function stopAudio() {
+function stopAudio(audio) {
   if (audio) {
     audio.pause();
     audio.currentTime = 0;
@@ -75,35 +74,46 @@ export default {
       type: Boolean,
       required: true
     },
+    state: {
+      type: Boolean,
+      required: false,
+      default: null
+    },
     i18n: {
       type: Object,
       required: true
     }
   },
   mounted() {
+    this.state = "shown";
     if (this.playRingtone) {
       try {
-        audio = this.$refs.audio;
         //audio.muted = true;
         // TODO this would help to fix "Uncaught (in promise) DOMException: play() failed because the user didn't interact with the document first."
         //document.body.addEventListener("mousemove", function () {
         //  audio.play();
         //});
-        audio.play();
+        this.$refs.audio.play();
       } catch (e) {
-        // TODO we need remove this popup falg from local storage to let others to play
-        console.log("Error playing ringtone for Jitsi call: " + e, e);
+        // TODO we need remove this popup flag from local storage to let others to play
+        console.log("Error playing ringtone for Jitsi call: " + this.caller, e);
       }
     }
   },
   methods: {
     passAccepted() {
-      this.$emit("accepted");
-      stopAudio();
+      if (this.state === "shown") {
+        this.state = "closed";
+        this.$emit("accepted");
+        stopAudio(this.$refs.audio);
+      }
     },
     passRejected() {
-      this.$emit("rejected");
-      stopAudio();
+      if (this.state === "shown") {
+        this.state = "closed";
+        this.$emit("rejected");
+        stopAudio(this.$refs.audio);
+      }
     }
   }
 };
