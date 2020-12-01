@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bundle>
+  <!-- Messages for Platform menu and view settings -->
+  <UIBasicProfile>
+    <label>
+      <jitsi>crwdns6966928:0crwdne6966928:0</jitsi>
+    </label>
+  </UIBasicProfile>
+  <UIEditUserProfileForm>
+    <label>
+      <jitsi>crwdns6966930:0crwdne6966930:0</jitsi>
+    </label>
+  </UIEditUserProfileForm>
+  <UICallButton>
+    <label>
+      <jitsi>crwdns6966932:0crwdne6966932:0</jitsi>
+      <join>crwdns6966934:0crwdne6966934:0</join>
+      <joined>crwdns6966936:0crwdne6966936:0</joined>
+    </label>
+  </UICallButton>
+  <!-- Messages for Platform add-on -->
+</bundle>

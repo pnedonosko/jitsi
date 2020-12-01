@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bundle>
+  <!-- Messages for Platform menu and view settings -->
+  <UIBasicProfile>
+    <label>
+      <jitsi>Jitsi</jitsi>
+    </label>
+  </UIBasicProfile>
+  <UIEditUserProfileForm>
+    <label>
+      <jitsi>Jitsi</jitsi>
+    </label>
+  </UIEditUserProfileForm>
+  <UICallButton>
+    <label>
+      <jitsi>Çağrı</jitsi>
+      <join>Katılın</join>
+      <joined>Joined</joined>
+    </label>
+  </UICallButton>
+  <!-- Messages for Platform add-on -->
+</bundle>
