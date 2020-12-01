@@ -1,5 +1,5 @@
 <template>
-  <v-btn ref="jitsi" :ripple="false" class="jitsiCallAction" outlined @click.native="startCall">
+  <v-btn ref="jitsi" :ripple="false" class="jitsiCallAction btn" outlined @click.native="startCall">
     <i :class="buttonTitle.icon" class="uiIconSocPhone uiIconBlue"></i>
     <span>{{ buttonTitle.title }}</span>
   </v-btn>
@@ -241,6 +241,18 @@ export default {
     &:before {
       color: #2eb58c;
       content: "\e92b";
+    }
+  }
+}
+</style>
+<style lang="less">
+.VuetifyApp {
+  .v-application {
+    .btn {
+      &.jitsiCallAction {
+        border: none !important;
+        background-color: inherit !important;
+      }
     }
   }
 }
