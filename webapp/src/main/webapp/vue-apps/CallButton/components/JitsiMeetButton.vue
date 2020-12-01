@@ -256,4 +256,22 @@ export default {
     }
   }
 }
+.uiAction {
+  .jitsiCallAction {
+    &.btn:first-child {
+      [class^="uiIcon"] {
+        color: var(--allPagesPrimaryColor, #578dc9);
+      }
+    }
+  }
+}
+#tiptip_content {
+  .connectAction {
+    .btn {
+      &.jitsiCallAction {
+        height: inherit;
+      }
+    }
+  }
+}
 </style>
