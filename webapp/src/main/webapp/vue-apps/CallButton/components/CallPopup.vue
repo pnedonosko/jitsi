@@ -43,6 +43,14 @@
 
 <script>
 let audio;
+
+function stopAudio() {
+  if (audio) {
+    audio.pause();
+    audio.currentTime = 0;
+  }
+}
+
 export default {
   name: "CallPopup",
   props: {
@@ -75,8 +83,13 @@ export default {
   mounted() {
     if (this.playRingtone) {
       try {
-        this.$refs.audio.play();
         audio = this.$refs.audio;
+        //audio.muted = true;
+        // TODO this would help to fix "Uncaught (in promise) DOMException: play() failed because the user didn't interact with the document first."
+        //document.body.addEventListener("mousemove", function () {
+        //  audio.play();
+        //});
+        audio.play();
       } catch (e) {
         // TODO we need remove this popup falg from local storage to let others to play
         console.log("Error playing ringtone for Jitsi call: " + e, e);
@@ -86,22 +99,11 @@ export default {
   methods: {
     passAccepted() {
       this.$emit("accepted");
-      if (audio && audio.stop) {
-        // TODO in FF sometime it can fail with
-        // TypeError: u.stop is not a function
-        // why, what is it actuall audio ref here?
-        // audio.stop();
-        audio.pause();
-        audio.currentTime = 0;
-      }
+      stopAudio();
     },
     passRejected() {
       this.$emit("rejected");
-      if (audio && audio.stop) {
-        // audio.stop();
-        audio.pause();
-        audio.currentTime = 0;
-      }
+      stopAudio();
     }
   }
 };

@@ -22,13 +22,10 @@ import java.util.Locale;
 
 import org.exoplatform.container.configuration.ConfigurationException;
 import org.exoplatform.container.xml.InitParams;
-import org.exoplatform.services.jcr.RepositoryService;
-import org.exoplatform.services.jcr.ext.app.SessionProviderService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.profile.settings.IMType;
 import org.exoplatform.social.core.profile.settings.UserProfileSettingsService;
-import org.exoplatform.upload.UploadService;
 import org.exoplatform.webconferencing.CallProvider;
 import org.exoplatform.webconferencing.UserInfo.IMInfo;
 

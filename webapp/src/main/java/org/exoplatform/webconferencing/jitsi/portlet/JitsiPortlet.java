@@ -26,13 +26,9 @@ import javax.portlet.GenericPortlet;
 import javax.portlet.PortletException;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 
 import org.exoplatform.container.ExoContainer;
 import org.exoplatform.container.ExoContainerContext;
-import org.exoplatform.portal.application.PortalRequestContext;
-import org.exoplatform.portal.webui.util.Util;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.web.application.JavascriptManager;
@@ -78,7 +74,6 @@ public class JitsiPortlet extends GenericPortlet {
   protected void doView(final RenderRequest request, final RenderResponse response) throws PortletException, IOException {
     if (this.provider != null) {
       try {
-        PortalRequestContext prContext = Util.getPortalRequestContext();
         // If we have settings to send to a client side
         String settingsJson = asJSON(provider.getSettings());
         JavascriptManager js = ((WebuiRequestContext) WebuiRequestContext.getCurrentInstance()).getJavascriptManager();

@@ -401,9 +401,10 @@
        */
       this.init = function(context) {
         var process = $.Deferred();
-        if (eXo && eXo.env && eXo.env.portal) {
-          // We want initialize call buttons and incoming calls dialog only for
-          // portal pages (including Chat)
+        // We want initialize call buttons and incoming calls dialog only for
+        // portal pages (including Chat, but don't do the work on call pages, e.g. don't ring the call.
+        // The settings.isCallPage will be set by a call page only - check it to detect call pages.
+        if (eXo && eXo.env && eXo.env.portal && settings && !settings.isCallApp) {
           var currentUserId = webConferencing.getUser().id;
           // Subscribe to user updates (incoming calls will be notified here)
           webConferencing.onUserUpdate(currentUserId, update => {
@@ -451,7 +452,7 @@
                         let playRingtone = !user || user.status == "available" || user.status == "away";
                         callButton.initCallPopup(callId, callerId, callerLink, callerAvatar, callerMessage, playRingtone).then(popup => {
                           popup.onAccepted(() => {
-                            log.info("User accepted call: " + callId);
+                            log.info("Call accepted: " + callId + " by user: " + currentUserId);
                             const callUrl = getCallUrl(callId);
                             const callWindow = webConferencing.showCallWindow(callUrl, callWindowName(callId));
                             callWindow.document.title = call.title;
@@ -596,7 +597,7 @@
        * (e.g. when need run a call page in a window).
        */
       this.getCallTitle = function() {
-        return "Jitsi Call"; // TODO i18n
+        return "Jitsi Call"; // TODO Do we need it?
       };
 
       /**

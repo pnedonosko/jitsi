@@ -77,11 +77,15 @@ export function initCallPopup(
     callerMessage,
     playRingtone) {
       
-  const ringId = `jitsi-call-ring-${callerId}`;
+  const log = webConferencing.getLog("jitsi");
+  const currentUserId = webConferencing.getUser().id;
+      
+  // Ring ID should be unique per a Platform instance
+  const ringId = `jitsi-call-ring-${window.location.host}-${callerId}`;
   if (playRingtone) {
     const callRinging = localStorage.getItem(ringId);
     if (!callRinging || Date.now() - callRinging > 5000) {
-      console.log(">>> Call start ringing: " + callId + " for " + callerId);
+      log.trace(">>> Call start ringing: " + callId + " for " + currentUserId);
       // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
       localStorage.setItem(
         ringId,
@@ -89,10 +93,10 @@ export function initCallPopup(
       ); // set it quick as possible to avoid race conditions
     } else {
       playRingtone = false;
-      console.log(">>> Call already ringing: " + callId + " for " + callerId);
+      log.trace(">>> Call already ringing: " + callId + " for " + currentUserId);
     }
-  }    
-      
+  }
+  
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
     const container = document.createElement("div");
     container.setAttribute("class", "call-popup"); // TODO why we need an ID unique per page?
@@ -115,16 +119,13 @@ export function initCallPopup(
       },
       mounted() {
         autoRejectId = setTimeout(() => {
-          if (onRejected) {
-            console.log("Auto reject for the call: " + callId);
-            onRejected();
-          }
+          log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
+          doReject();
         }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
       },
       i18n,
       vuetify,
       render: function(h) {
-        const thevue = this;
         return h(CallPopup, {
           props: {
             isDialogVisible: this.isDialogVisible,
@@ -132,52 +133,43 @@ export function initCallPopup(
             avatar: this.avatar,
             callerMessage: this.callerMessage,
             playRingtone: this.playRingtone,
-            i18n,
+            i18n
           },
           on: {
-            accepted: function() {
-              cancelCallAutorejection();
-              if (playRingtone) {
-                localStorage.removeItem(ringId);
-              }
-              closeCallPopup(callId);
-              if (onAccepted) {
-                onAccepted();
-                closePopup();
-              }
-            },
-            rejected: function(isClosed) {
-              cancelCallAutorejection();
-              if (playRingtone) {
-                localStorage.removeItem(ringId);
-              }
-              closeCallPopup(callId);
-              if (onRejected) {
-                onRejected(isClosed);
-                closePopup();
-              }
-            }
+            accepted: doAccept,
+            rejected: doReject
           }
         });
-      },
+      }
     });
     
-    function cancelCallAutorejection() {
-      clearTimeout(autoRejectId); // Clear autoreject for the call
-      console.log("Cancel autoreject for the call: " + callId);
+    function doAccept() {
+      closeCallPopup(callId);
+      if (playRingtone) {
+        localStorage.removeItem(ringId);
+      }
+      if (onAccepted) {
+        onAccepted();
+      }
     }
-
-    function closePopup() {
-      comp.isDialogVisible = false;
-      comp.$destroy();
+    
+    function doReject(isClosed) {
+      closeCallPopup(callId);
+      if (playRingtone) {
+        localStorage.removeItem(ringId);
+      }
+      if (onRejected) {
+        onRejected(isClosed);
+      }
     }
     
     const popup = {
       callId,
       callerId,
       close: function() {
-        cancelCallAutorejection();
-        closePopup();
+        clearTimeout(autoRejectId); // Clear autoreject for the call
+        comp.isDialogVisible = false;
+        comp.$destroy();
       },
       onAccepted: function(callback) {
         onAccepted = callback;
