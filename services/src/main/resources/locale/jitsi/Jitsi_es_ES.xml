@@ -15,7 +15,7 @@
     <label>
       <jitsi>Llamada</jitsi>
       <join>Unirse</join>
-      <joined>Joined</joined>
+      <joined>Unido</joined>
     </label>
   </UICallButton>
   <!-- Messages for Platform add-on -->
