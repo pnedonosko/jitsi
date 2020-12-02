@@ -212,7 +212,7 @@ export default {
                   position: absolute;
                   right: 0%;
                   bottom: 0%;
-                  transform: translate(-55%, 10%);
+                  transform: translate(-55%, 7%);
                 }
               }
               .uiIconClose {
