@@ -7,10 +7,10 @@
     no-click-animation
     persistent
     hide-overlay="true"
-    width="430" >
+    width="430">
     <v-card>
       <v-avatar color="#578dc9" width="70" height="70">
-        <img :src="avatar" :alt="caller">
+        <img :src="avatar" :alt="caller" />
       </v-avatar>
       <i class="uiIconSocPhone start-call"></i>
       <v-card-text color="#333" v-html="callerMessage" />
@@ -42,7 +42,6 @@
 </template>
 
 <script>
-
 function stopAudio(audio) {
   if (audio) {
     audio.pause();
@@ -192,6 +191,10 @@ export default {
                 color: white;
                 &::before {
                   content: "\e92b";
+                  left: 0%;
+                  bottom: 0%;
+                  transform: translate(-13px, 12px);
+                  position: absolute;
                 }
               }
             }
@@ -207,12 +210,12 @@ export default {
                 width: 50px;
                 &::before {
                   color: #aeb3b7;
-                  font-size: 37px;
+                  font-size: 40px;
                   content: "\00d7";
                   position: absolute;
                   right: 0%;
                   bottom: 0%;
-                  transform: translate(-55%, 7%);
+                  transform: translate(-13px, 4px);
                 }
               }
               .uiIconClose {
@@ -241,7 +244,7 @@ export default {
 </style>
 
 <style>
-  .incoming-dialog {
-    border: 1px solid #aeb3b7;
-  }
+.incoming-dialog {
+  border: 1px solid #aeb3b7;
+}
 </style>
