@@ -27,6 +27,10 @@
      */
 
     function JitsiProvider() {
+
+      const GUEST_TYPE = "guest";
+      const GUEST_EXPIRATION_MS = 1000 * 60 * 4; // 4 hrs
+      
       var self = this;
       var settings;
 
@@ -59,10 +63,11 @@
           return settings.title;
         }
       };
+      
       /**
        * Request a status of Jitsi Call App
        */
-      var getStatus = function(inviteId) {
+      var getCallAppStatus = function() {
         return $.get({
           type: "GET",
           url: "/jitsi",
@@ -145,34 +150,78 @@
       };
 
       var callWindowName = function(callId) {
-        // Window name should be without spaces
+        // Window name should be without spaces according Mozilla!
         return self.getType() + "-" + callId;
+      };
+      
+      /**
+       * Read a call from the backend storage by an ID. 
+       * Additionally check to keep the backend with calls clean of phantom guests - 
+       * those who was in the call in the past and stuck for unknown reasons and doesn't let the call to stop.
+       */
+      var getCall = function(callId, currentUserId) {
+        const callProcess = $.Deferred();
+        webConferencing.getCall(callId).then(call => {
+          // TODO check does call contain only guests and stop it (guests should be removed) if it's older of 3hrs
+          const now = Date.now();
+          if (now - call.lastDate.time > GUEST_EXPIRATION_MS 
+              && call.participants.filter(p => p.state === "joined" && p.type !== GUEST_TYPE).length === 0 
+              && call.participants.filter(p => p.state !== "leaved" && p.type === GUEST_TYPE).length > 0) {
+            log.debug("Call assumed as expired for guests: " + callId + ", now: " + now + ", date: " + JSON.stringify(call.lastDate));
+            webConferencing.updateCall(callId, "stopped").then(call => {
+              log.info("Call forsed to stopped (it contains only guests): " + callId + " by " + currentUserId);
+              callProcess.resolve(call); // resolve with a freshly stopped call (parties should all leaved and no guests)
+            }).catch(err => {
+              log.warn("Failed force call to stop (it contains only guests): " + callId, err);
+              // Indeed we assume this not as an error and lt it to run.
+              callProcess.resolve(call);
+            });
+          } else {
+            callProcess.resolve(call);
+          }
+        }).catch(err => {
+          callProcess.reject(err);
+        });
+        return callProcess.promise();
       };
 
       /**
        * Start a call in given context. 
        */
       var startCall = function(context, target) {
-        let callProcess = $.Deferred();
-        let callId = getCallId(context, target);
-        // Open call window
-        let callWindow = webConferencing.showCallWindow("", callWindowName(callId));
-        getStatus().then(response => {
-          if (response.status === "active") {
-            webConferencing.getCall(callId).then(call => {
-              // Call already running - join it
-              log.info("Call already exists. Joining call: " + callId);
-              // Note: for group calls, webconf will start the call when first user joined it - join will hapen from the call page
+        const callProcess = $.Deferred();
+        const callId = getCallId(context, target);
+        // Open the call window before async requests to avoid browser blocker, then we'll update it with a right URL
+        const callWindow = webConferencing.showCallWindow("", callWindowName(callId));
+        getCallAppStatus().then(res => {
+          if (res.status === "active") {
+            getCall(callId, context.currentUser.id).then(call => {
               if (target.type === "chat_room") {
+                // Chat room needs members sync to send notifications for call start
                 if (call.state === "stopped" || call.participants.length == 0) {
-                  // If room call stopped or empty we update all parties in it
+                  // If room call stopped or empty we update all parties in it to sync members 
                   const participants = Object.values(target.members).map(member => {
                     return member.id;
                   });
                   webConferencing.updateParticipants(callId, participants);
                 }
               }
-              callProcess.resolve(call);
+              if (call.state === "stopped") {
+                // Start the call explicitly if it is in stopped state.
+                // This way we will inform all parties about the call start.
+                log.info("Call exists but stopped. Starting call: " + callId);
+                webConferencing.updateCall(callId, "started").then(call => {
+                  log.info("Call started: " + callId + " by " + context.currentUser.id);
+                  callProcess.resolve(call);
+                }).catch(err => {
+                  log.error("Failed start a call: " + callId, err);
+                  webConferencing.showError("Failed start a call", webConferencing.errorText(err));
+                });
+              } else {
+                // otherwise, call already running and no need to send notification to its parties
+                log.info("Call already running. Joining call: " + callId);
+                callProcess.resolve(call);
+              }
             }).catch(err => {
               if (err) {
                 if (err.code == "NOT_FOUND_ERROR") {
@@ -182,11 +231,11 @@
                   });
                 } else {
                   log.error("Failed to get call info: " + callId, err);
-                  webConferencing.showError("Joining call error", webConferencing.errorText(err));
+                  webConferencing.showError("Failed join a call", webConferencing.errorText(err));
                 }
               } else {
                 log.error("Failed to get call info: " + callId);
-                webConferencing.showError("Joining call error", "Error read call information from the server");
+                webConferencing.showError("Failed join a call", "Error read call information from the server");
               }
             });
           } else {
@@ -207,7 +256,7 @@
         }).catch(err => {
           callWindow.close();
           setTimeout(() => {
-            alert("Cannot open call page. " + err);
+            webConferencing.showError("Cannot open call page", err); // TODO i18n
           }, 50);
         });
       };
@@ -299,95 +348,7 @@
         // core to add a button to a required places
         return button.promise();
       };
-
-      /**
-       * Helper method to build an incoming call popup.
-       */
-      // var _acceptCallPopover = function(callerId, callerLink, callerAvatar, callerMessage, playRingtone) {
-      //   log.trace(">> acceptCallPopover '" + callerMessage + "' caler:" + callerId + " (" + callerLink + ", avatar:" + callerAvatar + ")");
-      //   var process = $.Deferred();
-      //   var $call = $("div.uiIncomingCall");
-      //   // Remove previous dialogs (if you need handle several incoming at the
-      //   // same time - implement special logic for this)
-      //   if ($call.length > 0) {
-      //     try {
-      //       // By destroying a dialog, it should reject its incoming call
-      //       $call.dialog("destroy");
-      //     } catch (e) {
-      //       log.error("acceptCallPopover: error destroing previous dialog ", e);
-      //     }
-      //     $call.remove();
-      //   }
-      //   $call = $("<div class='uiIncomingCall' title='Incoming call'></div>");
-      //   $call.append($("<div class='messageAuthor'><a target='_blank' href='" + callerLink + "' class='avatarMedium'>" +
-      //     "<img src='" + callerAvatar + "'></a></div>" + "<div class='messageBody'><div class='messageText'>" + callerMessage +
-      //     "</div></div>"));
-      //   $(document.body).append($call);
-      //   $call.dialog({
-      //     resizable: false,
-      //     height: "auto",
-      //     width: 400,
-      //     modal: false,
-      //     buttons: {
-      //       "Answer": function() {
-      //         process.resolve("accepted");
-      //         $call.dialog("close");
-      //       },
-      //       "Decline": function() {
-      //         process.reject("declined");
-      //         $call.dialog("close");
-      //       }
-      //     }
-      //   });
-      //   $call.on("dialogclose", function(event, ui) {
-      //     if (process.state() == "pending") {
-      //       process.reject("closed");
-      //     }
-      //   });
-      //   process.notify($call);
-      // if (playRingtone) {
-      //   const ringId = "jitsi-call-ring-" + callerId;
-      //   let $ring;
-      //   let callRinging = localStorage.getItem(ringId);
-      //   if (!callRinging || Date.now() - callRinging.time > 5000) {
-      //     log.trace(">>> Ringing the caller: " + callerId);
-      //     // if not rnging or ring flag too old (for cases of crashed browser page w/o work in process.always below)
-      //     localStorage.setItem(ringId, {
-      //       time: Date.now()
-      //     }); // set it quick as possible to avoid rice conditions
-      //     callRinging = true;
-      //     // Start ringing incoming sound only if requested (depends on user status)
-      //     // TODO ringtone was incoming.mp3 type='audio/mpeg' -- Oct 29, 2020
-      //     $ring = $("<audio loop autoplay style='display: none;'>" +
-      //       "<source src='/jitsi/resources/audio/ringtone_exo-1.m4a'>" +
-      //       "Your browser does not support the audio element.</audio>");
-      //     $(document.body).append($ring);
-      //   }
-      //     process.fail(function() {
-      //       if ($call.callState != "joined") {
-      //         var $cancel = $("<audio autoplay style='display: none;'>" +
-      //           "<source src='/jitsi/resources/audio/incoming_cancel.mp3' type='audio/mpeg'>" +
-      //           "Your browser does not support the audio element.</audio>");
-      //         $(document.body).append($cancel);
-      //         setTimeout(function() {
-      //           $cancel.remove();
-      //         }, 2500);
-      //       }
-      //     });
-      //     process.always(function() {
-      //       // Stop incoming ringing on dialog completion
-      // if (callRinging) {
-      //   localStorage.removeItem(ringId);
-      // }
-      // if ($ring) {
-      //   $ring.remove();
-      //   log.trace("<<< Ringing stopped: " + callerId);
-      // }
-      //     });
-      //   }
-      //   return process.promise();
-      // };
-
+      
       /**
        * Returns invite link.
        */
@@ -425,13 +386,12 @@
                   // this particular user
                   log.info("Incoming call: " + callId);
                   // Get call details by ID
-                  webConferencing.getCall(callId).then(call => {
+                  getCall(callId, currentUserId).then(call => {
                     var callerId = call.owner.id;
                     var callerLink = call.owner.profileLink;
                     var callerAvatar = call.owner.avatarLink;
                     const styledOwnerTitle = call.owner.title.bold();
                     var callerMessage = !isGroup ? styledOwnerTitle + " started a Meeting with you." : "A meeting has started in the room " + styledOwnerTitle;
-                    var callerRoom = callerId;
                     call.title = call.owner.title; // for callee the call
                     // Check if current user not already in the call (joined)
                     let canJoinCall = true;
@@ -612,7 +572,7 @@
       var getCallState = function(context, target) {
         var gettingProcess = new Promise(function(resolve) {
           const callId = getCallId(context, target);
-          webConferencing.getCall(callId).then(call => {
+          getCall(callId, context.currentUser.id).then(call => {
             let user;
             if (call.state === "started") {
               for (const participant of call.participants) {
