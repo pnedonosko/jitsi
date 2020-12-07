@@ -101,6 +101,7 @@ export function initCallPopup(
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
     const container = document.createElement("div");
     container.setAttribute("class", "call-popup"); // TODO why we need an ID unique per page?
+    document.body.appendChild(container);
     let onAccepted;
     let onRejected;
     let autoRejectId;
