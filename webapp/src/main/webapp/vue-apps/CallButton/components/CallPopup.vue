@@ -76,7 +76,12 @@ export default {
     };
   },
   mounted() {
+    // console.log(this.$refs.incoming.$el.parentElement.parentElement);
+    // this.$refs.application.$el.height = "100vh";
+    // this.$refs.application.$el.overflow = "scroll";
+    // console.log(this.$refs.application.$el);
     this.state = "shown";
+    // this.class();
     if (this.playRingtone) {
       try {
         //audio.muted = true;
@@ -91,6 +96,9 @@ export default {
       }
     }
   },
+  // updated() {
+  //   // this.class();
+  // },
   methods: {
     passAccepted() {
       if (this.state === "shown") {

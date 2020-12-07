@@ -159,7 +159,7 @@ export function initCallPopup(
     let onRejected;
     let autoRejectId;
     const comp = new Vue({
-      el: container,
+      el: "#call-popup",
       components: {
         CallPopup
       },
@@ -169,10 +169,11 @@ export function initCallPopup(
         };
       },
       mounted() {
-        autoRejectId = setTimeout(() => {
-          log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
-          doReject();
-        }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
+        console.log(this);
+        // autoRejectId = setTimeout(() => {
+        //   log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
+        //   doReject();
+        // }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
       },
       i18n,
       vuetify,
@@ -209,6 +210,7 @@ export function initCallPopup(
     const popup = {
       callId,
       callerId,
+      component: comp,
       close: function() {
         clearTimeout(autoRejectId); // Clear autoreject for the call
         if (playRingtone) {
