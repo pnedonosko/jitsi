@@ -309,6 +309,7 @@
                   callButton.updateCallState(callId, callState);
                 });
               });
+              // callButton.initDrawer().then(comp => comp);
               // Resolve with our button - return Vue object here, so it
               // will be appended to Call Button UI in the Platform
             } else if (buttonType === "element") {

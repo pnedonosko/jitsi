@@ -1,44 +1,66 @@
 <template>
-  <v-dialog
-    ref="incoming"
-    :retain-focus="false"
-    v-model="isDialogVisible"
-    content-class="incoming-dialog"
-    no-click-animation
-    persistent
-    hide-overlay="true"
-    width="430">
-    <v-card>
-      <v-avatar color="#578dc9" width="70" height="70">
-        <img :src="avatar" :alt="caller" />
-      </v-avatar>
-      <i class="uiIconSocPhone start-call"></i>
-      <v-card-text color="#333" v-html="callerMessage" />
-      <v-card-actions color="#333">
-        <v-btn class="ma-2 accept-button" color="#2eb58c" elevation="0" fab @click="passAccepted">
-          <i class="uiIconSocPhone"></i>
-        </v-btn>
-        <span class="button-title" @click="passAccepted">
-          {{ i18n.te("UICallPopup.label.join")
-            ? $t("UICallPopup.label.join")
-          : "Join" }}
-        </span>
-        <v-spacer />
-        <v-btn class="ma-2 decline-button" outlined fab color="#b1b5b9" @click="passRejected()">
-          <i class="uiIconClose"></i>
-        </v-btn>
-        <span class="button-title" @click="passRejected()">
-          {{ i18n.te("UICallPopup.label.ignore")
-            ? $t("UICallPopup.label.ignore")
-          : "Ignore" }}
-        </span>
-        <audio ref="audio" style="display: none" loop preload="auto">
-          <source src="/jitsi/resources/audio/ringtone_exo-1.m4a" />
-          <p>"Your browser does not support the audio element</p>
-        </audio>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <!-- <div class="VuetifyApp"> -->
+  <v-app class="VuetifyApp call-popup">
+    <v-dialog
+      ref="incoming"
+      :retain-focus="false"
+      v-model="isDialogVisible"
+      content-class="incoming-dialog"
+      no-click-animation
+      persistent
+      lazy
+      hide-overlay
+      width="430" >
+      <v-card>
+        <v-avatar 
+          color="#578dc9" 
+          width="70" 
+          height="70">
+          <img :src="avatar" :alt="caller" >
+        </v-avatar>
+        <i class="uiIconSocPhone start-call"></i>
+        <v-card-text color="#333" v-html="callerMessage" />
+        <v-card-actions color="#333">
+          <v-btn 
+            class="ma-2 accept-button" 
+            color="#2eb58c" 
+            elevation="0" 
+            fab 
+            @click="passAccepted">
+            <i class="uiIconSocPhone"></i>
+          </v-btn>
+          <span class="button-title" @click="passAccepted">
+            {{ i18n.te("UICallPopup.label.join")
+              ? $t("UICallPopup.label.join")
+            : "Join" }}
+          </span>
+          <v-spacer />
+          <v-btn 
+            class="ma-2 decline-button" 
+            outlined 
+            fab 
+            color="#b1b5b9" 
+            @click="passRejected()">
+            <i class="uiIconClose"></i>
+          </v-btn>
+          <span class="button-title" @click="passRejected()">
+            {{ i18n.te("UICallPopup.label.ignore")
+              ? $t("UICallPopup.label.ignore")
+            : "Ignore" }}
+          </span>
+          <audio 
+            ref="audio" 
+            style="display: none" 
+            loop 
+            preload="auto">
+            <source src="/jitsi/resources/audio/ringtone_exo-1.m4a" >
+            <p>"Your browser does not support the audio element</p>
+          </audio>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-app>
+  <!-- </div> -->
 </template>
 
 <script>
@@ -73,18 +95,49 @@ export default {
       type: Boolean,
       required: true
     },
-    state: {
-      type: Boolean,
-      required: false,
-      default: null
-    },
+    // state: {
+    //   type: Boolean,
+    //   required: false,
+    //   default: null
+    // },
     i18n: {
       type: Object,
       required: true
     }
   },
+  data() {
+    return {
+      state: null,
+    };
+  },
+  computed: {
+    class() {
+      const isSelector = Object.values(
+        document.body.querySelectorAll(".v-dialog__content")
+      );
+      let bottom = 2;
+      return isSelector.map((popup, index) => {
+        if (index !== 0) {
+          bottom += 26;
+        } else {
+          bottom = 2;
+        }
+        popup.style = `bottom: ${bottom}%`;
+      });
+    }
+  },
+  // created() {
+  //   // this.$vuetify.application.framework.theme.styleEl.height = "100vh";
+  //   // this.$vuetify.application.framework.theme.styleEl.overflow = "scroll";
+  //   // console.log(this.$vuetify.application.framework.theme);
+  // },
   mounted() {
+    // console.log(this.$refs.incoming.$el.parentElement.parentElement);
+    // this.$refs.application.$el.height = "100vh";
+    // this.$refs.application.$el.overflow = "scroll";
+    // console.log(this.$refs.application.$el);
     this.state = "shown";
+    // this.class();
     if (this.playRingtone) {
       try {
         //audio.muted = true;
@@ -99,6 +152,9 @@ export default {
       }
     }
   },
+  // updated() {
+  //   // this.class();
+  // },
   methods: {
     passAccepted() {
       if (this.state === "shown") {
@@ -118,7 +174,7 @@ export default {
 };
 </script>
 <style scoped lang="less">
-.VuetifyApp {
+// .VuetifyApp {
   .spacer {
     flex-grow: unset !important;
     width: 12%;
@@ -126,10 +182,13 @@ export default {
   //.theme--light.v-card > .v-card__text
   .v-dialog__content {
     justify-content: center;
+    // position: absolute;
     left: unset;
-    bottom: 2%;
-    top: unset;
-    right: 2%;
+    // bottom: 2%;
+    // top: unset;
+    // right: 2%;
+    position: static;
+    margin: 20px 10px;
     height: fit-content;
     width: fit-content;
     height: -moz-fit-content;
@@ -240,11 +299,31 @@ export default {
     //     }
     //   }
   }
-}
+// }
 </style>
 
 <style>
+  #vuetify-apps {
+    display: flex;
+    flex-flow: column;
+    align-items: flex-end;
+    justify-content: flex-end;
+    width: 100%;
+    height: fit-content;
+    overflow-y: scroll;
+  }
 .incoming-dialog {
   border: 1px solid #aeb3b7;
 }
+.VuetifyApp.call-popup {
+  position: absolute;
+  width: 100%;
+  height: fit-content
+}
+/* .VuetifyApp */
+
+/* .v-application.v-app-call-popup { */
+  /* height: 100vh;
+  overflow-y: scroll; */
+/* } */
 </style>

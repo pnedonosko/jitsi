@@ -1,8 +1,10 @@
 import JitsiMeetButton from "./components/JitsiMeetButton.vue";
 import CallPopup from "./components/CallPopup.vue";
+// import CallPopupDrawer from "./components/CallPopupDrawer.vue";
 
 Vue.use(Vuetify);
 Vue.component("jitsi-meet-button", JitsiMeetButton);
+// Vue.component("CallPopup", CallPopup);
 const vuetify = new Vuetify({
   dark: true,
   iconfont: "",
@@ -99,14 +101,18 @@ export function initCallPopup(
   }
   
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
-    const container = document.createElement("div");
-    container.setAttribute("class", "call-popup"); // TODO why we need an ID unique per page?
-    document.body.appendChild(container);
+    // const container = document.createElement("div");
+    // container.setAttribute("class", "call-popup"); // TODO why we need an ID unique per page?
+    // const parentContainer = document.getElementById("UIPortalApplication");
+    // parentContainer.appendChild(container);
+    console.log(document.body.querySelectorAll(".call-popup"));
+    // eslint-disable-next-line no-debugger
+    debugger;
     let onAccepted;
     let onRejected;
     let autoRejectId;
     const comp = new Vue({
-      el: container,
+      el: "#call-popup",
       components: {
         CallPopup
       },
@@ -120,10 +126,11 @@ export function initCallPopup(
         };
       },
       mounted() {
-        autoRejectId = setTimeout(() => {
-          log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
-          doReject();
-        }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
+        console.log(this);
+        // autoRejectId = setTimeout(() => {
+        //   log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
+        //   doReject();
+        // }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
       },
       i18n,
       vuetify,
@@ -143,8 +150,8 @@ export function initCallPopup(
           }
         });
       }
-    });
-    
+    }) 
+    // .$mount("#call-popup");
     function doAccept() {
       closeCallPopup(callId);
       if (playRingtone) {
@@ -164,14 +171,15 @@ export function initCallPopup(
         onRejected(isClosed);
       }
     }
-    
+    // comp.$mount(".call-popup");
     const popup = {
       callId,
       callerId,
+      component: comp,
       close: function() {
         clearTimeout(autoRejectId); // Clear autoreject for the call
-        comp.isDialogVisible = false;
-        comp.$destroy();
+        this.component.isDialogVisible = false;
+        this.component.$destroy();
       },
       onAccepted: function(callback) {
         onAccepted = callback;
@@ -192,3 +200,33 @@ export function closeCallPopup(callId) {
     popup.close();
   }
 }
+
+// export function initDrawer(callId, callerId, callerLink, callerAvatar, callerMessage, playRingtone) {
+//   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
+    
+//     const comp = new Vue({
+//       el: ".room-content",
+//       components: {
+//         CallPopupDrawer
+//       },
+//       render: (h) => h(CallPopupDrawer, {props: {
+//         isDialogVisible: true,
+//         caller: callerId,
+//         avatar: callerAvatar,
+//         callerMessage: callerMessage,
+//         playRingtone: playRingtone,
+//         i18n
+//       },}),
+//       vuetify,
+//       i18n
+//     });
+//     // initCallPopup(
+//     //   callId,
+//     //   callerId,
+//     //   callerLink,
+//     //   callerAvatar,
+//     //   callerMessage,
+//     //   playRingtone);
+//     return comp;
+//   });
+// }
