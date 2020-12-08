@@ -418,14 +418,14 @@
                             callWindow.document.title = call.title;
                           });
                           popup.onRejected(() => {
-                            log.trace("<<< User declined " + (popup.callState ? " just " + popup.callState : "") + " call " + callId + ".");
+                            log.trace("<<< User declined " + (update.callState ? " just " + update.callState : "") + " call " + callId + ".");
                             if (isGroup) {
                               // We need inform other windows of the user in the browser to close popups in them
                               webConferencing.updateCall(callId, "leaved").then(() => {
                                 log.info("Call declined: " + callId + " by user " + currentUserId);
                               });
                             } else {
-                              if (popup.callState !== "stopped" && popup.callState !== "joined") {
+                              if (update.callState !== "stopped" && update.callState !== "joined") {
                                 // Delete the call if it is not group one, not already stopped and wasn't joined -
                                 // a group call will be deleted automatically when last party leave it.
                                 webConferencing.deleteCall(callId).then(call => {
