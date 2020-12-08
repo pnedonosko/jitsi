@@ -76,8 +76,15 @@ export function initCallPopup(
     callerAvatar,
     callerMessage,
     playRingtone) {
+
+  let popupResolve = null;
+  const popupLoading = new Promise((resolve) => {
+    popupResolve = resolve;
+  });
+  callPopups.set(callId, popupLoading); // Add sooner
       
   const log = webConferencing.getLog("jitsi");
+  log.trace(">>> Set call popup");
   const currentUserId = webConferencing.getUser().id;
       
   // Ring ID should be unique per a Platform instance
@@ -193,15 +200,21 @@ export function initCallPopup(
         onRejected = callback;
       }
     };
-    callPopups.set(callId, popup);
+    popupResolve(popup);
     return popup;
   });
 }
 
 export function closeCallPopup(callId) {
-  const popup = callPopups.get(callId);
-  if (popup) {
-    callPopups.delete(callId);
-    popup.close();
+  const log = webConferencing.getLog("jitsi");
+  const popupPromise = callPopups.get(callId);
+  log.trace(`>>> Close call popup; popupPromise: ${popupPromise}`);
+  if (popupPromise) {
+    callPopups.delete(callId); // Remove sooner
+    popupPromise.then(popup => {
+      popup.close();
+    });
+  } else {
+    log.trace(`Call has no popup: ${callId}`);
   }
 }
