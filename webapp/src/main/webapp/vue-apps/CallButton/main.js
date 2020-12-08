@@ -61,12 +61,26 @@ export function init(settings) {
 }
 
 export function updateCallState(callId, state) {
+  if (state === "started") {
+    setCallPopupPromise(callId);
+  }
   const buttonStates = callStates.get(callId);
   if (buttonStates) {
     buttonStates.forEach((stateHandler) => {
       stateHandler.setCallState(state);
     });
   }
+}
+
+function setCallPopupPromise(callId) {
+  let popupResolve = null;
+  const popupLoading = new Promise((resolve) => {
+    popupResolve = resolve;
+  });
+  callPopups.set(callId, {
+    loader: popupLoading,
+    resolve: popupResolve
+  }); // Add sooner when call state to come
 }
 
 export function initCallPopup(
@@ -77,12 +91,11 @@ export function initCallPopup(
     callerMessage,
     playRingtone) {
 
+  const popup = callPopups.get(callId);
   let popupResolve = null;
-  const popupLoading = new Promise((resolve) => {
-    popupResolve = resolve;
-  });
-  callPopups.set(callId, popupLoading); // Add sooner
-      
+  if (popup) {
+    popupResolve = popup.resolve;
+  }
   const log = webConferencing.getLog("jitsi");
   log.trace(">>> Set call popup");
   const currentUserId = webConferencing.getUser().id;
@@ -200,14 +213,24 @@ export function initCallPopup(
         onRejected = callback;
       }
     };
-    popupResolve(popup);
+    if(popupResolve) {
+      popupResolve(popup);
+    } else {
+      log.trace(`The popup resolve function is absent for the call: ${callId}`);
+    }
     return popup;
   });
 }
 
 export function closeCallPopup(callId) {
   const log = webConferencing.getLog("jitsi");
-  const popupPromise = callPopups.get(callId);
+  const popup = callPopups.get(callId);
+  let popupPromise = null;
+  if (popup) {
+    popupPromise = popup.loader;
+  } else {
+    log.trace(`The popup promise is absent for the call: ${callId}`);
+  }
   log.trace(`>>> Close call popup; popupPromise: ${popupPromise}`);
   if (popupPromise) {
     callPopups.delete(callId); // Remove sooner
