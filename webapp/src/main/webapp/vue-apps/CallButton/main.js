@@ -1,8 +1,6 @@
 import JitsiMeetButton from "./components/JitsiMeetButton.vue";
 import CallPopup from "./components/CallPopup.vue";
 // import CallPopupDrawer from "./components/CallPopupDrawer.vue";
-
-Vue.use(Vuetify);
 Vue.component("jitsi-meet-button", JitsiMeetButton);
 // Vue.component("CallPopup", CallPopup);
 const vuetify = new Vuetify({
@@ -101,13 +99,11 @@ export function initCallPopup(
   }
   
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
-    // const container = document.createElement("div");
-    // container.setAttribute("class", "call-popup"); // TODO why we need an ID unique per page?
-    // const parentContainer = document.getElementById("UIPortalApplication");
-    // parentContainer.appendChild(container);
-    console.log(document.body.querySelectorAll(".call-popup"));
-    // eslint-disable-next-line no-debugger
-    debugger;
+    const container = document.createElement("div");
+    const parentContainer = document.getElementById("vuetify-apps");
+    parentContainer.parentElement.classList.add("call-popup");
+    // TODO why we need an ID unique per page?
+    document.body.appendChild(container);
     let onAccepted;
     let onRejected;
     let autoRejectId;
@@ -122,16 +118,36 @@ export function initCallPopup(
           callerId: callerId,
           avatar: callerAvatar,
           callerMessage: callerMessage,
-          playRingtone: playRingtone
+          playRingtone: playRingtone,
+          // popupsContainer: []
         };
       },
-      mounted() {
-        console.log(this);
-        // autoRejectId = setTimeout(() => {
-        //   log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
-        //   doReject();
-        // }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
+      computed: {
+        popupsContainer() {
+          return Object.values(document.querySelectorAll(".audio-call-popup"));
+        }
       },
+      watch: {
+        popupsContainer(val) {
+          console.log(val, "val");
+        }
+      },
+      mounted() {
+        // this.popupsContainer = Object.values(document.querySelectorAll(".audio-call-popup"));
+        this.popupsContainer.map((audio, index) => {
+          if (index !== 0) {
+            audio.pause();
+            audio.currentTime = 0;
+          }
+        })
+        autoRejectId = setTimeout(() => {
+          log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
+          doReject();
+        }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
+      },
+      // updated() {
+      //   console.log(this.popupsContainer, "updated");
+      // },
       i18n,
       vuetify,
       render: function(h) {
@@ -150,8 +166,7 @@ export function initCallPopup(
           }
         });
       }
-    }) 
-    // .$mount("#call-popup");
+    })
     function doAccept() {
       closeCallPopup(callId);
       if (playRingtone) {
@@ -171,7 +186,6 @@ export function initCallPopup(
         onRejected(isClosed);
       }
     }
-    // comp.$mount(".call-popup");
     const popup = {
       callId,
       callerId,
