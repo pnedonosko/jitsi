@@ -1,66 +1,70 @@
 <template>
-  <!-- <div class="VuetifyApp"> -->
-  <v-app class="VuetifyApp call-popup">
-    <v-dialog
-      ref="incoming"
-      :retain-focus="false"
-      v-model="isDialogVisible"
-      content-class="incoming-dialog"
-      no-click-animation
-      persistent
-      lazy
-      hide-overlay
-      width="430" >
-      <v-card>
-        <v-avatar 
-          color="#578dc9" 
-          width="70" 
-          height="70">
-          <img :src="avatar" :alt="caller" >
-        </v-avatar>
-        <i class="uiIconSocPhone start-call"></i>
-        <v-card-text color="#333" v-html="callerMessage" />
-        <v-card-actions color="#333">
-          <v-btn 
-            class="ma-2 accept-button" 
-            color="#2eb58c" 
-            elevation="0" 
-            fab 
-            @click="passAccepted">
-            <i class="uiIconSocPhone"></i>
-          </v-btn>
-          <span class="button-title" @click="passAccepted">
-            {{ i18n.te("UICallPopup.label.join")
-              ? $t("UICallPopup.label.join")
-            : "Join" }}
-          </span>
-          <v-spacer />
-          <v-btn 
-            class="ma-2 decline-button" 
-            outlined 
-            fab 
-            color="#b1b5b9" 
-            @click="passRejected()">
-            <i class="uiIconClose"></i>
-          </v-btn>
-          <span class="button-title" @click="passRejected()">
-            {{ i18n.te("UICallPopup.label.ignore")
-              ? $t("UICallPopup.label.ignore")
-            : "Ignore" }}
-          </span>
-          <audio 
-            ref="audio" 
-            style="display: none" 
-            loop 
-            preload="auto">
-            <source src="/jitsi/resources/audio/ringtone_exo-1.m4a" >
-            <p>"Your browser does not support the audio element</p>
-          </audio>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+  <div class="VuetifyApp">
+  <v-app v-if="isDialogVisible">
+    <div>
+      <v-dialog
+        ref="incoming"
+        :retain-focus="false"
+        v-model="isDialogVisible"
+        content-class="incoming-dialog"
+        no-click-animation
+        persistent
+        hide-overlay
+        width="430" >
+        <v-card>
+          <v-avatar 
+            color="#578dc9" 
+            width="70" 
+            height="70">
+            <img :src="avatar" :alt="caller" >
+          </v-avatar>
+          <i class="uiIconSocPhone start-call"></i>
+          <v-card-text color="#333" v-html="callerMessage" />
+          <v-card-actions color="#333">
+            <v-btn 
+              class="ma-2 accept-button" 
+              color="#2eb58c" 
+              elevation="0" 
+              fab 
+              @click="passAccepted">
+              <i class="uiIconSocPhone"></i>
+            </v-btn>
+            <span class="button-title" @click="passAccepted">
+              {{ i18n.te("UICallPopup.label.join")
+                ? $t("UICallPopup.label.join")
+              : "Join" }}
+            </span>
+            <v-spacer />
+            <v-btn 
+              class="ma-2 decline-button" 
+              outlined 
+              fab 
+              color="#b1b5b9" 
+              @click="passRejected()">
+              <i class="uiIconClose"></i> 
+            </v-btn>
+            <span class="button-title" @click="passRejected()">
+              {{ i18n.te("UICallPopup.label.ignore")
+                ? $t("UICallPopup.label.ignore")
+              : "Ignore" }}
+            </span>
+            <audio 
+              class="audio-call-popup"
+              ref="audio" 
+              style="display: none" 
+              loop 
+              preload="auto">
+              <source src="/jitsi/resources/audio/ringtone_exo-1.m4a" >
+              <p>"Your browser does not support the audio element</p>
+            </audio>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <!-- <h1>Hello</h1>
+      <v-text-field label="INPUT"></v-text-field> -->
+    </div>
   </v-app>
-  <!-- </div> -->
+  </div>
 </template>
 
 <script>
@@ -110,27 +114,6 @@ export default {
       state: null,
     };
   },
-  computed: {
-    class() {
-      const isSelector = Object.values(
-        document.body.querySelectorAll(".v-dialog__content")
-      );
-      let bottom = 2;
-      return isSelector.map((popup, index) => {
-        if (index !== 0) {
-          bottom += 26;
-        } else {
-          bottom = 2;
-        }
-        popup.style = `bottom: ${bottom}%`;
-      });
-    }
-  },
-  // created() {
-  //   // this.$vuetify.application.framework.theme.styleEl.height = "100vh";
-  //   // this.$vuetify.application.framework.theme.styleEl.overflow = "scroll";
-  //   // console.log(this.$vuetify.application.framework.theme);
-  // },
   mounted() {
     // console.log(this.$refs.incoming.$el.parentElement.parentElement);
     // this.$refs.application.$el.height = "100vh";
@@ -188,7 +171,7 @@ export default {
     // top: unset;
     // right: 2%;
     position: static;
-    margin: 20px 10px;
+    margin: 0px 10px 20px;
     height: fit-content;
     width: fit-content;
     height: -moz-fit-content;
@@ -304,13 +287,13 @@ export default {
 
 <style>
   #vuetify-apps {
+    padding-top: 20px;
     display: flex;
     flex-flow: column;
     align-items: flex-end;
     justify-content: flex-end;
     width: 100%;
-    height: fit-content;
-    overflow-y: scroll;
+    min-height: 100vh;
   }
 .incoming-dialog {
   border: 1px solid #aeb3b7;
@@ -318,12 +301,8 @@ export default {
 .VuetifyApp.call-popup {
   position: absolute;
   width: 100%;
-  height: fit-content
+  height: 100%;
+  overflow-y: scroll;
+  z-index: 200;
 }
-/* .VuetifyApp */
-
-/* .v-application.v-app-call-popup { */
-  /* height: 100vh;
-  overflow-y: scroll; */
-/* } */
 </style>

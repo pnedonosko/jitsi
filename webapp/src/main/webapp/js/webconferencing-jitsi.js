@@ -429,7 +429,7 @@
                               if (update.callState !== "stopped" && update.callState !== "joined") {
                                 // Delete the call if it is not group one, not already stopped and wasn't joined -
                                 // a group call will be deleted automatically when last party leave it.
-                                webConferencing.deleteCall(callId).then(call => {
+                                webConferencing.deleteCall(callId).then(() => {
                                   log.info("Call deleted: " + callId + " by user " + currentUserId);
                                 }).catch(err => {
                                   if (err && (err.code === "NOT_FOUND_ERROR")) {
