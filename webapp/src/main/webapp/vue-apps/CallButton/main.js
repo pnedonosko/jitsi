@@ -13,6 +13,7 @@ const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || "e
 const localePortlet = "locale.jitsi";
 const resourceBundleName = "Jitsi";
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/${localePortlet}.${resourceBundleName}-${lang}.json`;
+const log = webConferencing.getLog("jitsi");
 const callStates = new Map();
 const callPopups = new Map();
 
@@ -81,6 +82,7 @@ function setCallPopupPromise(callId) {
     loader: popupLoading,
     resolve: popupResolve
   }); // Add sooner when call state to come
+  log.trace(">>> Set call popup");
 }
 
 export function initCallPopup(
@@ -95,9 +97,9 @@ export function initCallPopup(
   let popupResolve = null;
   if (popup) {
     popupResolve = popup.resolve;
+  } else {
+    log.trace(">>> Popup is undefined");
   }
-  const log = webConferencing.getLog("jitsi");
-  log.trace(">>> Set call popup");
   const currentUserId = webConferencing.getUser().id;
       
   // Ring ID should be unique per a Platform instance
@@ -180,9 +182,6 @@ export function initCallPopup(
     })
     function doAccept() {
       closeCallPopup(callId);
-      if (playRingtone) {
-        localStorage.removeItem(ringId);
-      }
       if (onAccepted) {
         onAccepted();
       }
@@ -190,9 +189,6 @@ export function initCallPopup(
     
     function doReject(isClosed) {
       closeCallPopup(callId);
-      if (playRingtone) {
-        localStorage.removeItem(ringId);
-      }
       if (onRejected) {
         onRejected(isClosed);
       }
@@ -203,6 +199,9 @@ export function initCallPopup(
       component: comp,
       close: function() {
         clearTimeout(autoRejectId); // Clear autoreject for the call
+        if (playRingtone) {
+          localStorage.removeItem(ringId);
+        }
         this.component.isDialogVisible = false;
         this.component.$destroy();
       },
@@ -223,7 +222,6 @@ export function initCallPopup(
 }
 
 export function closeCallPopup(callId) {
-  const log = webConferencing.getLog("jitsi");
   const popup = callPopups.get(callId);
   let popupPromise = null;
   if (popup) {
@@ -233,8 +231,8 @@ export function closeCallPopup(callId) {
   }
   log.trace(`>>> Close call popup; popupPromise: ${popupPromise}`);
   if (popupPromise) {
-    callPopups.delete(callId); // Remove sooner
     popupPromise.then(popup => {
+      callPopups.delete(callId);
       popup.close();
     });
   } else {
