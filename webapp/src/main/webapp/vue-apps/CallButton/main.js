@@ -223,19 +223,17 @@ export function initCallPopup(
 
 export function closeCallPopup(callId) {
   const popup = callPopups.get(callId);
+  callPopups.delete(callId);
   let popupPromise = null;
   if (popup) {
     popupPromise = popup.loader;
-  } else {
-    log.trace(`The popup promise is absent for the call: ${callId}`);
-  }
-  log.trace(`>>> Close call popup; popupPromise: ${popupPromise}`);
-  if (popupPromise) {
-    popupPromise.then(popup => {
-      callPopups.delete(callId);
-      popup.close();
-    });
-  } else {
-    log.trace(`Call has no popup: ${callId}`);
+    if (popupPromise) {
+      popupPromise.then(popup => {
+        log.trace(`>>> Close popup for the call: ${callId}`);
+        popup.close();
+      });
+    } else {
+      log.trace(`Call has no popup: ${callId}`);
+    }
   }
 }
