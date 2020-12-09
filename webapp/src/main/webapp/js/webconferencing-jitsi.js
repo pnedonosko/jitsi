@@ -419,7 +419,7 @@
                             callWindow.document.title = call.title;
                           });
                           popup.onRejected(() => {
-                            log.trace("<<< User declined " + (update.callState ? " just " + update.callState : "") + " call " + callId + ".");
+                            log.trace("<<< User declined just " + update.callState + " call " + callId);
                             if (isGroup) {
                               // We need inform other windows of the user in the browser to close popups in them
                               webConferencing.updateCall(callId, "leaved").then(() => {
