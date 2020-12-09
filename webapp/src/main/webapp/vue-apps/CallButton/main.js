@@ -62,6 +62,7 @@ export function init(settings) {
 }
 
 export function updateCallState(callId, state) {
+  log.trace(">>> updateCallState for " + callId + " state: " + state);
   if (state === "started") {
     savePopupLoader(callId);
   }
