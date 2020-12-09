@@ -1,9 +1,6 @@
 import JitsiMeetButton from "./components/JitsiMeetButton.vue";
 import CallPopup from "./components/CallPopup.vue";
-<<<<<<< HEAD
 import CallPopupList from "./components/CallPopupList.vue";
-=======
->>>>>>> Style fixes for multiple toast
 
 Vue.component("jitsi-meet-button", JitsiMeetButton);
 Vue.component("CallPopup", CallPopup);
@@ -243,6 +240,7 @@ export function initCallPopup(
 
 export function closeCallPopup(callId) {
   const popup = callPopups.get(callId);
+  callPopups.delete(callId);
   let popupPromise = null;
   if (popup) {
     popupPromise = popup.loader;
