@@ -63,7 +63,7 @@ export function init(settings) {
 
 export function updateCallState(callId, state) {
   if (state === "started") {
-    setCallPopupPromise(callId);
+    savePopupLoader(callId);
   }
   const buttonStates = callStates.get(callId);
   if (buttonStates) {
@@ -73,7 +73,7 @@ export function updateCallState(callId, state) {
   }
 }
 
-function setCallPopupPromise(callId) {
+function savePopupLoader(callId) {
   let popupResolve = null;
   const popupLoading = new Promise((resolve) => {
     popupResolve = resolve;
@@ -82,7 +82,7 @@ function setCallPopupPromise(callId) {
     loader: popupLoading,
     resolve: popupResolve
   }); // Add sooner when call state to come
-  log.trace(">>> Set call popup");
+  log.trace(">>> Save call popup for " + callId);
 }
 
 export function initCallPopup(
@@ -93,13 +93,6 @@ export function initCallPopup(
     callerMessage,
     playRingtone) {
 
-  const popup = callPopups.get(callId);
-  let popupResolve = null;
-  if (popup) {
-    popupResolve = popup.resolve;
-  } else {
-    log.trace(">>> Popup is undefined");
-  }
   const currentUserId = webConferencing.getUser().id;
       
   // Ring ID should be unique per a Platform instance
@@ -140,22 +133,10 @@ export function initCallPopup(
           callerId: callerId,
           avatar: callerAvatar,
           callerMessage: callerMessage,
-          playRingtone: playRingtone,
-          // audiosContainer: []
+          playRingtone: playRingtone
         };
       },
-      // computed: {
-      //   audiosContainer() {
-      //     return Object.values(document.querySelectorAll(".audio-call-popup"));
-      //   }
-      // },
       mounted() {
-        // this.audiosContainer.map((audio, index) => {
-        //   if (index !== 0) {
-        //     audio.pause();
-        //     audio.currentTime = 0;
-        //   }
-        // })
         autoRejectId = setTimeout(() => {
           log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
           doReject();
@@ -212,28 +193,23 @@ export function initCallPopup(
         onRejected = callback;
       }
     };
-    if(popupResolve) {
-      popupResolve(popup);
+    const callPopup = callPopups.get(callId);
+    if (callPopup) {
+      callPopup.resolve(popup);
     } else {
-      log.trace(`The popup resolve function is absent for the call: ${callId}`);
+      log.trace(`Call popup loader not found for the call: ${callId}`);
     }
     return popup;
   });
 }
 
 export function closeCallPopup(callId) {
-  const popup = callPopups.get(callId);
-  callPopups.delete(callId);
-  let popupPromise = null;
-  if (popup) {
-    popupPromise = popup.loader;
-    if (popupPromise) {
-      popupPromise.then(popup => {
-        log.trace(`>>> Close popup for the call: ${callId}`);
-        popup.close();
-      });
-    } else {
-      log.trace(`Call has no popup: ${callId}`);
-    }
+  const callPopup = callPopups.get(callId);
+  if (callPopup) {
+    callPopups.delete(callId);
+    callPopup.loader.then(popup => {
+      log.trace(`>>> Close popup for the call: ${callId}`);
+      popup.close();
+    });
   }
 }
