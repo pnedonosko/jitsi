@@ -1,6 +1,9 @@
 import JitsiMeetButton from "./components/JitsiMeetButton.vue";
 import CallPopup from "./components/CallPopup.vue";
+<<<<<<< HEAD
 import CallPopupList from "./components/CallPopupList.vue";
+=======
+>>>>>>> Style fixes for multiple toast
 
 Vue.component("jitsi-meet-button", JitsiMeetButton);
 Vue.component("CallPopup", CallPopup);
@@ -159,7 +162,7 @@ export function initCallPopup(
     let onRejected;
     let autoRejectId;
     const comp = new Vue({
-      el: "#call-popup",
+      el: container,
       components: {
         CallPopup
       },
@@ -168,32 +171,23 @@ export function initCallPopup(
           isNotifVisible: true,
         };
       },
-      computed: {
-        popupsContainer() {
-          return Object.values(document.querySelectorAll(".audio-call-popup"));
-        }
-      },
-      watch: {
-        popupsContainer(val) {
-          console.log(val, "val");
-        }
-      },
+      // computed: {
+      //   audiosContainer() {
+      //     return Object.values(document.querySelectorAll(".audio-call-popup"));
+      //   }
+      // },
       mounted() {
-        // this.popupsContainer = Object.values(document.querySelectorAll(".audio-call-popup"));
-        this.popupsContainer.map((audio, index) => {
-          if (index !== 0) {
-            audio.pause();
-            audio.currentTime = 0;
-          }
-        })
+        // this.audiosContainer.map((audio, index) => {
+        //   if (index !== 0) {
+        //     audio.pause();
+        //     audio.currentTime = 0;
+        //   }
+        // })
         autoRejectId = setTimeout(() => {
           log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
           doReject();
         }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
       },
-      // updated() {
-      //   console.log(this.popupsContainer, "updated");
-      // },
       i18n,
       vuetify,
       render: function(h) {
