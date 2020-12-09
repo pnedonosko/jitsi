@@ -86,6 +86,7 @@ function setCallPopupPromise(callId) {
     loader: popupLoading,
     resolve: popupResolve
   }); // Add sooner when call state to come
+  log.trace(">>> Set call popup");
 }
 export function initCallPopupList() {
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
@@ -118,9 +119,9 @@ export function initCallPopup(
   let popupResolve = null;
   if (popup) {
     popupResolve = popup.resolve;
+  } else {
+    log.trace(">>> Popup is undefined");
   }
-  const log = webConferencing.getLog("jitsi");
-  log.trace(">>> Set call popup");
   const currentUserId = webConferencing.getUser().id;
       
   // Ring ID should be unique per a Platform instance
@@ -241,7 +242,6 @@ export function initCallPopup(
 }
 
 export function closeCallPopup(callId) {
-  const log = webConferencing.getLog("jitsi");
   const popup = callPopups.get(callId);
   let popupPromise = null;
   if (popup) {
@@ -251,8 +251,8 @@ export function closeCallPopup(callId) {
   }
   log.trace(`>>> Close call popup; popupPromise: ${popupPromise}`);
   if (popupPromise) {
-    callPopups.delete(callId); // Remove sooner
     popupPromise.then(popup => {
+      callPopups.delete(callId);
       popup.close();
 
     });
