@@ -274,6 +274,5 @@ export default {
   width: 100%;
   height: 100%;
   overflow-y: scroll;
-  z-index: 200;
 }
 </style>
