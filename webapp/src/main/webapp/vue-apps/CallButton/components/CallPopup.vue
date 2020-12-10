@@ -200,9 +200,6 @@ export default {
               color: #aeb3b7;
               content: "\e9d2";
             }
-            .uiIconClose {
-              opacity: 1;
-            }
           }
         }
         .button-title {
