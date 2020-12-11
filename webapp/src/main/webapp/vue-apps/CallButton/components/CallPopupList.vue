@@ -38,6 +38,8 @@ export default {
     text-align: right;
     display: flex;
     align-items: flex-end;
+    min-height: 100vh;
+    justify-content: flex-end;
     flex-flow: column;
     pointer-events: none;
 }</style>
