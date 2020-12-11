@@ -1,6 +1,6 @@
 <template>
   <div class="VuetifyApp call-popup-list" >
-    <h1 style="text-align: right;">Hello</h1>
+    <v-btn style="text: align-right; display: none">See more</v-btn>
     <!-- <call-popup
       :is-dialog-visible="isNotifVisible"
       :caller="caller"
@@ -39,4 +39,5 @@ export default {
     display: flex;
     align-items: flex-end;
     flex-flow: column;
+    pointer-events: none;
 }</style>
