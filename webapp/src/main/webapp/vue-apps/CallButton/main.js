@@ -194,7 +194,6 @@ export function initCallPopup(
     const popup = {
       callId,
       callerId,
-      component: comp,
       close: function() {
         clearTimeout(autoRejectId); // Clear autoreject for the call
         if (playRingtone) {
