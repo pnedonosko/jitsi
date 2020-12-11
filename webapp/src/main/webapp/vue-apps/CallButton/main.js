@@ -1,8 +1,9 @@
 import JitsiMeetButton from "./components/JitsiMeetButton.vue";
 import CallPopup from "./components/CallPopup.vue";
+import CallPopupList from "./components/CallPopupList.vue";
 
 Vue.component("jitsi-meet-button", JitsiMeetButton);
-// Vue.component("CallPopup", CallPopup);
+Vue.component("CallPopup", CallPopup);
 const vuetify = new Vuetify({
   dark: true,
   iconfont: "",
@@ -85,7 +86,25 @@ function savePopupLoader(callId) {
   }); // Add sooner when call state to come
   log.trace(">>> Save call popup for " + callId);
 }
-
+export function initCallPopupList() {
+  return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
+    const container = document.createElement("div");
+    document.body.appendChild(container)
+    return new Vue({
+      el: container,
+      components: {
+        CallPopupList
+      },
+      i18n, 
+      vuetify,
+      render: function(h) {
+        return h(CallPopupList)
+      }
+    })
+  })
+}
+// const parentContainer = document.createElement("div");
+// parentContainer.setAttribute("class", "call-popup-list");
 export function initCallPopup(
     callId,
     callerId,
@@ -116,10 +135,11 @@ export function initCallPopup(
   
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
     const container = document.createElement("div");
-    const parentContainer = document.getElementById("vuetify-apps");
-    parentContainer.parentElement.classList.add("call-popup");
+    const parentContainer = document.querySelector(".call-popup-list");
+    parentContainer.appendChild(container);
+    //parentContainer.parentElement.classList.add("call-popup");
     // TODO why we need an ID unique per page?
-    document.body.appendChild(container);
+    // document.body.appendChild(parentContainer);
     let onAccepted;
     let onRejected;
     let autoRejectId;
@@ -130,11 +150,7 @@ export function initCallPopup(
       },
       data() {
         return {
-          isDialogVisible: true,
-          callerId: callerId,
-          avatar: callerAvatar,
-          callerMessage: callerMessage,
-          playRingtone: playRingtone
+          isNotifVisible: true,
         };
       },
       mounted() {
@@ -148,11 +164,11 @@ export function initCallPopup(
       render: function(h) {
         return h(CallPopup, {
           props: {
-            isDialogVisible: this.isDialogVisible,
-            caller: this.callerId,
-            avatar: this.avatar,
-            callerMessage: this.callerMessage,
-            playRingtone: this.playRingtone,
+            isNotifVisible: this.isNotifVisible,
+            caller: callerId,
+            avatar: callerAvatar,
+            callerMessage: callerMessage,
+            playRingtone: playRingtone,
             i18n
           },
           on: {
@@ -161,7 +177,7 @@ export function initCallPopup(
           }
         });
       }
-    })
+    });
     function doAccept() {
       closeCallPopup(callId);
       if (onAccepted) {
@@ -169,26 +185,27 @@ export function initCallPopup(
       }
     }
     
-    function doReject(isClosed) {
+    function doReject() {
       closeCallPopup(callId);
       if (onRejected) {
-        onRejected(isClosed);
+        onRejected();
       }
     }
     const popup = {
       callId,
       callerId,
-      component: comp,
       close: function() {
         clearTimeout(autoRejectId); // Clear autoreject for the call
         if (playRingtone) {
           localStorage.removeItem(ringId);
         }
-        this.component.isDialogVisible = false;
-        this.component.$destroy();
+        comp.$root.isNotifVisible = false;
+        comp.$root.$destroy();
+        parentContainer.removeChild(comp.$el);
       },
       onAccepted: function(callback) {
         onAccepted = callback;
+
       },
       onRejected: function(callback) {
         onRejected = callback;
@@ -211,6 +228,7 @@ export function closeCallPopup(callId) {
     callPopup.loader.then(popup => {
       log.trace(`>>> Close popup for the call: ${callId}`);
       popup.close();
+
     });
   }
 }

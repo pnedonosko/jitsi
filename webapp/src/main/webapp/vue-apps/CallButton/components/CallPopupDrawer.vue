@@ -7,7 +7,7 @@
           <div>Hello2</div>
           <div>Hello3</div>
           <!-- <ul class="call-popup"> -->
-          <CallPopup :isdialogvisible="isDialogVisible" :caller="caller" :avatar="avatar" :callermessage="callerMessage" :playringtone="playRingtone" :state="state" :i18n="i18n"/>
+          <CallPopup :isdialogvisible="isNotifVisible" :caller="caller" :avatar="avatar" :callermessage="callerMessage" :playringtone="playRingtone" :state="state" :i18n="i18n"/>
           <!-- </ul> -->
         </template>
       </exo-drawer>
@@ -21,7 +21,7 @@ export default {
     CallPopup
   },
   props: {
-    isDialogVisible: {
+    isNotifVisible: {
       type: Boolean,
       required: true,
       default: false

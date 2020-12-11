@@ -1,53 +1,36 @@
 <template>
-  <div class="VuetifyApp">
-    <v-app v-if="isDialogVisible">
-      <v-dialog
-        ref="incoming"
-        :retain-focus="false"
-        v-model="isDialogVisible"
-        content-class="incoming-dialog"
-        no-click-animation
-        persistent
-        hide-overlay
-        width="430">
-        <v-card>
-          <v-avatar color="#578dc9" width="70" height="70">
-            <img :src="avatar" :alt="caller" >
-          </v-avatar>
-          <i class="uiIconSocPhone start-call"></i>
-          <v-card-text color="#333" v-html="callerMessage" />
-          <v-card-actions color="#333">
-            <v-btn
-              class="ma-2 accept-button"
-              color="#2eb58c"
-              elevation="0"
-              fab
-              @click="passAccepted">
-              <i class="uiIconPopupPhone"></i>
-            </v-btn>
-            <span class="button-title" @click="passAccepted">
-              {{ i18n.te("UICallPopup.label.join")
-                ? $t("UICallPopup.label.join")
-              : "Join" }}
-            </span>
-            <v-spacer />
-            <v-btn class="ma-2 decline-button" outlined fab color="#b1b5b9" @click="passRejected()">
-              <i class="uiIconPopupClose"></i>
-            </v-btn>
-            <span class="button-title" @click="passRejected()">
-              {{ i18n.te("UICallPopup.label.ignore")
-                ? $t("UICallPopup.label.ignore")
-              : "Ignore" }}
-            </span>
-            <audio ref="audio" class="audio-call-popup" style="display: none" loop preload="auto">
-              <source src="/jitsi/resources/audio/ringtone_exo-1.m4a" >
-              <p>"Your browser does not support the audio element</p>
-            </audio>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-app>
-  </div>
+  <v-app v-if="isNotifVisible" :key="caller" class="VuetifyApp call-popup call-popup-toast">
+    <v-card class="incoming-dialog">
+      <v-avatar color="#578dc9" width="70" height="70">
+        <img :src="avatar" :alt="caller" >
+      </v-avatar>
+      <i class="uiIconSocPhone start-call"></i>
+      <v-card-text color="#333" v-html="callerMessage" />
+      <v-card-actions color="#333">
+        <v-btn class="ma-2 accept-button" color="#2eb58c" fab @click="passAccepted">
+          <i class="uiIconPopupPhone"></i>
+        </v-btn>
+        <span class="button-title" @click="passAccepted">
+          {{ i18n.te("UICallPopup.label.join")
+            ? $t("UICallPopup.label.join")
+          : "Join" }}
+        </span>
+        <v-spacer />
+        <v-btn class="ma-2 decline-button" outlined fab color="#b1b5b9" @click="passRejected()">
+          <i class="uiIconPopupClose"></i>
+        </v-btn>
+        <span class="button-title" @click="passRejected()">
+          {{ i18n.te("UICallPopup.label.ignore")
+            ? $t("UICallPopup.label.ignore")
+          : "Ignore" }}
+        </span>
+        <audio ref="audio" class="audio-call-popup" style="display: none" loop preload="auto">
+          <source src="/jitsi/resources/audio/ringtone_exo-1.m4a" >
+          <p>"Your browser does not support the audio element</p>
+        </audio>
+      </v-card-actions>
+    </v-card>
+  </v-app>
 </template>
 
 <script>
@@ -61,7 +44,7 @@ function stopAudio(audio) {
 export default {
   name: "CallPopup",
   props: {
-    isDialogVisible: {
+    isNotifVisible: {
       type: Boolean,
       required: true,
       default: false
@@ -114,6 +97,7 @@ export default {
         this.state = "closed";
         this.$emit("accepted");
         stopAudio(this.$refs.audio);
+        
       }
     },
     passRejected() {
@@ -121,39 +105,36 @@ export default {
         this.state = "closed";
         this.$emit("rejected");
         stopAudio(this.$refs.audio);
-      }
+      } 
     }
   }
 };
 </script>
 <style scoped lang="less">
-// .VuetifyApp {
-.spacer {
-  flex-grow: unset !important;
-  width: 12%;
-}
-//.theme--light.v-card > .v-card__text
-.v-dialog__content {
-  justify-content: center;
-  left: unset;
-  position: static;
-  margin: 0px 10px 20px;
-  height: fit-content;
-  width: fit-content;
-  height: -moz-fit-content;
-  width: -moz-fit-content;
-}
-.v-dialog {
-  border-radius: 2px;
-  height: 160px;
+.VuetifyApp {
+  .spacer {
+    flex-grow: unset !important;
+    width: 12%;
+  }
+  &.call-popup-toast {
+    // width: fit-content;
+    height: -moz-fit-content;
+    // width: -moz-fit-content;
+    justify-content: center;
+    left: unset;
+    position: static;
+    margin: 0px 15px 25px;
+    height: fit-content;
+    width: 430px;
+  }
   .v-sheet.v-card {
     border-radius: 2px;
+    border: 1px solid #aeb3b7;
     height: 160px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(2, 80px);
     grid-auto-rows: 10px;
-    width: initial;
     [class^="uiIcon"].start-call {
       position: absolute;
       top: 15%;
@@ -221,21 +202,20 @@ export default {
             }
           }
         }
-      }
-      .button-title {
-        font-weight: 700;
-        font-size: 14px;
-        cursor: pointer;
-        color: #333;
+        .button-title {
+          font-weight: 700;
+          font-size: 14px;
+          cursor: pointer;
+          color: #333;
+        }
       }
     }
   }
 }
-// }
 </style>
 
 <style>
-#vuetify-apps {
+/* #vuetify-apps {
   padding-top: 20px;
   display: flex;
   flex-flow: column;
@@ -243,14 +223,25 @@ export default {
   justify-content: flex-end;
   width: 100%;
   min-height: 100vh;
-}
+} */
+/* #app.call-popup-toast {
+  padding: 0 15px 25px;
+  display: flex;
+  flex-flow: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  width: 100%;
+  height: 100%;
+} */
 .incoming-dialog {
-  border: 1px solid #aeb3b7;
+  pointer-events: all;
 }
-.VuetifyApp.call-popup {
-  position: absolute;
+/* .VuetifyApp.call-popup { */
+  /* position: absolute;
   width: 100%;
   height: 100%;
   overflow-y: scroll;
-}
+  top: 0; */
+  /* pointer-events: all; */
+/* } */
 </style>
