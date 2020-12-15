@@ -20,7 +20,6 @@ const store = new Vuex.Store({
     instance: 0,
     instanceArray: [],
     caller: "",
-    // openDrawer: null
     isDrawerOpen: "none"
   },
   mutations: {
@@ -28,7 +27,6 @@ const store = new Vuex.Store({
       state.caller = payload.caller;
     },
     increment(state, payload) {
-      console.log(payload.caller, );
       if (payload.caller !== state.caller) {
         state.instance ++;
         state.instanceArray.push(state.instance);
@@ -44,9 +42,6 @@ const store = new Vuex.Store({
     closeDrawer(state) {
       state.isDrawerOpen = "none"
     }
-    // passOpenDrawer(state, payload) {
-    //   state.openDrawer = payload.method;
-    // }
   }
 })
 
@@ -139,8 +134,6 @@ export function initCallPopupList() {
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
     const container = document.createElement("div");
     document.body.appendChild(container);
-    // EventBus.$on("created", ref => {child += ref; console.log(child)});
-    // console.log(child, "child");
     return new Vue({
       el: container,
       store: store,
@@ -191,21 +184,13 @@ export function initCallPopup(
     const parentContainer = document.querySelectorAll(".incoming-toast-list");
     const drawerContainer = parentContainer[0];
     const listContainer = parentContainer[1];
-    console.log(listContainer, parentContainer);
-    //Object.values(parentContainer).map(() => {drawerContainer = parentContainer[0]; listContainer = parentContainer[1]});
     listContainer.appendChild(container);
-    //if (drawerContainer.children.length) {
-     // console.log(drawerContainer.children)
-    //  listContainer.appendChild(container);
-    //}
     drawerContainer.appendChild(containerDrawer);
-   // listContainer.appendChild(container);
-    console.log(drawerContainer);
-    // console.log(listContainer);
+
     let onAccepted;
     let onRejected;
     let autoRejectId;
-    const containers = Object.values(document.querySelectorAll(".list-drawer-popup-container"));
+    // const containers = Object.values(document.querySelectorAll(".list-drawer-popup-container"));
     
     // eslint-disable-next-line prefer-const
     // for(let el of containers) {
@@ -222,14 +207,14 @@ export function initCallPopup(
           };
         },
         mounted() {
-          // autoRejectId = setTimeout(() => {
-          //   log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
-          //   this.$store.commit("decrement");
-          // if (this.$store.state.instance <= 1) {
-          //   this.$store.commit("closeDrawer")
-          // }
-          //   doReject();
-          // }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
+          autoRejectId = setTimeout(() => {
+            log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
+            this.$store.commit("decrement");
+          if (this.$store.state.instance <= 1) {
+            this.$store.commit("closeDrawer")
+          }
+            doReject();
+          }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
         },
         i18n,
         vuetify,
@@ -263,11 +248,11 @@ export function initCallPopup(
           };
         },
         mounted() {
-          // autoRejectId = setTimeout(() => {
-          //   log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
-          //   this.$store.commit("decrement");
-          //   doReject();
-          // }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
+          autoRejectId = setTimeout(() => {
+            log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
+            this.$store.commit("decrement");
+            doReject();
+          }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
         },
         i18n,
         vuetify,
@@ -316,9 +301,9 @@ export function initCallPopup(
         }
         comp.$root.isNotifVisible = false;
         compDrawer.$root.isNotifVisible = false;
-        // console.log(comp.$root.$el);
         comp.$root.$destroy();
         compDrawer.$root.$destroy();
+
         drawerContainer.removeChild(compDrawer.$el);
         listContainer.removeChild(comp.$el);
         // console.log(parentContainer, drawerContainer, "drawerContainerparentContainer")
@@ -365,7 +350,6 @@ export function closeCallPopup(callId) {
 }
 
 export function initDrawer() {
-  // callId, callerId, callerLink, callerAvatar, callerMessage, playRingtone) {
   const container = document.createElement("div");
   document.body.appendChild(container);
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {

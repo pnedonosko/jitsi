@@ -1,15 +1,10 @@
 <template>
   <v-app class="VuetifyApp call-popup-list">
-    <v-btn :style="{'display': displayButton.button}" @click="openDrawer">See more</v-btn>
-    <!-- <call-popup
-      :is-dialog-visible="isNotifVisible"
-      :caller="caller"
-      :avatar="avatar"
-      :caller-message="callerMessage"
-      :play-ringtone="playRingtone"
-      :i18n="i18n"
-      @accepted="accepted"
-    @rejected="rejected" />-->
+    <v-btn :ripple="false" :style="{'display': displayButton.button}" outlined @click="openDrawer">
+      <i class="uiIconIncomingCalls"></i>
+      <span class="message">You have {{ this.$store.state.instance - 2 }} more incoming calls</span>
+      <span class="btn-link">See all</span>
+    </v-btn>
     <div ref="callpopuplist" class="incoming-toast-list"></div>
   </v-app>
 </template>
@@ -29,86 +24,42 @@ export default {
     };
   },
   computed: {
-    // childLength() {
-    //   const child = 0;
-    //   // EventBus.$on("created", ref => child += ref);
-    //   //   console.log(child, "child");
-    //   return child;
-    // },
-    // mapper() {
-    //   return Object.values(callPopups);
-    // },
     displayButton() {
-      //   console.log(this.childLength, "childLength");
-      //   return this.childLength > 1 ? { button: "block" } : { button: "none" };
-      //   const mapper = Object.values(callPopups);
-      //   console.log(this.mapper, this.mapper.length);
       this.hideChild();
-      // console.log(this.$refs.callpopuplist);
-      return this.$store.state.instance > 0
+      return this.$store.state.instance > 2
         ? { button: "inline-flex" }
         : { button: "none" };
     }
   },
   watch: {
     displayButton(newVal, oldVal) {
-      // EventBus.$on("created", ref => this.childLength += ref);
       console.log(newVal, oldVal);
     }
   },
-  //   mounted() {
-  //     // console.log(this.childLength);
-  //     // console.log(this.$refs.callpopuplist.childNodes);
-  //     // EventBus.$on("created", ref => console.log(ref, "EventBus"))
-  //   },
-  //   updated() {
-  //     // console.log(this.childLength);
-  //     // console.log(this.$refs.callpopuplist.childNodes);
-  //     // console.log(this.$refs, "REFS");
-  //     // EventBus.$on("created", ref => console.log(ref, "EventBus"));
-  //   },
   methods: {
     hideChild() {
       if (this.$refs.callpopuplist) {
-        // console.log(this.$refs.callpopuplist.children);
-        // console.log(this.$refs.callpopuplist.root);
-        // console.log(this.$refs.callpopuplist._vnode);
         if (this.$refs.callpopuplist.children) {
-          //   console.log(this.$refs.callpopuplist.children);
           if (this.$store.state.instance > 0) {
-            // console.log(this.$refs.callpopuplist.children[2].style.display);
             Object.values(this.$refs.callpopuplist.children).map(
               (popup, index) => {
                 if (index < 2 && this.$store.state.instance <= 2) {
-                  console.log(popup, index, this.$store.state.instance);
                   this.$refs.callpopuplist.children[index].style.display =
                     "flex";
                 }
                 if (index >= 2 && this.$store.state.instance > 2) {
-                  console.log(popup, index, this.$store.state.instance);
                   this.$refs.callpopuplist.children[index].style.display =
                     "none";
                 }
               }
             );
-            // this.$refs.callpopuplist.children[0].style.display = "flex";
-            // this.$refs.callpopuplist.children[1].style.display = "flex";
-            // if (this.$store.state.instance > 2) {
-            //   this.$refs.callpopuplist.children[2].style.display = "none";
-            // }
           }
-          //   else if (this.$store.state.instance <= 2) {
-          //     this.$refs.callpopuplist.children[0].style.display = "flex";
-          //     this.$refs.callpopuplist.children[1].style.display = "flex";
-          //   }
         }
       }
     },
     openDrawer() {
-        console.log(this.$store.state);
-        console.log(this.EventBus.$on("openDropdown"))
-        this.$store.commit("openDrawer");
-        this.EventBus.$on("openDropdown", meth => meth());
+      this.$store.commit("openDrawer");
+      this.EventBus.$emit("openDropdown");
     }
   }
 };
@@ -124,16 +75,39 @@ export default {
     text-align: right;
     height: 100vh;
     overflow-y: scroll;
-
     pointer-events: none;
     .v-btn {
+      border-radius: 2px;
+      position: absolute;
+      background-color: white;
+      border: 1px solid #aeb3b7;
+      top: 40%;
       text-align: right;
+      justify-content: space-evenly;
       margin: 15px;
       margin-bottom: 0px;
       padding: 0;
       align-self: flex-end;
-      width: 430px;
+      width: 428px;
       pointer-events: all;
+      .uiIconIncomingCalls {
+        &::before {
+          content: "\e61c";
+          color: #fb8e18;
+          font-size: 20px;
+        }
+      }
+      span {
+        font-size: 16px;
+        &.message {
+          color: #333;
+          font-weight: bold;
+        }
+        &.btn-link {
+          color: #aeb3b7;
+          text-decoration: none;
+        }
+      }
     }
     .incoming-toast-list {
       display: flex;

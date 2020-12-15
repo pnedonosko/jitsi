@@ -105,10 +105,6 @@ export default {
     };
   },
   computed: {
-    // mapper() {
-    //   console.log(callPopups)
-    //   return Object.values(callPopups);
-    // },
     // index() {
     //   return this.$store.state.instance;
     // },
@@ -120,10 +116,6 @@ export default {
     //   return `callpopup-${this.instance[this.index]}`;
     // },
     // dislpayNotif() {
-    //   // console.log(this.mapper, this.mapper.length, "toast");
-    //   // console.log(this.$refs[`callpopup-${this.index}`].$el.classList);
-    //   // eslint-disable-next-line no-debugger
-    //   debugger;
     //   return this.index > 2
     //     ? { display: "none" }
     //     : { display: "flex" };
@@ -175,7 +167,6 @@ export default {
         if (this.$store.state.instance <= 1) {
           this.$store.commit("closeDrawer")
         }
-        // this.index = this.$store.state.instance;
         this.state = "closed";
         this.$emit("rejected");
         stopAudio(this.$refs.audio);
@@ -183,15 +174,10 @@ export default {
     },
     increment() {
       this.$store.commit({type: "increment", caller: this.caller});
-      console.log(this.$store.state.instance);
     },
     decrement() {
       this.$store.commit("decrement");
     }
-    // instanceCreated() {
-    //   this.click ++;
-    //   EventBus.$emit("created", this.click);
-    // }
   }
 };
 </script>
@@ -208,7 +194,7 @@ export default {
     justify-content: center;
     left: unset;
     position: static;
-    margin: 0px 0px 25px;
+    margin: 0px 0px 15px;
     height: fit-content;
     width: 430px;
   }
