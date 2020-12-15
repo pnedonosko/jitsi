@@ -1,13 +1,23 @@
 <template>
-  <v-app v-if="isNotifVisible" :key="caller" class="VuetifyApp call-popup call-popup-toast">
+  <v-app
+    v-if="isNotifVisible"
+
+    class="VuetifyApp call-popup call-popup-toast" >
     <v-card class="incoming-dialog">
-      <v-avatar color="#578dc9" width="70" height="70">
+      <v-avatar 
+        color="#578dc9" 
+        width="70" 
+        height="70">
         <img :src="avatar" :alt="caller" >
       </v-avatar>
       <i class="uiIconSocPhone start-call"></i>
       <v-card-text color="#333" v-html="callerMessage" />
       <v-card-actions color="#333">
-        <v-btn class="ma-2 accept-button" color="#2eb58c" fab @click="passAccepted">
+        <v-btn 
+          class="ma-2 accept-button" 
+          color="#2eb58c" 
+          fab 
+          @click="passAccepted">
           <i class="uiIconPopupPhone"></i>
         </v-btn>
         <span class="button-title" @click="passAccepted">
@@ -16,7 +26,12 @@
           : "Join" }}
         </span>
         <v-spacer />
-        <v-btn class="ma-2 decline-button" outlined fab color="#b1b5b9" @click="passRejected()">
+        <v-btn 
+          class="ma-2 decline-button" 
+          outlined 
+          fab 
+          color="#b1b5b9" 
+          @click="passRejected()">
           <i class="uiIconPopupClose"></i>
         </v-btn>
         <span class="button-title" @click="passRejected()">
@@ -24,7 +39,12 @@
             ? $t("UICallPopup.label.ignore")
           : "Ignore" }}
         </span>
-        <audio ref="audio" class="audio-call-popup" style="display: none" loop preload="auto">
+        <audio 
+          ref="audio" 
+          class="audio-call-popup" 
+          style="display: none" 
+          loop 
+          preload="auto">
           <source src="/jitsi/resources/audio/ringtone_exo-1.m4a" >
           <p>"Your browser does not support the audio element</p>
         </audio>
@@ -34,6 +54,8 @@
 </template>
 
 <script>
+// import { EventBus } from "../main.js";
+// import { callPopups } from "../main.js";
 function stopAudio(audio) {
   if (audio) {
     audio.pause();
@@ -68,12 +90,56 @@ export default {
     i18n: {
       type: Object,
       required: true
-    }
+    },
+    // index: {
+    //   type: Array,
+    //   required: true
+    // }
   },
   data() {
     return {
-      state: null
+      state: null,
+      index: this.$store.state.instance,
+      // instance: this.$store.state.instanceArray,
+      isVisible: true
     };
+  },
+  computed: {
+    // mapper() {
+    //   console.log(callPopups)
+    //   return Object.values(callPopups);
+    // },
+    // index() {
+    //   return this.$store.state.instance;
+    // },
+    instance() {
+      return this.$store.state.instanceArray
+      },
+    // className() {
+    //   // return this.index !== 0 ? `callpopup-${this.instance[this.index - 1]}` : `callpopup-${this.instance[this.index]}`;
+    //   return `callpopup-${this.instance[this.index]}`;
+    // },
+    // dislpayNotif() {
+    //   // console.log(this.mapper, this.mapper.length, "toast");
+    //   // console.log(this.$refs[`callpopup-${this.index}`].$el.classList);
+    //   // eslint-disable-next-line no-debugger
+    //   debugger;
+    //   return this.index > 2
+    //     ? { display: "none" }
+    //     : { display: "flex" };
+    // }
+  },
+  // watch: {
+  //   index(oldV, newV) {
+  //     // return newV > 2 ? this.isVisible === false : this.isVisible === true
+  //     return this.className = `callpopup-${newV}`;
+  //   },
+
+  // },
+  created() {
+    this.increment();
+    this.$store.commit({type: "setCaller", caller: this.caller});
+    // EventBus.$emit("created", this.instance);
   },
   mounted() {
     this.state = "shown";
@@ -94,19 +160,38 @@ export default {
   methods: {
     passAccepted() {
       if (this.state === "shown") {
+        this.decrement();
+        if (this.$store.state.instance <= 1) {
+          this.$store.commit("closeDrawer")
+        }
         this.state = "closed";
         this.$emit("accepted");
         stopAudio(this.$refs.audio);
-        
       }
     },
     passRejected() {
       if (this.state === "shown") {
+        this.decrement();
+        if (this.$store.state.instance <= 1) {
+          this.$store.commit("closeDrawer")
+        }
+        // this.index = this.$store.state.instance;
         this.state = "closed";
         this.$emit("rejected");
         stopAudio(this.$refs.audio);
-      } 
+      }
+    },
+    increment() {
+      this.$store.commit({type: "increment", caller: this.caller});
+      console.log(this.$store.state.instance);
+    },
+    decrement() {
+      this.$store.commit("decrement");
     }
+    // instanceCreated() {
+    //   this.click ++;
+    //   EventBus.$emit("created", this.click);
+    // }
   }
 };
 </script>
@@ -123,7 +208,7 @@ export default {
     justify-content: center;
     left: unset;
     position: static;
-    margin: 0px 15px 25px;
+    margin: 0px 0px 25px;
     height: fit-content;
     width: 430px;
   }
@@ -158,6 +243,7 @@ export default {
       padding: 20px 15px 20px 0px;
       font-size: 16px;
       color: #333;
+      text-align: left;
     }
     .v-card__actions {
       grid-column: 2 / span 2;
@@ -212,6 +298,9 @@ export default {
     }
   }
 }
+.show {
+  display: flex;
+}
 </style>
 
 <style>
@@ -237,11 +326,11 @@ export default {
   pointer-events: all;
 }
 /* .VuetifyApp.call-popup { */
-  /* position: absolute;
+/* position: absolute;
   width: 100%;
   height: 100%;
   overflow-y: scroll;
   top: 0; */
-  /* pointer-events: all; */
+/* pointer-events: all; */
 /* } */
 </style>

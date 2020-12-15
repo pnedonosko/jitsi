@@ -1,9 +1,58 @@
+import Vuex from "vuex";
 import JitsiMeetButton from "./components/JitsiMeetButton.vue";
 import CallPopup from "./components/CallPopup.vue";
 import CallPopupList from "./components/CallPopupList.vue";
+import CallPopupDrawer from "./components/CallPopupDrawer.vue";
+export const EventBus = new Vue();
+
+Vue.use(Vuex);
+
+Vue.mixin({
+  data: function() {
+    return {
+      EventBus: EventBus
+    }
+  }
+})
+
+const store = new Vuex.Store({
+  state: {
+    instance: 0,
+    instanceArray: [],
+    caller: "",
+    // openDrawer: null
+    isDrawerOpen: "none"
+  },
+  mutations: {
+    setCaller(state, payload) {
+      state.caller = payload.caller;
+    },
+    increment(state, payload) {
+      console.log(payload.caller, );
+      if (payload.caller !== state.caller) {
+        state.instance ++;
+        state.instanceArray.push(state.instance);
+      }
+    },
+    decrement(state) {
+      state.instance --;
+      state.instanceArray.pop(state.instance);
+    },
+    openDrawer(state) {
+      state.isDrawerOpen = "block"
+    },
+    closeDrawer(state) {
+      state.isDrawerOpen = "none"
+    }
+    // passOpenDrawer(state, payload) {
+    //   state.openDrawer = payload.method;
+    // }
+  }
+})
 
 Vue.component("jitsi-meet-button", JitsiMeetButton);
-Vue.component("CallPopup", CallPopup);
+// Vue.component("CallPopup", CallPopup);
+Vue.use(Vuetify);
 const vuetify = new Vuetify({
   dark: true,
   iconfont: "",
@@ -16,7 +65,7 @@ const resourceBundleName = "Jitsi";
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/${localePortlet}.${resourceBundleName}-${lang}.json`;
 const log = webConferencing.getLog("jitsi");
 const callStates = new Map();
-const callPopups = new Map();
+export const callPopups = new Map();
 
 export function init(settings) {
   // getting locale ressources
@@ -47,6 +96,7 @@ export function init(settings) {
           return this.callSettings.callState;
         }
       },
+      vuetify,
       render: (h) =>
         h(JitsiMeetButton, {
           props: {
@@ -56,8 +106,7 @@ export function init(settings) {
             resourceBundleName: resourceBundleName,
           }
         }),
-      i18n,
-      vuetify,
+      i18n
     });
   });
 }
@@ -89,11 +138,15 @@ function savePopupLoader(callId) {
 export function initCallPopupList() {
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
     const container = document.createElement("div");
-    document.body.appendChild(container)
+    document.body.appendChild(container);
+    // EventBus.$on("created", ref => {child += ref; console.log(child)});
+    // console.log(child, "child");
     return new Vue({
       el: container,
+      store: store,
       components: {
-        CallPopupList
+        CallPopupList, 
+        CallPopup
       },
       i18n, 
       vuetify,
@@ -103,8 +156,6 @@ export function initCallPopupList() {
     })
   })
 }
-// const parentContainer = document.createElement("div");
-// parentContainer.setAttribute("class", "call-popup-list");
 export function initCallPopup(
     callId,
     callerId,
@@ -114,7 +165,6 @@ export function initCallPopup(
     playRingtone) {
 
   const currentUserId = webConferencing.getUser().id;
-      
   // Ring ID should be unique per a Platform instance
   const ringId = `jitsi-call-ring-${window.location.host}-${callerId}`;
   if (playRingtone) {
@@ -135,49 +185,114 @@ export function initCallPopup(
   
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
     const container = document.createElement("div");
-    const parentContainer = document.querySelector(".call-popup-list");
-    parentContainer.appendChild(container);
-    //parentContainer.parentElement.classList.add("call-popup");
-    // TODO why we need an ID unique per page?
-    // document.body.appendChild(parentContainer);
+    container.setAttribute("class", "list-drawer-popup-container");
+    const containerDrawer = document.createElement("div");
+    containerDrawer.setAttribute("class", "list-drawer-popup-container");
+    const parentContainer = document.querySelectorAll(".incoming-toast-list");
+    const drawerContainer = parentContainer[0];
+    const listContainer = parentContainer[1];
+    console.log(listContainer, parentContainer);
+    //Object.values(parentContainer).map(() => {drawerContainer = parentContainer[0]; listContainer = parentContainer[1]});
+    listContainer.appendChild(container);
+    //if (drawerContainer.children.length) {
+     // console.log(drawerContainer.children)
+    //  listContainer.appendChild(container);
+    //}
+    drawerContainer.appendChild(containerDrawer);
+   // listContainer.appendChild(container);
+    console.log(drawerContainer);
+    // console.log(listContainer);
     let onAccepted;
     let onRejected;
     let autoRejectId;
-    const comp = new Vue({
-      el: container,
-      components: {
-        CallPopup
-      },
-      data() {
-        return {
-          isNotifVisible: true,
-        };
-      },
-      mounted() {
-        autoRejectId = setTimeout(() => {
-          log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
-          doReject();
-        }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
-      },
-      i18n,
-      vuetify,
-      render: function(h) {
-        return h(CallPopup, {
-          props: {
-            isNotifVisible: this.isNotifVisible,
-            caller: callerId,
-            avatar: callerAvatar,
-            callerMessage: callerMessage,
-            playRingtone: playRingtone,
-            i18n
-          },
-          on: {
-            accepted: doAccept,
-            rejected: doReject
-          }
-        });
-      }
-    });
+    const containers = Object.values(document.querySelectorAll(".list-drawer-popup-container"));
+    
+    // eslint-disable-next-line prefer-const
+    // for(let el of containers) {
+      // console.log(el);
+     const comp = new Vue({
+        el: container,
+        store: store,
+        components: {
+          CallPopup
+        },
+        data() {
+          return {
+            isNotifVisible: true,
+          };
+        },
+        mounted() {
+          // autoRejectId = setTimeout(() => {
+          //   log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
+          //   this.$store.commit("decrement");
+          // if (this.$store.state.instance <= 1) {
+          //   this.$store.commit("closeDrawer")
+          // }
+          //   doReject();
+          // }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
+        },
+        i18n,
+        vuetify,
+        render: function(h) {
+          return h(CallPopup, {
+            props: {
+              isNotifVisible: this.isNotifVisible,
+              caller: callerId,
+              avatar: callerAvatar,
+              callerMessage: callerMessage,
+              playRingtone: playRingtone,
+              index: store.state.instance,
+              i18n
+            },
+            on: {
+              accepted: doAccept,
+              rejected: doReject
+            }
+          });
+        }
+      });
+    const compDrawer =  new Vue({
+        el: containerDrawer,
+        store: store,
+        components: {
+          CallPopup
+        },
+        data() {
+          return {
+            isNotifVisible: true,
+          };
+        },
+        mounted() {
+          // autoRejectId = setTimeout(() => {
+          //   log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
+          //   this.$store.commit("decrement");
+          //   doReject();
+          // }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
+        },
+        i18n,
+        vuetify,
+        render: function(h) {
+          return h(CallPopup, {
+            props: {
+              isNotifVisible: this.isNotifVisible,
+              caller: callerId,
+              avatar: callerAvatar,
+              callerMessage: callerMessage,
+              playRingtone: playRingtone,
+              index: store.state.instance,
+              i18n
+            },
+            on: {
+              accepted: doAccept,
+              rejected: doReject
+            }
+          });
+        }
+      });
+    // }
+    // comp.$mount(container);
+    // compDrawer.$mount(containerDrawer);
+    
     function doAccept() {
       closeCallPopup(callId);
       if (onAccepted) {
@@ -200,8 +315,15 @@ export function initCallPopup(
           localStorage.removeItem(ringId);
         }
         comp.$root.isNotifVisible = false;
+        compDrawer.$root.isNotifVisible = false;
+        // console.log(comp.$root.$el);
         comp.$root.$destroy();
-        parentContainer.removeChild(comp.$el);
+        compDrawer.$root.$destroy();
+        drawerContainer.removeChild(compDrawer.$el);
+        listContainer.removeChild(comp.$el);
+        // console.log(parentContainer, drawerContainer, "drawerContainerparentContainer")
+        // drawerContainer.removeChild(comp.$root.$el);
+        // Object.values(parentContainer).map(cont => {console.log(cont.children); cont.removeChild(comp.$root.$el)});
       },
       onAccepted: function(callback) {
         onAccepted = callback;
@@ -240,4 +362,24 @@ export function closeCallPopup(callId) {
   } else {
     log.trace(`Call has no popup: ${callId}`);
   }
+}
+
+export function initDrawer() {
+  // callId, callerId, callerLink, callerAvatar, callerMessage, playRingtone) {
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
+    
+    const comp = new Vue({
+      el: container,
+      store: store,
+      components: {
+        CallPopupDrawer
+      },
+      render: (h) => h(CallPopupDrawer),
+      vuetify,
+      i18n
+    });
+    return comp;
+  });
 }

@@ -455,6 +455,7 @@
         if (eXo && eXo.env && eXo.env.portal && settings && !settings.isCallApp) {
           var currentUserId = webConferencing.getUser().id;
           // Subscribe to user updates (incoming calls will be notified here)
+          callButton.initDrawer().then(() => {});
           callButton.initCallPopupList().then(()=> {}); 
           webConferencing.onUserUpdate(currentUserId, update => {
             // This connector cares only about own provider events
