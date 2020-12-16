@@ -1,7 +1,6 @@
 <template>
   <v-app
     v-if="isNotifVisible"
-
     class="VuetifyApp call-popup call-popup-toast" >
     <v-card class="incoming-dialog">
       <v-avatar 
