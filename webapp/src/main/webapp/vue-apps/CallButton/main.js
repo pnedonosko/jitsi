@@ -4,7 +4,13 @@ import CallPopup from "./components/CallPopup.vue";
 import CallPopupList from "./components/CallPopupList.vue";
 import CallPopupDrawer from "./components/CallPopupDrawer.vue";
 export const EventBus = new Vue();
-
+// eslint-disable-next-line prefer-const
+export const storage = {
+  instance: 0,
+  instanceArray: [],
+  caller: "",
+  isDrawerOpen: "none"
+};
 Vue.use(Vuex);
 
 Vue.mixin({
@@ -321,6 +327,8 @@ export function initCallPopup(
     const callPopup = callPopups.get(callId);
     if (callPopup) {
       callPopup.resolve(popup);
+      console.log(callPopup.resolve(popup), "callPopup");
+
     } else {
       log.trace(`Call popup loader not found for the call: ${callId}`);
     }

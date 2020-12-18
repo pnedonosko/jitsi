@@ -11,6 +11,8 @@
 
 <script>
 import CallPopup from "./CallPopup.vue";
+import { callPopups } from "../main.js";
+import { storage } from "../main.js";
 // import { EventBus } from "../main.js";
 
 export default {
@@ -26,6 +28,7 @@ export default {
   computed: {
     displayButton() {
       this.hideChild();
+      // return callPopups.size > 2
       return this.$store.state.instance > 2
         ? { button: "inline-flex" }
         : { button: "none" };
@@ -36,13 +39,18 @@ export default {
       console.log(newVal, oldVal);
     }
   },
+  mounted() {
+    this.EventBus.$on("instanceCreated", data => console.log(data, "EventBus"))
+  },
   methods: {
     hideChild() {
       if (this.$refs.callpopuplist) {
         if (this.$refs.callpopuplist.children) {
+          // if (callPopups.size > 0) {
           if (this.$store.state.instance > 0) {
             Object.values(this.$refs.callpopuplist.children).map(
               (popup, index) => {
+                // if (index < 2 && callPopups.size <= 2) {
                 if (index < 2 && this.$store.state.instance <= 2) {
                   this.$refs.callpopuplist.children[index].style.display =
                     "flex";
