@@ -1,4 +1,4 @@
-import Vuex from "vuex";
+// import Vuex from "vuex";
 import JitsiMeetButton from "./components/JitsiMeetButton.vue";
 import CallPopup from "./components/CallPopup.vue";
 import CallPopupList from "./components/CallPopupList.vue";
@@ -11,7 +11,7 @@ export const storage = {
   caller: "",
   isDrawerOpen: "none"
 };
-Vue.use(Vuex);
+// Vue.use(Vuex);
 
 Vue.mixin({
   data: function() {
@@ -21,35 +21,35 @@ Vue.mixin({
   }
 })
 
-const store = new Vuex.Store({
-  state: {
-    instance: 0,
-    instanceArray: [],
-    caller: "",
-    isDrawerOpen: "none"
-  },
-  mutations: {
-    setCaller(state, payload) {
-      state.caller = payload.caller;
-    },
-    increment(state, payload) {
-      if (payload.caller !== state.caller) {
-        state.instance ++;
-        state.instanceArray.push(state.instance);
-      }
-    },
-    decrement(state) {
-      state.instance --;
-      state.instanceArray.pop(state.instance);
-    },
-    openDrawer(state) {
-      state.isDrawerOpen = "block"
-    },
-    closeDrawer(state) {
-      state.isDrawerOpen = "none"
-    }
-  }
-})
+// const store = new Vuex.Store({
+//   state: {
+//     //instance: 0,
+//     //instanceArray: [],
+//     //caller: "",
+//     isDrawerOpen: "none"
+//   },
+//   mutations: {
+//     //setCaller(state, payload) {
+//     //  state.caller = payload.caller;
+//     //},
+//     //increment(state, payload) {
+//     //  if (payload.caller !== state.caller) {
+//     //    state.instance ++;
+//     //    state.instanceArray.push(state.instance);
+//     //  }
+//     //},
+//     //decrement(state) {
+//     //  state.instance --;
+//     //  state.instanceArray.pop(state.instance);
+//     //},
+//     openDrawer() {
+//       storage.isDrawerOpen = "block"
+//     },
+//     closeDrawer(state) {
+//       storage.isDrawerOpen = "none"
+//     }
+//   }
+// })
 
 Vue.component("jitsi-meet-button", JitsiMeetButton);
 // Vue.component("CallPopup", CallPopup);
@@ -142,7 +142,7 @@ export function initCallPopupList() {
     document.body.appendChild(container);
     return new Vue({
       el: container,
-      store: store,
+      // store: store,
       components: {
         CallPopupList, 
         CallPopup
@@ -200,10 +200,8 @@ export function initCallPopup(
     
     // eslint-disable-next-line prefer-const
     // for(let el of containers) {
-      // console.log(el);
      const comp = new Vue({
         el: container,
-        store: store,
         components: {
           CallPopup
         },
@@ -215,9 +213,9 @@ export function initCallPopup(
         mounted() {
           autoRejectId = setTimeout(() => {
             log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
-            this.$store.commit("decrement");
-          if (this.$store.state.instance <= 1) {
-            this.$store.commit("closeDrawer")
+            storage.instance = storage.instance > 0 ? storage.instance-- : 0;
+          if (storage.instance <= 1) {
+            storage.isDrawerOpen = "none";
           }
             doReject();
           }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
@@ -232,7 +230,6 @@ export function initCallPopup(
               avatar: callerAvatar,
               callerMessage: callerMessage,
               playRingtone: playRingtone,
-              index: store.state.instance,
               i18n
             },
             on: {
@@ -244,7 +241,6 @@ export function initCallPopup(
       });
     const compDrawer =  new Vue({
         el: containerDrawer,
-        store: store,
         components: {
           CallPopup
         },
@@ -256,7 +252,6 @@ export function initCallPopup(
         mounted() {
           autoRejectId = setTimeout(() => {
             log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
-            this.$store.commit("decrement");
             doReject();
           }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
         },
@@ -270,7 +265,6 @@ export function initCallPopup(
               avatar: callerAvatar,
               callerMessage: callerMessage,
               playRingtone: playRingtone,
-              index: store.state.instance,
               i18n
             },
             on: {
@@ -280,9 +274,6 @@ export function initCallPopup(
           });
         }
       });
-    // }
-    // comp.$mount(container);
-    // compDrawer.$mount(containerDrawer);
     
     function doAccept() {
       closeCallPopup(callId);
@@ -290,7 +281,6 @@ export function initCallPopup(
         onAccepted();
       }
     }
-    
     function doReject() {
       closeCallPopup(callId);
       if (onRejected) {
@@ -312,7 +302,6 @@ export function initCallPopup(
 
         drawerContainer.removeChild(compDrawer.$el);
         listContainer.removeChild(comp.$el);
-        // console.log(parentContainer, drawerContainer, "drawerContainerparentContainer")
         // drawerContainer.removeChild(comp.$root.$el);
         // Object.values(parentContainer).map(cont => {console.log(cont.children); cont.removeChild(comp.$root.$el)});
       },
@@ -327,7 +316,6 @@ export function initCallPopup(
     const callPopup = callPopups.get(callId);
     if (callPopup) {
       callPopup.resolve(popup);
-      console.log(callPopup.resolve(popup), "callPopup");
 
     } else {
       log.trace(`Call popup loader not found for the call: ${callId}`);
@@ -361,10 +349,8 @@ export function initDrawer() {
   const container = document.createElement("div");
   document.body.appendChild(container);
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
-    
     const comp = new Vue({
       el: container,
-      store: store,
       components: {
         CallPopupDrawer
       },

@@ -44,11 +44,8 @@ export default {
     });
   },
   updated() {
-    console.log("updatedList");
     this.EventBus.$on("instanceCreated", data => {
-      console.log(data, "EventBus");
       this.storage = data.instanceCreated;
-      console.log(this.storage, "updatedList");
     });
   },
   methods: {
@@ -73,8 +70,9 @@ export default {
       }
     },
     openDrawer() {
-      this.$store.commit("openDrawer");
-      this.EventBus.$emit("openDropdown");
+      // this.$store.commit("openDrawer");
+      this.storage.isDrawerOpen = "block";
+      this.EventBus.$emit("openDrawer");
     }
   }
 };

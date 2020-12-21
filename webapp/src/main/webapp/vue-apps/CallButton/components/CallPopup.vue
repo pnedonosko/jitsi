@@ -1,50 +1,31 @@
 <template>
-  <v-app
-    v-if="isNotifVisible"
-    class="VuetifyApp call-popup call-popup-toast" >
+  <v-app v-if="isNotifVisible" class="VuetifyApp call-popup call-popup-toast">
     <v-card class="incoming-dialog">
-      <v-avatar 
-        color="#578dc9" 
-        width="70" 
-        height="70">
-        <img :src="avatar" :alt="caller" >
+      <v-avatar color="#578dc9" width="70" height="70">
+        <img :src="avatar" :alt="caller" />
       </v-avatar>
       <i class="uiIconSocPhone start-call"></i>
       <v-card-text color="#333" v-html="callerMessage" />
       <v-card-actions color="#333">
-        <v-btn 
-          class="ma-2 accept-button" 
-          color="#2eb58c" 
-          fab 
-          @click="passAccepted">
+        <v-btn class="ma-2 accept-button" color="#2eb58c" fab @click="passAccepted">
           <i class="uiIconPopupPhone"></i>
         </v-btn>
         <span class="button-title" @click="passAccepted">
           {{ i18n.te("UICallPopup.label.join")
-            ? $t("UICallPopup.label.join")
+          ? $t("UICallPopup.label.join")
           : "Join" }}
         </span>
         <v-spacer />
-        <v-btn 
-          class="ma-2 decline-button" 
-          outlined 
-          fab 
-          color="#b1b5b9" 
-          @click="passRejected()">
+        <v-btn class="ma-2 decline-button" outlined fab color="#b1b5b9" @click="passRejected()">
           <i class="uiIconPopupClose"></i>
         </v-btn>
         <span class="button-title" @click="passRejected()">
           {{ i18n.te("UICallPopup.label.ignore")
-            ? $t("UICallPopup.label.ignore")
+          ? $t("UICallPopup.label.ignore")
           : "Ignore" }}
         </span>
-        <audio 
-          ref="audio" 
-          class="audio-call-popup" 
-          style="display: none" 
-          loop 
-          preload="auto">
-          <source src="/jitsi/resources/audio/ringtone_exo-1.m4a" >
+        <audio ref="audio" class="audio-call-popup" style="display: none" loop preload="auto">
+          <source src="/jitsi/resources/audio/ringtone_exo-1.m4a" />
           <p>"Your browser does not support the audio element</p>
         </audio>
       </v-card-actions>
@@ -94,17 +75,17 @@ export default {
   data() {
     return {
       state: null,
-      isVisible: true, 
-      instanceBus: []
+      isVisible: true,
+      storage: {}
     };
   },
-  computed: {
-  },
+  computed: {},
   created() {
-    this.incrementBus(storage, this.caller);
-    this.setCaller(storage, this.caller);
-    this.EventBus.$emit("instanceCreated", {instanceCreated: storage});
-    // console.log(callPopups.size, "CALLPOPUPS");
+    const thevue = this;
+    this.storage = storage;
+    this.incrementBus(this.storage, this.caller);
+    this.setCaller(this.storage, this.caller);
+    this.EventBus.$emit("instanceCreated", { instanceCreated: thevue.storage });
   },
   mounted() {
     this.state = "shown";
@@ -124,49 +105,47 @@ export default {
   },
   methods: {
     passAccepted() {
+      const thevue = this;
       if (this.state === "shown") {
-        // this.decrement();
-        this.decrementBus(storage);
-        if (this.$store.state.instance <= 1) {
-          this.$store.commit("closeDrawer")
-        }
+        this.decrementBus(this.storage);
+        this.closeDrawer();
         this.state = "closed";
         this.$emit("accepted");
         stopAudio(this.$refs.audio);
       }
     },
     passRejected() {
+      const thevue = this;
       if (this.state === "shown") {
-        // this.decrement();
-        this.decrementBus(storage);
-        if (this.$store.state.instance <= 1) {
-          this.$store.commit("closeDrawer")
-        }
+        this.decrementBus(this.storage);
+        this.closeDrawer();
         this.state = "closed";
         this.$emit("rejected");
         stopAudio(this.$refs.audio);
       }
     },
-    // increment() {
-    //   this.$store.commit({type: "increment", caller: this.caller});
-    // },
-    // decrement() {
-    //   this.$store.commit("decrement");
-    // },
     decrementBus(state) {
-      state.instance --;
+      const thevue = this;
+      state.instance--;
       state.instanceArray.pop(state.instance);
-      this.EventBus.$emit("instanceCreated", {instanceCreated: storage});
+      this.EventBus.$emit("instanceCreated", {
+        instanceCreated: thevue.storage
+      });
     },
     setCaller(state, caller) {
       state.caller = caller;
     },
     incrementBus(state, caller) {
       if (caller !== state.caller) {
-        state.instance ++;
+        state.instance++;
         state.instanceArray.push(state.instance);
       }
     },
+    closeDrawer() {
+      if (this.storage.instance <= 1) {
+        this.storage.isDrawerOpen = "none";
+      }
+    }
   }
 };
 </script>

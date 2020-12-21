@@ -1,6 +1,6 @@
 <template>
   <div class="VuetifyApp">
-    <v-app :style="{'display': this.$store.state.isDrawerOpen}">
+    <v-app :style="{'display': storage.isDrawerOpen}">
       <exo-drawer
         ref="callPopupDrawer"
         class="call-popup-drawer"
@@ -30,23 +30,35 @@ export default {
   props: {},
   data() {
     return {
-      showPopupDrawer: false
+      showPopupDrawer: false,
+      storage: {
+        isDrawerOpen: "none"
+      }
     };
   },
   mounted() {
     const thevue = this;
-    this.EventBus.$on("openDropdown", function(payload) {
+    // this.EventBus.$emit("closeDrawer", thevue.closedDrawer);
+    this.EventBus.$on("openDrawer", function(payload) {
       thevue.openDrawer();
     });
+    this.EventBus.$on("instanceCreated", data => {
+      this.storage = data.instanceCreated;
+    });
     this.openDrawer();
+  },
+  updated() {
+    this.EventBus.$on("instanceCreated", data => {
+      this.storage = data.instanceCreated;
+    });
+
   },
   methods: {
     openDrawer() {
       this.$refs.callPopupDrawer.open();
     },
-
     closedDrawer() {
-      this.$store.commit("closeDrawer");
+      this.storage.isDrawerOpen = "none";
     }
   }
 };
