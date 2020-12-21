@@ -99,7 +99,7 @@ export default {
   data() {
     return {
       state: null,
-      index: this.$store.state.instance,
+      // index: this.$store.state.instance,
       // instance: this.$store.state.instanceArray,
       isVisible: true, 
       instanceBus: []
@@ -109,9 +109,9 @@ export default {
     // index() {
     //   return this.$store.state.instance;
     // },
-    instance() {
-      return this.$store.state.instanceArray
-      },
+    // instance() {
+    //   return this.$store.state.instanceArray
+    //   },
     // className() {
     //   // return this.index !== 0 ? `callpopup-${this.instance[this.index - 1]}` : `callpopup-${this.instance[this.index]}`;
     //   return `callpopup-${this.instance[this.index]}`;
@@ -130,14 +130,8 @@ export default {
 
   // },
   created() {
-    // this.increment();
-    // this.$store.commit({type: "setCaller", caller: this.caller});
     // this.instanceBus.push(this.caller);
-    
-    this.increment(storage, this.caller);
-    this.setCaller(storage, this.caller);
     // storage.instance++;
-    this.EventBus.$emit("instanceCreated", {instanceCreated: storage});
     // EventBus.$emit("created", this.instance);
     console.log(callPopups.size, "CALLPOPUPS");
   },
@@ -160,7 +154,7 @@ export default {
   methods: {
     passAccepted() {
       if (this.state === "shown") {
-        this.decrement();
+        // this.decrementBus(storage);
         if (this.$store.state.instance <= 1) {
           this.$store.commit("closeDrawer")
         }
@@ -171,32 +165,13 @@ export default {
     },
     passRejected() {
       if (this.state === "shown") {
-        this.decrement(storage);
+        // this.decrementBus(storage);
         if (this.$store.state.instance <= 1) {
           this.$store.commit("closeDrawer")
         }
         this.state = "closed";
         this.$emit("rejected");
         stopAudio(this.$refs.audio);
-      }
-    },
-    // increment() {
-    //   this.$store.commit({type: "increment", caller: this.caller});
-    // },
-    // decrement() {
-    //   this.$store.commit("decrement");
-    // },
-    decrement(state) {
-      state.instance --;
-      state.instanceArray.pop(state.instance);
-    },
-    setCaller(state, caller) {
-      state.caller = caller;
-    },
-    increment(state, caller) {
-      if (caller !== state.caller) {
-        state.instance ++;
-        state.instanceArray.push(state.instance);
       }
     },
   }

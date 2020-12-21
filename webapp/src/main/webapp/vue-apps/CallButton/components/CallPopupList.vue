@@ -2,7 +2,7 @@
   <v-app class="VuetifyApp call-popup-list">
     <v-btn :ripple="false" :style="{'display': displayButton.button}" outlined @click="openDrawer">
       <i class="uiIconIncomingCalls"></i>
-      <span class="message">You have {{ this.$store.state.instance - 2 }} more incoming calls</span>
+      <span class="message">You have more incoming calls</span>
       <span class="btn-link">See all</span>
     </v-btn>
     <div ref="callpopuplist" class="incoming-toast-list"></div>
@@ -28,11 +28,16 @@ export default {
   computed: {
     displayButton() {
       this.hideChild();
-      // return callPopups.size > 2
-      return this.$store.state.instance > 2
+      console.log(callPopups);
+      // console.log(storage.instance, callPopups.size, this.$store.state.instance, "SIZE");
+      // return storage.instance > 2
+      return callPopups.size > 2
         ? { button: "inline-flex" }
         : { button: "none" };
-    }
+    },
+    numberOfCalls() {
+      return storage.instance;
+    },
   },
   watch: {
     displayButton(newVal, oldVal) {
@@ -40,22 +45,24 @@ export default {
     }
   },
   mounted() {
-    this.EventBus.$on("instanceCreated", data => console.log(data, "EventBus"))
+    this.EventBus.$on("instanceCreated", data => console.log(data, "EventBus"));
   },
+  // updated() {
+  //   console.log("updatedList");
+  //   this.EventBus.$on("instanceCreated", data => console.log(data, "EventBus"));
+  // },
   methods: {
     hideChild() {
       if (this.$refs.callpopuplist) {
         if (this.$refs.callpopuplist.children) {
-          // if (callPopups.size > 0) {
-          if (this.$store.state.instance > 0) {
+          if (callPopups.size > 0) {
             Object.values(this.$refs.callpopuplist.children).map(
               (popup, index) => {
-                // if (index < 2 && callPopups.size <= 2) {
-                if (index < 2 && this.$store.state.instance <= 2) {
+                 if (index < 2 && callPopups.size <= 2) {
                   this.$refs.callpopuplist.children[index].style.display =
                     "flex";
                 }
-                if (index >= 2 && this.$store.state.instance > 2) {
+                 if (index >= 2 && callPopups.size > 2) {
                   this.$refs.callpopuplist.children[index].style.display =
                     "none";
                 }
