@@ -53,7 +53,6 @@
 </template>
 
 <script>
-// import { EventBus } from "../main.js";
 import { storage } from "../main.js";
 import { callPopups } from "../main.js";
 function stopAudio(audio) {
@@ -90,56 +89,22 @@ export default {
     i18n: {
       type: Object,
       required: true
-    },
-    // index: {
-    //   type: Array,
-    //   required: true
-    // }
+    }
   },
   data() {
     return {
       state: null,
-      index: this.$store.state.instance,
-      // instance: this.$store.state.instanceArray,
       isVisible: true, 
       instanceBus: []
     };
   },
   computed: {
-    // index() {
-    //   return this.$store.state.instance;
-    // },
-    instance() {
-      return this.$store.state.instanceArray
-      },
-    // className() {
-    //   // return this.index !== 0 ? `callpopup-${this.instance[this.index - 1]}` : `callpopup-${this.instance[this.index]}`;
-    //   return `callpopup-${this.instance[this.index]}`;
-    // },
-    // dislpayNotif() {
-    //   return this.index > 2
-    //     ? { display: "none" }
-    //     : { display: "flex" };
-    // }
   },
-  // watch: {
-  //   index(oldV, newV) {
-  //     // return newV > 2 ? this.isVisible === false : this.isVisible === true
-  //     return this.className = `callpopup-${newV}`;
-  //   },
-
-  // },
   created() {
-    // this.increment();
-    // this.$store.commit({type: "setCaller", caller: this.caller});
-    // this.instanceBus.push(this.caller);
-    
-    this.increment(storage, this.caller);
+    this.incrementBus(storage, this.caller);
     this.setCaller(storage, this.caller);
-    // storage.instance++;
     this.EventBus.$emit("instanceCreated", {instanceCreated: storage});
-    // EventBus.$emit("created", this.instance);
-    console.log(callPopups.size, "CALLPOPUPS");
+    // console.log(callPopups.size, "CALLPOPUPS");
   },
   mounted() {
     this.state = "shown";
@@ -160,7 +125,8 @@ export default {
   methods: {
     passAccepted() {
       if (this.state === "shown") {
-        this.decrement();
+        // this.decrement();
+        this.decrementBus(storage);
         if (this.$store.state.instance <= 1) {
           this.$store.commit("closeDrawer")
         }
@@ -171,7 +137,8 @@ export default {
     },
     passRejected() {
       if (this.state === "shown") {
-        this.decrement(storage);
+        // this.decrement();
+        this.decrementBus(storage);
         if (this.$store.state.instance <= 1) {
           this.$store.commit("closeDrawer")
         }
@@ -186,14 +153,15 @@ export default {
     // decrement() {
     //   this.$store.commit("decrement");
     // },
-    decrement(state) {
+    decrementBus(state) {
       state.instance --;
       state.instanceArray.pop(state.instance);
+      this.EventBus.$emit("instanceCreated", {instanceCreated: storage});
     },
     setCaller(state, caller) {
       state.caller = caller;
     },
-    increment(state, caller) {
+    incrementBus(state, caller) {
       if (caller !== state.caller) {
         state.instance ++;
         state.instanceArray.push(state.instance);

@@ -2,7 +2,7 @@
   <v-app class="VuetifyApp call-popup-list">
     <v-btn :ripple="false" :style="{'display': displayButton.button}" outlined @click="openDrawer">
       <i class="uiIconIncomingCalls"></i>
-      <span class="message">You have {{ this.$store.state.instance - 2 }} more incoming calls</span>
+      <span class="message">You have {{ storage.instance - 2 }} more incoming calls</span>
       <span class="btn-link">See all</span>
     </v-btn>
     <div ref="callpopuplist" class="incoming-toast-list"></div>
@@ -12,8 +12,7 @@
 <script>
 import CallPopup from "./CallPopup.vue";
 import { callPopups } from "../main.js";
-import { storage } from "../main.js";
-// import { EventBus } from "../main.js";
+// import { storage } from "../main.js";
 
 export default {
   name: "CallPopupList",
@@ -22,17 +21,17 @@ export default {
   },
   data() {
     return {
-      child: 0
+      child: 0,
+      storage: {}
     };
   },
   computed: {
     displayButton() {
       this.hideChild();
-      // return callPopups.size > 2
-      return this.$store.state.instance > 2
+      return this.storage.instance > 2
         ? { button: "inline-flex" }
         : { button: "none" };
-    }
+    },
   },
   watch: {
     displayButton(newVal, oldVal) {
@@ -40,22 +39,30 @@ export default {
     }
   },
   mounted() {
-    this.EventBus.$on("instanceCreated", data => console.log(data, "EventBus"))
+    this.EventBus.$on("instanceCreated", data => {
+      this.storage = data.instanceCreated;
+    });
+  },
+  updated() {
+    console.log("updatedList");
+    this.EventBus.$on("instanceCreated", data => {
+      console.log(data, "EventBus");
+      this.storage = data.instanceCreated;
+      console.log(this.storage, "updatedList");
+    });
   },
   methods: {
     hideChild() {
       if (this.$refs.callpopuplist) {
         if (this.$refs.callpopuplist.children) {
-          // if (callPopups.size > 0) {
-          if (this.$store.state.instance > 0) {
+          if (this.storage.instance > 0) {
             Object.values(this.$refs.callpopuplist.children).map(
               (popup, index) => {
-                // if (index < 2 && callPopups.size <= 2) {
-                if (index < 2 && this.$store.state.instance <= 2) {
+                  if (index < 2 && this.storage.instance <= 2 ) {
                   this.$refs.callpopuplist.children[index].style.display =
                     "flex";
                 }
-                if (index >= 2 && this.$store.state.instance > 2) {
+                if (index >= 2 && this.storage.instance > 2) {
                   this.$refs.callpopuplist.children[index].style.display =
                     "none";
                 }
