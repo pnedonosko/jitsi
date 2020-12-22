@@ -27,7 +27,6 @@ export default {
   },
   computed: {
     displayButton() {
-      this.hideChild();
       return this.storage.instance > 2
         ? { button: "inline-flex" }
         : { button: "none" };
@@ -49,35 +48,22 @@ export default {
     });
   },
   methods: {
-    hideChild() {
-      if (this.$refs.callpopuplist) {
-        if (this.$refs.callpopuplist.children) {
-          if (this.storage.instance > 0) {
-            Object.values(this.$refs.callpopuplist.children).map(
-              (popup, index) => {
-                  if (index < 2 && this.storage.instance <= 2 ) {
-                  this.$refs.callpopuplist.children[index].style.display =
-                    "flex";
-                }
-                if (index >= 2 && this.storage.instance > 2) {
-                  this.$refs.callpopuplist.children[index].style.display =
-                    "none";
-                }
-              }
-            );
-          }
-        }
-      }
-    },
     openDrawer() {
-      // this.$store.commit("openDrawer");
       this.storage.isDrawerOpen = "block";
       this.EventBus.$emit("openDrawer");
     }
   }
 };
 </script>
-<style lang="less" scoped>
+<style lang="less">
+  .incoming-toast-list {
+    .call-popup-toast {
+      display: none;
+      &:nth-child(-n+2) {
+        display: flex;
+      }
+    }
+  }
 </style>
 <style scoped lang="less">
 .VuetifyApp {

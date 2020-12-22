@@ -2,7 +2,7 @@
   <v-app v-if="isNotifVisible" class="VuetifyApp call-popup call-popup-toast">
     <v-card class="incoming-dialog">
       <v-avatar color="#578dc9" width="70" height="70">
-        <img :src="avatar" :alt="caller" />
+        <img :src="avatar" :alt="caller" >
       </v-avatar>
       <i class="uiIconSocPhone start-call"></i>
       <v-card-text color="#333" v-html="callerMessage" />
@@ -12,7 +12,7 @@
         </v-btn>
         <span class="button-title" @click="passAccepted">
           {{ i18n.te("UICallPopup.label.join")
-          ? $t("UICallPopup.label.join")
+            ? $t("UICallPopup.label.join")
           : "Join" }}
         </span>
         <v-spacer />
@@ -21,11 +21,11 @@
         </v-btn>
         <span class="button-title" @click="passRejected()">
           {{ i18n.te("UICallPopup.label.ignore")
-          ? $t("UICallPopup.label.ignore")
+            ? $t("UICallPopup.label.ignore")
           : "Ignore" }}
         </span>
         <audio ref="audio" class="audio-call-popup" style="display: none" loop preload="auto">
-          <source src="/jitsi/resources/audio/ringtone_exo-1.m4a" />
+          <source src="/jitsi/resources/audio/ringtone_exo-1.m4a" >
           <p>"Your browser does not support the audio element</p>
         </audio>
       </v-card-actions>
