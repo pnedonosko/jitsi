@@ -52,7 +52,6 @@ export const storage = {
 // })
 
 Vue.component("jitsi-meet-button", JitsiMeetButton);
-// Vue.component("CallPopup", CallPopup);
 Vue.use(Vuetify);
 const vuetify = new Vuetify({
   dark: true,
@@ -142,10 +141,8 @@ export function initCallPopupList() {
     document.body.appendChild(container);
     return new Vue({
       el: container,
-      // store: store,
       components: {
         CallPopupList, 
-        CallPopup
       },
       i18n, 
       vuetify,
@@ -232,8 +229,8 @@ export function initCallPopup(
               isNotifVisible: this.isNotifVisible,
               caller: callerId,
               avatar: callerAvatar,
-              callerMessage: callerMessage,
-              playRingtone: playRingtone,
+              callerMessage,
+              playRingtone,
               i18n
             },
             on: {
