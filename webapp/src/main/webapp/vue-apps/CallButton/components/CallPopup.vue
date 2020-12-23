@@ -83,8 +83,8 @@ export default {
   created() {
     const thevue = this;
     this.storage = storage;
-    this.incrementBus(this.storage, this.caller);
-    this.setCaller(this.storage, this.caller);
+    this.incrementBus(storage, this.caller);
+    this.setCaller(storage, this.caller);
     this.EventBus.$emit("instanceCreated", { instanceCreated: thevue.storage });
   },
   mounted() {
@@ -103,11 +103,15 @@ export default {
       }
     }
   },
+  updated() {
+    const thevue = this;
+    this.EventBus.$emit("instanceCreated", { instanceCreated: thevue.storage });
+  },
   methods: {
     passAccepted() {
       const thevue = this;
       if (this.state === "shown") {
-        this.decrementBus(this.storage);
+        this.decrementBus(storage);
         this.closeDrawer();
         this.state = "closed";
         this.$emit("accepted");
@@ -117,7 +121,7 @@ export default {
     passRejected() {
       const thevue = this;
       if (this.state === "shown") {
-        this.decrementBus(this.storage);
+        this.decrementBus(storage);
         this.closeDrawer();
         this.state = "closed";
         this.$emit("rejected");
@@ -142,8 +146,8 @@ export default {
       }
     },
     closeDrawer() {
-      if (this.storage.instance <= 1) {
-        this.storage.isDrawerOpen = "none";
+      if (storage.instance <= 1) {
+        storage.isDrawerOpen = "none";
       }
     }
   }
@@ -242,13 +246,13 @@ export default {
             }
           }
         }
-        .button-title {
+      }
+      .button-title {
           font-weight: 700;
           font-size: 14px;
           cursor: pointer;
           color: #333;
         }
-      }
     }
   }
 }

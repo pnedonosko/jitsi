@@ -213,10 +213,14 @@ export function initCallPopup(
         mounted() {
           autoRejectId = setTimeout(() => {
             log.info("Auto rejected the call: " + callId + " user: " + currentUserId);
-            storage.instance = storage.instance > 0 ? storage.instance-- : 0;
-          if (storage.instance <= 1) {
-            storage.isDrawerOpen = "none";
-          }
+            if (storage.instance > 0) {
+              storage.instance--;
+            } else {
+              storage.instance = 0;
+            }
+            if (storage.instance <= 1) {
+              storage.isDrawerOpen = "none";
+            }
             doReject();
           }, 60000); // Reject automatically calls in 60 seconds if the user hasn't answered
         },

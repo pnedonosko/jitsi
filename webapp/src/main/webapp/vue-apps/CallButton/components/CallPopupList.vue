@@ -1,5 +1,5 @@
 <template>
-  <v-app class="VuetifyApp call-popup-list">
+  <v-app class="VuetifyApp call-popup-list call-popup-list-array">
     <v-btn :ripple="false" :style="{'display': displayButton.button}" outlined @click="openDrawer">
       <i class="uiIconIncomingCalls"></i>
       <span class="message">You have {{ storage.instance - 2 }} more incoming calls</span>
@@ -12,7 +12,6 @@
 <script>
 import CallPopup from "./CallPopup.vue";
 import { callPopups } from "../main.js";
-// import { storage } from "../main.js";
 
 export default {
   name: "CallPopupList",
@@ -56,14 +55,19 @@ export default {
 };
 </script>
 <style lang="less">
+.call-popup-list-array {
   .incoming-toast-list {
     .call-popup-toast {
       display: none;
       &:nth-child(-n+2) {
         display: flex;
       }
+      &:nth-child(2) {
+        margin-bottom: 60px;
+      }
     }
   }
+}
 </style>
 <style scoped lang="less">
 .VuetifyApp {
@@ -80,7 +84,7 @@ export default {
       position: absolute;
       background-color: white;
       border: 1px solid #aeb3b7;
-      top: 40%;
+      top: 33%;
       text-align: right;
       justify-content: space-evenly;
       margin: 15px;

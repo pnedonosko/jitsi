@@ -79,6 +79,8 @@ export default {
   }
   .uiIconPopupClose {
     opacity: 1;
+    align-self: center;
+    margin: 0 15px;
     cursor: pointer;
     &::before {
       color: #aeb3b7;
