@@ -24,10 +24,10 @@
             ? $t("UICallPopup.label.ignore")
           : "Ignore" }}
         </span>
-        <audio ref="audio" class="audio-call-popup" style="display: none" loop preload="auto">
+        <!-- <audio ref="audio" class="audio-call-popup" style="display: none" loop preload="auto">
           <source src="/jitsi/resources/audio/ringtone_exo-1.m4a" >
           <p>"Your browser does not support the audio element</p>
-        </audio>
+        </audio> -->
       </v-card-actions>
     </v-card>
   </v-app>
@@ -36,12 +36,12 @@
 <script>
 import { storage } from "../main.js";
 import { callPopups } from "../main.js";
-function stopAudio(audio) {
-  if (audio) {
-    audio.pause();
-    audio.currentTime = 0;
-  }
-}
+// function stopAudio(audio) {
+//   if (audio) {
+//     audio.pause();
+//     audio.currentTime = 0;
+//   }
+// }
 
 export default {
   name: "CallPopup",
@@ -85,27 +85,27 @@ export default {
     this.storage = storage;
     this.incrementBus(storage, this.caller);
     this.setCaller(storage, this.caller);
-    this.EventBus.$emit("instanceCreated", { instanceCreated: thevue.storage });
+    this.EventBus.$emit("instanceCreated", { instanceCreated: storage });
   },
   mounted() {
     this.state = "shown";
-    if (this.playRingtone) {
-      try {
-        //audio.muted = true;
-        // TODO this would help to fix "Uncaught (in promise) DOMException: play() failed because the user didn't interact with the document first."
-        //document.body.addEventListener("mousemove", function () {
-        //  audio.play();
-        //});
-        this.$refs.audio.play();
-      } catch (e) {
-        // TODO we need remove this popup flag from local storage to let others to play
-        console.log("Error playing ringtone for Jitsi call: " + this.caller, e);
-      }
-    }
+    // if (this.playRingtone) {
+    //   try {
+    //     //audio.muted = true;
+    //     // TODO this would help to fix "Uncaught (in promise) DOMException: play() failed because the user didn't interact with the document first."
+    //     //document.body.addEventListener("mousemove", function () {
+    //     //  audio.play();
+    //     //});
+    //     // this.$refs.audio.play();
+    //   } catch (e) {
+    //     // TODO we need remove this popup flag from local storage to let others to play
+    //     console.log("Error playing ringtone for Jitsi call: " + this.caller, e);
+    //   }
+    // }
   },
   updated() {
     const thevue = this;
-    this.EventBus.$emit("instanceCreated", { instanceCreated: thevue.storage });
+    this.EventBus.$emit("instanceCreated", { instanceCreated: storage });
   },
   methods: {
     passAccepted() {
@@ -115,7 +115,7 @@ export default {
         this.closeDrawer();
         this.state = "closed";
         this.$emit("accepted");
-        stopAudio(this.$refs.audio);
+        // stopAudio(this.$refs.audio);
       }
     },
     passRejected() {
@@ -125,16 +125,14 @@ export default {
         this.closeDrawer();
         this.state = "closed";
         this.$emit("rejected");
-        stopAudio(this.$refs.audio);
+        // stopAudio(this.$refs.audio);
       }
     },
     decrementBus(state) {
       const thevue = this;
       state.instance--;
       state.instanceArray.pop(state.instance);
-      this.EventBus.$emit("instanceCreated", {
-        instanceCreated: thevue.storage
-      });
+      this.EventBus.$emit("instanceCreated", {instanceCreated: storage});
     },
     setCaller(state, caller) {
       state.caller = caller;
@@ -204,9 +202,11 @@ export default {
       text-align: left;
     }
     .v-card__actions {
-      grid-column: 2 / span 2;
+      grid-column: 1 / span 3;
       grid-row: 2 / span 1;
       padding: 8px 0px !important;
+      display: flex;
+      justify-content: center;
       .v-btn {
         padding: 0;
         height: 50px;

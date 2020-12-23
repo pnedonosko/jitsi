@@ -6,13 +6,25 @@
       <span class="btn-link">See all</span>
     </v-btn>
     <div ref="callpopuplist" class="incoming-toast-list"></div>
+    <!-- <div v-if="callpopupList">
+      <h1>HELLO</h1> -->
+    <audio ref="audio" class="audio-call-popup" style="display: none" loop preload="auto">
+      <source src="/jitsi/resources/audio/ringtone_exo-1.m4a" >
+      <p>"Your browser does not support the audio element</p>
+    </audio>
+    <!-- </div> -->
   </v-app>
 </template>
 
 <script>
 import CallPopup from "./CallPopup.vue";
 import { callPopups } from "../main.js";
-
+function stopAudio(audio) {
+  if (audio) {
+    audio.pause();
+    audio.currentTime = 0;
+  }
+}
 export default {
   name: "CallPopupList",
   components: {
@@ -21,7 +33,10 @@ export default {
   data() {
     return {
       child: 0,
-      storage: {}
+      storage: {},
+      isPlaying: false
+      // src: ""
+      // callpopupList: this.$refs.callpopuplist.children
     };
   },
   computed: {
@@ -30,12 +45,18 @@ export default {
         ? { button: "inline-flex" }
         : { button: "none" };
     },
+    callpopupList() {
+      return this.$refs.callpopuplist.children;
+    }
   },
   watch: {
     displayButton(newVal, oldVal) {
       console.log(newVal, oldVal);
     }
   },
+  // created() {
+  //   this.callpopupList = this.$refs.callpopuplist.children;
+  // },
   mounted() {
     this.EventBus.$on("instanceCreated", data => {
       this.storage = data.instanceCreated;
@@ -45,6 +66,21 @@ export default {
     this.EventBus.$on("instanceCreated", data => {
       this.storage = data.instanceCreated;
     });
+    if (this.storage.instance > 0) {
+       if (!this.isPlaying) {
+        this.isPlaying = true;
+        try {
+            this.$refs.audio.play();
+            // this.isPlaying = true;
+        } catch (e) {
+          // TODO we need remove this popup flag from local storage to let others to play
+          console.log("Error playing ringtone for Jitsi call: ", e);
+        }
+      }
+    } else {
+      stopAudio(this.$refs.audio);
+      this.isPlaying = false;
+    }
   },
   methods: {
     openDrawer() {
