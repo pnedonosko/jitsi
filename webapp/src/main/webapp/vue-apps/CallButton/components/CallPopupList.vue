@@ -12,6 +12,7 @@
 <script>
 import CallPopup from "./CallPopup.vue";
 import { callPopups } from "../main.js";
+import { EventBus } from "../main.js";
 
 export default {
   name: "CallPopupList",
@@ -37,19 +38,19 @@ export default {
     }
   },
   mounted() {
-    this.EventBus.$on("instanceCreated", data => {
+    EventBus.$on("instanceCreated", data => {
       this.storage = data.instanceCreated;
     });
   },
   updated() {
-    this.EventBus.$on("instanceCreated", data => {
+    EventBus.$on("instanceCreated", data => {
       this.storage = data.instanceCreated;
     });
   },
   methods: {
     openDrawer() {
       this.storage.isDrawerOpen = "block";
-      this.EventBus.$emit("openDrawer");
+      EventBus.$emit("openDrawer");
     }
   }
 };

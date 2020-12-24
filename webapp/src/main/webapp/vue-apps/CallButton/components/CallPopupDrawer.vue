@@ -20,8 +20,10 @@
     </v-app>
   </div>
 </template>
+
 <script>
 import CallPopup from "./CallPopup.vue";
+import { EventBus } from "../main.js";
 
 export default {
   components: {
@@ -38,17 +40,17 @@ export default {
   },
   mounted() {
     const thevue = this;
-    // this.EventBus.$emit("closeDrawer", thevue.closedDrawer);
-    this.EventBus.$on("openDrawer", function(payload) {
+    // EventBus.$emit("closeDrawer", thevue.closedDrawer);
+    EventBus.$on("openDrawer", function(payload) {
       thevue.openDrawer();
     });
-    this.EventBus.$on("instanceCreated", data => {
+    EventBus.$on("instanceCreated", data => {
       this.storage = data.instanceCreated;
     });
     this.openDrawer();
   },
   updated() {
-    this.EventBus.$on("instanceCreated", data => {
+    EventBus.$on("instanceCreated", data => {
       this.storage = data.instanceCreated;
     });
 

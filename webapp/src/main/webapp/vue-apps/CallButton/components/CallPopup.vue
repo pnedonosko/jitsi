@@ -36,6 +36,8 @@
 <script>
 import { storage } from "../main.js";
 import { callPopups } from "../main.js";
+import { EventBus } from "../main.js";
+
 function stopAudio(audio) {
   if (audio) {
     audio.pause();
@@ -85,7 +87,7 @@ export default {
     this.storage = storage;
     this.incrementBus(storage, this.caller);
     this.setCaller(storage, this.caller);
-    this.EventBus.$emit("instanceCreated", { instanceCreated: thevue.storage });
+    EventBus.$emit("instanceCreated", { instanceCreated: thevue.storage });
   },
   mounted() {
     this.state = "shown";
@@ -105,7 +107,7 @@ export default {
   },
   updated() {
     const thevue = this;
-    this.EventBus.$emit("instanceCreated", { instanceCreated: thevue.storage });
+    EventBus.$emit("instanceCreated", { instanceCreated: thevue.storage });
   },
   methods: {
     passAccepted() {
@@ -132,7 +134,7 @@ export default {
       const thevue = this;
       state.instance--;
       state.instanceArray.pop(state.instance);
-      this.EventBus.$emit("instanceCreated", {
+      EventBus.$emit("instanceCreated", {
         instanceCreated: thevue.storage
       });
     },

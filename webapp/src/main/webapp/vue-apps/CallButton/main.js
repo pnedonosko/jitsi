@@ -13,13 +13,13 @@ export const storage = {
 };
 // Vue.use(Vuex);
 
-Vue.mixin({
-  data: function() {
-    return {
-      EventBus: EventBus
-    }
-  }
-})
+// Vue.mixin({
+//   data: function() {
+//     return {
+//       EventBus: EventBus
+//     }
+//   }
+// })
 
 // const store = new Vuex.Store({
 //   state: {
