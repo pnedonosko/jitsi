@@ -50,6 +50,14 @@ function stopAudio(audio) {
 //     audio.currentTime = 0;
 //   }
 // }
+import { EventBus } from "../main.js";
+
+function stopAudio(audio) {
+  if (audio) {
+    audio.pause();
+    audio.currentTime = 0;
+  }
+}
 
 export default {
   name: "CallPopup",
