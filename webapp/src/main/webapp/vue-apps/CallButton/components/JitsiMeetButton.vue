@@ -1,5 +1,10 @@
 <template>
-  <v-btn ref="jitsi" :ripple="false" class="jitsiCallAction btn" outlined @click.stop.prevent="startCall">
+  <v-btn
+    ref="jitsi"
+    :ripple="false"
+    class="jitsiCallAction btn"
+    outlined
+    @click.stop.prevent="startCall">
     <i :class="buttonTitle.icon" class="uiIconSocPhone uiIconBlue"></i>
     <span>{{ buttonTitle.title }}</span>
   </v-btn>
@@ -32,33 +37,59 @@ export default {
       settings: this.callSettings,
       log: null,
       callWindow: null
-      // callState: null
     };
   },
   computed: {
     callState: function() {
       return this.callSettings.callState;
     },
+    parentElement() {
+      if (this.$refs.jitsi) {
+        return this.$refs.jitsi.$el.parentElement.parentElement.parentElement
+          .parentElement.parentElement;
+      }
+    },
     buttonTitle: function() {
       if (this.callState === "joined") {
+        if (this.$refs.jitsi) {
+          return {
+            title: !this.parentElement.classList.contains("call-button-mini")
+              ? this.i18n.te("UICallButton.label.joined")
+                ? this.$t("UICallButton.label.joined")
+                : "Joined"
+              : "",
+            icon: "callIcon-joined"
+          };
+        }
         return {
-          title: this.i18n.te("UICallButton.label.joined")
-            ? this.$t("UICallButton.label.joined")
-            : "Joined",
           icon: "callIcon-joined"
         };
       } else if (this.callState === "started" || this.callState === "leaved") {
+        if (this.$refs.jitsi) {
+          return {
+            title: !this.parentElement.classList.contains("call-button-mini")
+              ? this.i18n.te("UICallButton.label.join")
+                ? this.$t("UICallButton.label.join")
+                : "Join Call"
+              : "",
+            icon: "callIcon-join"
+          };
+        }
         return {
-          title: this.i18n.te("UICallButton.label.join")
-            ? this.$t("UICallButton.label.join")
-            : "Join Call",
           icon: "callIcon-join"
         };
       } else {
+        if (this.$refs.jitsi) {
+          return {
+            title: !this.parentElement.classList.contains("call-button-mini")
+              ? this.i18n.te("UICallButton.label.jitsi")
+                ? this.$t("UICallButton.label.jitsi")
+                : "Call"
+              : "",
+            icon: "callIcon-call"
+          };
+        }
         return {
-          title: this.i18n.te("UICallButton.label.jitsi")
-            ? this.$t("UICallButton.label.jitsi")
-            : "Call",
           icon: "callIcon-call"
         };
       }
@@ -173,12 +204,12 @@ export default {
                 display: none;
               }
               .uiIconSocPhone {
-                  font-size: 18px;
-                  margin-bottom: 0px;
-                  &::before {
-                    content: "\e92b";
-                  }
+                font-size: 18px;
+                margin-bottom: 0px;
+                &::before {
+                  content: "\e92b";
                 }
+              }
             }
           }
         }
