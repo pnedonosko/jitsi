@@ -38,26 +38,12 @@ import { storage } from "../main.js";
 import { callPopups } from "../main.js";
 import { EventBus } from "../main.js";
 
-function stopAudio(audio) {
-  if (audio) {
-    audio.pause();
-    audio.currentTime = 0;
-  }
-}
 // function stopAudio(audio) {
 //   if (audio) {
 //     audio.pause();
 //     audio.currentTime = 0;
 //   }
 // }
-import { EventBus } from "../main.js";
-
-function stopAudio(audio) {
-  if (audio) {
-    audio.pause();
-    audio.currentTime = 0;
-  }
-}
 
 export default {
   name: "CallPopup",
@@ -101,11 +87,7 @@ export default {
     this.storage = storage;
     this.incrementBus(storage, this.caller);
     this.setCaller(storage, this.caller);
-<<<<<<< HEAD
-    EventBus.$emit("instanceCreated", { instanceCreated: thevue.storage });
-=======
     this.EventBus.$emit("instanceCreated", { instanceCreated: storage });
->>>>>>> Fixed multiplaying ringtone
   },
   mounted() {
     this.state = "shown";
@@ -125,11 +107,7 @@ export default {
   },
   updated() {
     const thevue = this;
-<<<<<<< HEAD
-    EventBus.$emit("instanceCreated", { instanceCreated: thevue.storage });
-=======
     this.EventBus.$emit("instanceCreated", { instanceCreated: storage });
->>>>>>> Fixed multiplaying ringtone
   },
   methods: {
     passAccepted() {
@@ -156,13 +134,7 @@ export default {
       const thevue = this;
       state.instance--;
       state.instanceArray.pop(state.instance);
-<<<<<<< HEAD
-      EventBus.$emit("instanceCreated", {
-        instanceCreated: thevue.storage
-      });
-=======
       this.EventBus.$emit("instanceCreated", {instanceCreated: storage});
->>>>>>> Fixed multiplaying ringtone
     },
     setCaller(state, caller) {
       state.caller = caller;

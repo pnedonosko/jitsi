@@ -27,7 +27,6 @@ function stopAudio(audio) {
     audio.currentTime = 0;
   }
 }
-import { EventBus } from "../main.js";
 
 export default {
   name: "CallPopupList",
