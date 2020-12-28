@@ -51,46 +51,46 @@ export default {
     },
     buttonTitle: function() {
       if (this.callState === "joined") {
-        if (this.$refs.jitsi) {
+        if (this.$refs.jitsi && this.parentElement) {
           return {
             title: !this.parentElement.classList.contains("call-button-mini")
               ? this.i18n.te("UICallButton.label.joined")
                 ? this.$t("UICallButton.label.joined")
                 : "Joined"
               : "",
-            icon: "callIcon-joined"
+            icon: "uiIconCallJoined"
           };
         }
         return {
-          icon: "callIcon-joined"
+          icon: "uiIconCallJoined"
         };
       } else if (this.callState === "started" || this.callState === "leaved") {
-        if (this.$refs.jitsi) {
+        if (this.$refs.jitsi && this.parentElement) {
           return {
             title: !this.parentElement.classList.contains("call-button-mini")
               ? this.i18n.te("UICallButton.label.join")
                 ? this.$t("UICallButton.label.join")
                 : "Join Call"
               : "",
-            icon: "callIcon-join"
+            icon: "uiIconCallJoin"
           };
         }
         return {
-          icon: "callIcon-join"
+          icon: "uiIconCallJoin"
         };
       } else {
-        if (this.$refs.jitsi) {
+        if (this.$refs.jitsi && this.parentElement) {
           return {
             title: !this.parentElement.classList.contains("call-button-mini")
               ? this.i18n.te("UICallButton.label.jitsi")
                 ? this.$t("UICallButton.label.jitsi")
                 : "Call"
               : "",
-            icon: "callIcon-call"
+            icon: "uiIconCallStart"
           };
         }
         return {
-          icon: "callIcon-call"
+          icon: "uiIconCallStart"
         };
       }
     }
@@ -167,6 +167,59 @@ export default {
     }
   }
 }
+.jitsiCallAction {
+  color: var(--allPagesDarkGrey, #4d5466) !important;
+  .uiIconSocPhone {
+    // font-size: 14px;
+    margin-bottom: -2px;
+    &:before {
+      content: "\e92b";
+      height: 16px;
+      width: 16px;
+      margin-right: 4px;
+      // margin-left: 3px;
+    }
+    &.uiIconCallStart {
+      // font-size: 18px;
+      &:before {
+        color: unset;
+        content: "\e92b";
+      }
+    }
+    &.uiIconCallJoin {
+      // font-size: 18px;
+      &:before {
+        content: "\E61C";
+        color: #fb8e18;
+      }
+    }
+    &.uiIconCallJoined {
+      // font-size: 18px;
+      &:before {
+        color: #2eb58c;
+        content: "\e92b";
+      }
+    }
+  }
+  // .uiIconCallStart {
+  //   &:before {
+  //     color: unset;
+  //     content: "\e92b";
+  //   }
+  // }
+  // .uiIconCallJoin {
+  //   &:before {
+  //     content: "\E61C";
+  //     color: #fb8e18;
+  //   }
+  // }
+  // .uiIconCallJoined {
+  //   &:before {
+  //     color: #2eb58c;
+  //     content: "\e92b";
+  //   }
+  // }
+}
 .call-button-mini {
   .VuetifyApp {
     .call-button-container {
@@ -204,11 +257,11 @@ export default {
                 display: none;
               }
               .uiIconSocPhone {
-                font-size: 18px;
+                font-size: 18px !important;
                 margin-bottom: 0px;
-                &::before {
-                  content: "\e92b";
-                }
+                // &::before {
+                //   content: "\e92b";
+                // }
               }
             }
           }
@@ -253,37 +306,7 @@ export default {
     }
   }
 }
-.jitsiCallAction {
-  color: var(--allPagesDarkGrey, #4d5466) !important;
-  .uiIconSocPhone {
-    font-size: 14px;
-    margin-bottom: -2px;
-    &:before {
-      height: 16px;
-      width: 16px;
-      margin-right: 4px;
-      // margin-left: 3px;
-    }
-  }
-  .callIcon-call {
-    &:before {
-      color: unset;
-      content: "\e92b";
-    }
-  }
-  .callIcon-join {
-    &:before {
-      content: "\E61C";
-      color: #fb8e18;
-    }
-  }
-  .callIcon-joined {
-    &:before {
-      color: #2eb58c;
-      content: "\e92b";
-    }
-  }
-}
+
 </style>
 <style lang="less">
 .VuetifyApp {
@@ -292,10 +315,16 @@ export default {
       &.jitsiCallAction {
         border: none !important;
         background-color: inherit !important;
+
       }
     }
   }
 }
+.call-button--profile, .call-button--chat {
+    .uiIconSocPhone {
+      font-size: 14px;
+    }
+  } 
 .uiAction {
   .jitsiCallAction {
     &.btn:first-child {
