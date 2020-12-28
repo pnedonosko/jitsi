@@ -87,7 +87,7 @@ export default {
     this.storage = storage;
     this.incrementBus(storage, this.caller);
     this.setCaller(storage, this.caller);
-    this.EventBus.$emit("instanceCreated", { instanceCreated: storage });
+    EventBus.$emit("instanceCreated", { instanceCreated: storage });
   },
   mounted() {
     this.state = "shown";
@@ -107,7 +107,7 @@ export default {
   },
   updated() {
     const thevue = this;
-    this.EventBus.$emit("instanceCreated", { instanceCreated: storage });
+    EventBus.$emit("instanceCreated", { instanceCreated: storage });
   },
   methods: {
     passAccepted() {
@@ -134,7 +134,7 @@ export default {
       const thevue = this;
       state.instance--;
       state.instanceArray.pop(state.instance);
-      this.EventBus.$emit("instanceCreated", {instanceCreated: storage});
+      EventBus.$emit("instanceCreated", {instanceCreated: storage});
     },
     setCaller(state, caller) {
       state.caller = caller;
