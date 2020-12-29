@@ -10,6 +10,7 @@ const vuetify = new Vuetify({
   iconfont: "",
 });
 
+
 // getting language of user
 const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || "en";
 const localePortlet = "locale.jitsi";
@@ -21,6 +22,20 @@ const callPopups = new Map();
 
 export function init(settings) {
   // getting locale ressources
+  const parentContainer = document.querySelector(".leftHeaderDrawer");
+    if (parentContainer) {
+      console.log(webConferencing)
+      parentContainer.addEventListener("click", e => {
+        if (e.target.classList.contains("backButton") 
+        && e.target.parentElement.classList.contains("leftHeaderDrawer")) {
+          const container = document.querySelector(".single-btn-container");
+          const button = document.querySelector(".jitsiCallAction")
+          if (container && button) {
+            container.removeChild(button);
+          }
+        }
+      });
+    }
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
     // init Vue app when locale ressources are ready
     const comp =  new Vue({
@@ -69,20 +84,6 @@ export function init(settings) {
     //  }
     //  comp.$destroy();
     //});
-    const parentContainer = document.querySelector(".leftHeaderDrawer");
-    if (parentContainer) {
-      parentContainer.addEventListener("click", e => {
-        if(e.target.classList.contains("backButton") 
-        && e.target.parentElement.classList.contains("leftHeaderDrawer")) {
-          const container = document.querySelector(".single-btn-container");
-          const button = document.querySelector(".jitsiCallAction")
-          if (container) {
-            container.removeChild(button);
-          }
-          comp.$destroy();
-        }
-      });
-    }
     return comp;
   });
 }
