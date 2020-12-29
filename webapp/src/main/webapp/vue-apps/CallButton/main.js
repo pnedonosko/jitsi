@@ -70,17 +70,19 @@ export function init(settings) {
     //  comp.$destroy();
     //});
     const parentContainer = document.querySelector(".leftHeaderDrawer");
-    parentContainer.addEventListener("click", e => {
-      if(e.target.classList.contains("backButton") 
-      && e.target.parentElement.classList.contains("leftHeaderDrawer")) {
-        const container = document.querySelector(".single-btn-container");
-        const button = document.querySelector(".jitsiCallAction")
-        if (container) {
-          container.removeChild(button);
+    if (parentContainer) {
+      parentContainer.addEventListener("click", e => {
+        if(e.target.classList.contains("backButton") 
+        && e.target.parentElement.classList.contains("leftHeaderDrawer")) {
+          const container = document.querySelector(".single-btn-container");
+          const button = document.querySelector(".jitsiCallAction")
+          if (container) {
+            container.removeChild(button);
+          }
+          comp.$destroy();
         }
-        comp.$destroy();
-      }
-    });
+      });
+    }
     return comp;
   });
 }
