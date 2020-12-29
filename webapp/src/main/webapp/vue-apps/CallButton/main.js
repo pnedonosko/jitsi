@@ -69,7 +69,8 @@ export function init(settings) {
     //  }
     //  comp.$destroy();
     //});
-    document.addEventListener("click", e => {
+    const parentContainer = document.querySelector(".leftHeaderDrawer");
+    parentContainer.addEventListener("click", e => {
       if(e.target.classList.contains("backButton") 
       && e.target.parentElement.classList.contains("leftHeaderDrawer")) {
         const container = document.querySelector(".single-btn-container");
