@@ -45,8 +45,7 @@ export default {
     },
     parentElement() {
       if (this.$refs.jitsi) {
-        return this.$refs.jitsi.$el.parentElement.parentElement.parentElement
-          .parentElement.parentElement;
+        return this.$refs.jitsi.$el.parentElement.parentElement.parentElement.parentElement.parentElement;
       }
     },
     buttonTitle: function() {
@@ -171,7 +170,7 @@ export default {
   color: var(--allPagesDarkGrey, #4d5466) !important;
   .uiIconSocPhone {
     // font-size: 14px;
-    margin-bottom: -2px;
+    //margin-bottom: -2px;
     &:before {
       content: "\e92b";
       height: 16px;
@@ -306,7 +305,6 @@ export default {
     }
   }
 }
-
 </style>
 <style lang="less">
 .VuetifyApp {
@@ -323,6 +321,7 @@ export default {
 .call-button--profile, .call-button--chat {
     .uiIconSocPhone {
       font-size: 14px;
+      margin-bottom: -2px;
     }
   } 
 .uiAction {

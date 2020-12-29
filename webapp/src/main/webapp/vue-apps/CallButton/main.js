@@ -1,6 +1,8 @@
 import JitsiMeetButton from "./components/JitsiMeetButton.vue";
 import CallPopup from "./components/CallPopup.vue";
 
+const EVENT_ROOM_SELECTION_CHANGED = "exo-chat-selected-contact-changed";
+
 Vue.component("jitsi-meet-button", JitsiMeetButton);
 // Vue.component("CallPopup", CallPopup);
 const vuetify = new Vuetify({
@@ -21,7 +23,7 @@ export function init(settings) {
   // getting locale ressources
   return exoi18n.loadLanguageAsync(lang, url).then((i18n) => {
     // init Vue app when locale ressources are ready
-    return new Vue({
+    const comp =  new Vue({
       data() {
         return {
           callSettings: settings
@@ -58,6 +60,27 @@ export function init(settings) {
       i18n,
       vuetify,
     });
+    //document.addEventListener(EVENT_ROOM_SELECTION_CHANGED, target => {
+    //  console.log("CHANGED ROOM", target);
+    //  const container = document.querySelector(".single-btn-container");
+    //  const button = document.querySelector(".jitsiCallAction")
+    //  if (container && button) {
+    //    container.removeChild(button);
+    //  }
+    //  comp.$destroy();
+    //});
+    document.addEventListener("click", e => {
+      if(e.target.classList.contains("backButton") 
+      && e.target.parentElement.classList.contains("leftHeaderDrawer")) {
+        const container = document.querySelector(".single-btn-container");
+        const button = document.querySelector(".jitsiCallAction")
+        if (container) {
+          container.removeChild(button);
+        }
+        comp.$destroy();
+      }
+    });
+    return comp;
   });
 }
 
